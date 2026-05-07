@@ -6,6 +6,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
   const { slug } = await params;
   const curso: any = CURSOS.find((c) => c.id === slug);
 
+  // 404
   if (!curso) {
     return (
       <main className="p-8 bg-base-100 min-h-[calc(100vh-64px)]">
