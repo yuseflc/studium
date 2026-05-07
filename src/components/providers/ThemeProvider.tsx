@@ -16,19 +16,30 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const [theme, setThemeState] = useState<Theme>('default');
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as Theme;
-        if (savedTheme) {
+        const savedTheme = localStorage.getItem('theme') as Theme | null;
+        
+        if (savedTheme && savedTheme !== 'default') {
             setThemeState(savedTheme);
-            document.documentElement.setAttribute('data-theme', savedTheme === 'default' ? '' : savedTheme);
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        } else {
+            // Usa la preferencia del sistema
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const systemTheme = prefersDark ? 'dark' : 'bumblebee';
+            setThemeState('default');
+            document.documentElement.setAttribute('data-theme', systemTheme);
         }
     }, []);
 
     const setTheme = (newTheme: Theme) => {
         setThemeState(newTheme);
-        localStorage.setItem('theme', newTheme);
+        
         if (newTheme === 'default') {
-            document.documentElement.removeAttribute('data-theme');
+            localStorage.removeItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const systemTheme = prefersDark ? 'dark' : 'bumblebee';
+            document.documentElement.setAttribute('data-theme', systemTheme);
         } else {
+            localStorage.setItem('theme', newTheme);
             document.documentElement.setAttribute('data-theme', newTheme);
         }
     };
