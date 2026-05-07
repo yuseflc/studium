@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import User from "@/models/User";
+import Course from "@/models/Course";
+import Task from "@/models/Task";
+import Submission from "@/models/Submission";
 
 declare global {
   var mongooseConnection: {
@@ -7,10 +11,10 @@ declare global {
   };
 }
 
-const MONGODB_URI : string | undefined = process.env.MONGODB_URI_PROD;
+const MONGODB_URI: string | undefined = process.env.MONGODB_URI_PROD;
 
 if (!MONGODB_URI) {
-  throw new Error("Por favor agrega tu URI de MongoDB a .env.local");
+  throw new Error("Please add your MongoDB URI to .env.local");
 }
 
 let cached = global.mongooseConnection;
@@ -48,4 +52,7 @@ export async function connectDB() {
 
   return cached.conn;
 }
+
+// Exportar modelos de manera centralizada
+export { User, Course, Task, Submission };
 
