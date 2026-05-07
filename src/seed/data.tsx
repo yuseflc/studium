@@ -1,12 +1,12 @@
 const CURSOS = [
     {
-        id: "curso-1",
+        id: "course-1",
         nombre: "Curso de Introducción a la Programación",
         descripcion: "Aprende los fundamentos de la programación con este curso básico.",
         imagen: "https://i.pravatar.cc/150?u=curso1"
     },
     {
-        id: "curso-2",
+        id: "course-2",
         nombre: "Curso de Desarrollo Web",
         descripcion: "Domina las tecnologías web modernas y crea aplicaciones web increíbles.",
         imagen: "https://i.pravatar.cc/150?u=curso2"
