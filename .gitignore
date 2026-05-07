@@ -9,6 +9,9 @@
 /pnpm-lock.yaml
 /pnpm-workspace.yaml
 
+#bun
+bun.lock
+
 # testing
 /coverage
 

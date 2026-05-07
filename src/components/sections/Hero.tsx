@@ -17,7 +17,7 @@ const Hero = () => {
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
                         <a href="/mycourses"><button className="btn btn-primary">Mis Cursos</button></a>
-                        <button className="btn btn-outline btn-secondary">Explorar Catálogo</button>
+                        <button className="btn btn-outline btn-secondary">Ver utilidades</button>
                     </div>
                 </div>
             </div>
