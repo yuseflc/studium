@@ -16,7 +16,7 @@ const Hero = () => {
                         Impulsa tu carrera profesional con las mejores herramientas digitales.
                     </p>
                     <div className="flex flex-wrap justify-center gap-4">
-                        <button className="btn btn-primary">Mis Cursos</button>
+                        <a href="/mycourses"><button className="btn btn-primary">Mis Cursos</button></a>
                         <button className="btn btn-outline btn-secondary">Ver utilidades</button>
                     </div>
                 </div>
