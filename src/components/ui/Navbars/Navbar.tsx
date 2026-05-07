@@ -1,8 +1,8 @@
 'use client';
 
 import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
-import { NOTIFICACIONES, MENSAJES } from "@/seed/data";
-import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { NOTIFICACIONES, MENSAJES, USUARIO } from "@/seed/data";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 export default function Navbar() {
 
@@ -103,27 +103,30 @@ export default function Navbar() {
                         </div>
                     </div>
                 </div>
-                <div className="dropdown dropdown-end text-base-content">
-                    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                        <div className="w-10 rounded-full">
-                            <img
-                                alt="Tailwind CSS Navbar component"
-                                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+
+                {/* Condición para usuario logueado */}
+                {USUARIO ? (
+                    
+                    <div className="dropdown dropdown-end text-base-content">
+                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                            <div className="w-10 rounded-full">
+                                <img alt={`Avatar de ${USUARIO.name}`} src={USUARIO.image} />
+                            </div>
                         </div>
+                        <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                            <p><span className="badge">{USUARIO.name}</span></p>
+                            
+                            <li><a>Perfil</a></li>
+                            <li><a>Configuración</a></li>
+                            <li><a>Cerrar sesión</a></li>
+                        </ul>
                     </div>
-                    <ul
-                        tabIndex={-1}
-                        className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                        <li>
-                            <a className="justify-between">
-                                Profile
-                                <span className="badge">New</span>
-                            </a>
-                        </li>
-                        <li><a>Settings</a></li>
-                        <li><a>Logout</a></li>
-                    </ul>
-                </div>
+                ) : (
+                    <a href="/login" className="btn btn-primary btn-sm">
+                        Iniciar sesión
+                    </a>
+                )}
+
             </div>
         </div>
     )
