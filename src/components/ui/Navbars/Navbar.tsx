@@ -3,6 +3,7 @@
 import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES, USUARIO } from "@/seed/data";
 import { useTheme } from "@/components/providers/ThemeProvider";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 export default function Navbar() {
 
@@ -114,11 +115,11 @@ export default function Navbar() {
                             </div>
                         </div>
                         <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                            <p><span className="badge">{USUARIO.name}</span></p>
+                            <p className="text-center" ><span className="badge m-2">{USUARIO.name}</span></p>
                             
                             <li><a>Perfil</a></li>
                             <li><a>Configuración</a></li>
-                            <li><a>Cerrar sesión</a></li>
+                            <li><a className="text-red-200 hover:text-red-400">Cerrar sesión</a></li>
                         </ul>
                     </div>
                 ) : (
