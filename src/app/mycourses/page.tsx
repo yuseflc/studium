@@ -12,7 +12,7 @@ export default function CourseCatalogPage() {
               <h2 className="card-title text-base-content">{c.nombre}</h2>
               <p className="text-sm text-base-content/80">{c.descripcion}</p>
               <div className="card-actions justify-end">
-                <Link href={`/course/${c.id}`} className="btn btn-primary">
+                <Link href={`/mycourses/${c.id}`} className="btn btn-primary">
                   Ver curso
                 </Link>
               </div>
