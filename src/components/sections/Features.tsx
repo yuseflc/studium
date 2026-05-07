@@ -13,8 +13,8 @@ export default function FeaturesSection() {
             <div className="py-24">
                 <div className="mx-auto w-full max-w-5xl px-6">
                     <div className="text-center md:text-left">
-                        <h2 className="text-base-content max-w-2xl text-balance text-4xl font-bold tracking-tight">Todo lo que necesitas para tu éxito académico</h2>
-                        <p className="mt-4 text-lg text-base-content/70">Una plataforma integral diseñada para conectar a estudiantes y profesores de manera eficiente.</p>
+                        <h2 className="text-base-content max-w-full text-balance text-4xl font-bold tracking-tight text-center">Todo lo que necesitas para tu éxito académico</h2>
+                        <p className="mt-4 text-lg text-base-content/70 text-center">Una plataforma integral diseñada para conectar a estudiantes y profesores de manera eficiente.</p>
                     </div>
                     <div className="mt-16 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                         <Card className="bg-base-100 border-none shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden p-6 group">

@@ -10,7 +10,7 @@ const Hero = () => {
                         alt="Estudiando" 
                         className="w-full max-w-md mb-8 drop-shadow-2xl" 
                     />
-                    <h1 className="text-6xl font-bold text-base-content">Tu Espacio de Aprendizaje</h1>
+                    <h1 className="text-6xl font-bold text-base-content ">Tu <span className="text-secondary font-bold font-mono">estudio</span> organizado en una misma <span className="text-secondary font-bold font-mono">plataforma</span></h1>
                     <p className="py-6 text-lg text-base-content/80 font-mono">
                         Accede a tus cursos, materiales académicos y participa en la comunidad estudiantil.
                         Impulsa tu carrera profesional con las mejores herramientas digitales.
