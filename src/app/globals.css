@@ -16,3 +16,6 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+a:active {
+  cursor: pointer;
+}
