@@ -42,4 +42,15 @@ const NOTIFICACIONES = [
         time: "Hace 2 horas"
     }
 ];
-export { CURSOS, MENSAJES, NOTIFICACIONES };
+const USUARIO = 
+    {
+        id: "usuario-1",
+        name: "María García",
+        email: "maria.garcia@example.com",
+        image: "https://i.pravatar.cc/150?u=maria",
+        role: "estudiante",
+        enrolledCourses: ["curso-1"],
+        notifications: ["notification-1"],
+    }
+
+export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO };
