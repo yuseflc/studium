@@ -8,7 +8,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 export default function Navbar() {
 
     return (
-        <div className="navbar bg-base-100 shadow-sm px-4">
+        <div className="navbar bg-transparent hover:bg-base-100/50 backdrop-blur-sm shadow-sm px-4 top-0 sticky z-50  transition-all">
             <div className="flex-1">
                 <a className="btn btn-ghost text-xl text-base-content" href="/">
                     Studium
