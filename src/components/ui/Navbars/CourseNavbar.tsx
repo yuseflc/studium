@@ -21,7 +21,7 @@ export default function CourseNavbar() {
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
                         <div className="indicator">
                             <IconBell stroke={2} />
-                            <span className="badge badge-sm indicator-item bg-primary text-primary-content">{NOTIFICACIONES.length}</span>
+                            <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">{NOTIFICACIONES.length}</span>
                         </div>
                     </div>
                     <div
