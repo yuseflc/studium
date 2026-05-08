@@ -144,6 +144,7 @@ export default function Navbar() {
                         <Link href="#contact" className="btn btn-ghost">Contacto</Link>
                     </li>
                 </ul>
+<<<<<<< HEAD
             </div>
 
             {/* Lista izquierda */}
@@ -151,6 +152,15 @@ export default function Navbar() {
                 <ThemeSwitcher />
             </div>
 
+=======
+            </div>
+
+            {/* Lista izquierda */}
+            <div className="navbar-end">
+                <ThemeSwitcher />
+            </div>
+
+>>>>>>> b108355 ([Upgrade] Landing NavBar)
         </div>
     );
 }

@@ -1,9 +1,15 @@
 export default function Pricing() {
     return (
+<<<<<<< HEAD
         <section className="flex flex-col lg:flex-row w-full items-center lg:items-stretch justify-center py-24 bg-base-100 gap-6 px-4 space-between">
 
             <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-base-200">
                 <div className="card-body flex flex-col justify-between">
+=======
+        <section id="pricing" className="flex w-full items-center justify-center py-24 bg-base-100 gap-6">
+            <div className="card w-80 md:w-96 bg-base-100 shadow-xl border border-base-200">
+                <div className="card-body">
+>>>>>>> b108355 ([Upgrade] Landing NavBar)
                     <div className="flex justify-between items-center">
                         <h2 className="text-2xl md:text-3xl font-bold text-base-content">Gratuito</h2>
                         <span className="text-xl font-semibold text-base-content">0 €/mes</span>
