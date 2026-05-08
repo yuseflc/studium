@@ -1,6 +1,6 @@
 export default function Pricing() {
     return (
-        <section className="flex w-full items-center justify-center py-24 bg-base-100 gap-6">
+        <section id="pricing" className="flex w-full items-center justify-center py-24 bg-base-100 gap-6">
             <div className="card w-80 md:w-96 bg-base-100 shadow-xl border border-base-200">
                 <div className="card-body">
                     <div className="flex justify-between items-center">
