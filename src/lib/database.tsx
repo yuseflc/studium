@@ -34,12 +34,23 @@ export async function connectDB() {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
+      minPoolSize: 5,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      family: 4,
     };
 
     cached.promise = mongoose
-      .connect(MONGODB_URI, opts)
+      .connect(String(MONGODB_URI), opts)
       .then((mongoose) => {
+        console.log('MongoDB connected successfully');
         return mongoose;
+      })
+      .catch((error) => {
+        console.error('MongoDB connection error:', error);
+        cached.promise = null;
+        throw error;
       });
   }
 
