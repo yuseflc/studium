@@ -60,7 +60,7 @@ export default function CourseNavbar() {
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
                         <div className="indicator">
                             <IconMessageCircle stroke={2} />
-                            <span className="badge badge-sm indicator-item bg-primary text-primary-content">{MENSAJES.length}</span>
+                            <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">{MENSAJES.length}</span>
                         </div>
                     </div>
                     <div
@@ -108,7 +108,7 @@ export default function CourseNavbar() {
                         <div className="w-10 rounded-full">
                             <img
                                 alt="Tailwind CSS Navbar component"
-                                src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp" />
+                                src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" />
                         </div>
                     </div>
                     <ul
