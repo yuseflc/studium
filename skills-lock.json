@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "mongodb": {
+      "source": "hoodini/ai-agents-skills",
+      "sourceType": "github",
+      "skillPath": "skills/mongodb/SKILL.md",
+      "computedHash": "7307fd4f2e946457587880475908c63d9df7017150ca1abde5629055f7961f69"
+    }
+  }
+}

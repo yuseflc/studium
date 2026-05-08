@@ -1,115 +1,143 @@
-import mongoose from "mongoose";
+import mongoose, { CallbackWithoutResultAndOptionalError } from "mongoose";
 
+// Interfaz para los criterios de evaluación
 export interface ICriteria {
-  description: string;
-  weight: number; // Percentage of the score
+  description: string; // Descripción del criterio
+  weight: number; // Porcentaje de la puntuación
 }
 
+// Interfaz para las tareas
 export interface ITask {
   _id?: mongoose.Types.ObjectId;
-  title: string;
-  description: string;
-  type: "assignment" | "quiz" | "forum" | "project";
-  courseId: mongoose.Types.ObjectId;
-  subjectId: mongoose.Types.ObjectId;
-  createdById: mongoose.Types.ObjectId; // Teacher or admin who created the task
-  maxPoints: number;
-  criteria?: ICriteria[];
-  startDate: Date;
-  dueDate: Date;
-  allowLateSubmission: boolean;
-  active: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  title: string; // Título de la tarea
+  description: string; // Descripción de la tarea
+  type: "assignment" | "quiz" | "forum" | "project"; // Tipo: tarea, cuestionario, foro, proyecto
+  courseId: mongoose.Types.ObjectId; // ID del curso
+  subjectId: mongoose.Types.ObjectId; // ID de la materia
+  createdById: mongoose.Types.ObjectId; // ID del profesor o administrador que creó la tarea
+  maxPoints: number; // Puntuación máxima
+  criteria?: ICriteria[]; // Criterios de evaluación
+  startDate: Date; // Fecha de inicio
+  dueDate: Date; // Fecha de entrega
+  allowLateSubmission: boolean; // Permite entregas tardías
+  active: boolean; // Activa
+  createdAt: Date; // Fecha de creación
+  updatedAt: Date; // Fecha de actualización
 }
 
+// Esquema de criterios de evaluación
 const CriteriaSchema = new mongoose.Schema<ICriteria>(
   {
     description: {
       type: String,
-      required: [true, "Criterion description is required"],
-      trim: true,
+      required: [true, "La descripción del criterio es requerida"], // Descripción requerida
+      trim: true, // Elimina espacios al inicio y final
     },
     weight: {
       type: Number,
-      required: true,
-      min: [0, "Weight cannot be less than 0"],
-      max: [100, "Weight cannot exceed 100"],
+      required: true, // Requerido
+      min: [0, "El peso no puede ser menor que 0"], // Validación de mínimo
+      max: [100, "El peso no puede exceder 100"], // Validación de máximo
     },
   },
-  { _id: false }
+  { _id: false } // No genera _id para subdocumentos
 );
 
+// Esquema de tareas
 const TaskSchema = new mongoose.Schema<ITask>(
   {
     title: {
       type: String,
-      required: [true, "Task title is required"],
-      trim: true,
-      maxlength: [200, "Title cannot exceed 200 characters"],
+      required: [true, "El título de la tarea es requerido"], // Título requerido
+      trim: true, // Elimina espacios al inicio y final
+      maxlength: [200, "El título no puede exceder 200 caracteres"], // Límite de caracteres
     },
     description: {
       type: String,
-      required: [true, "Task description is required"],
+      required: [true, "La descripción de la tarea es requerida"], // Descripción requerida
     },
     type: {
       type: String,
-      enum: ["assignment", "quiz", "forum", "project"],
-      required: true,
-      default: "assignment",
+      enum: ["assignment", "quiz", "forum", "project"], // Valores permitidos: tarea, cuestionario, foro, proyecto
+      required: true, // Requerido
+      default: "assignment", // Valor por defecto: tarea
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Course",
-      required: [true, "Course ID is required"],
+      ref: "Course", // Referencia al modelo Course
+      required: [true, "El ID del curso es requerido"], // ID de curso requerido
     },
     subjectId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: [true, "Subject ID is required"],
+      required: [true, "El ID de la materia es requerido"], // ID de materia requerido
     },
     createdById: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: [true, "Task creator is required"],
+      ref: "User", // Referencia al modelo User
+      required: [true, "El creador de la tarea es requerido"], // Creador requerido
     },
     maxPoints: {
       type: Number,
-      required: true,
-      default: 100,
-      min: [0, "Points cannot be negative"],
+      required: true, // Requerido
+      default: 100, // Valor por defecto: 100
+      min: [0, "Los puntos no pueden ser negativos"], // Validación de mínimo
     },
-    criteria: [CriteriaSchema],
+    criteria: [CriteriaSchema], // Array de criterios
     startDate: {
       type: Date,
-      required: true,
-      default: Date.now,
+      required: true, // Requerido
+      default: Date.now, // Valor por defecto: fecha actual
     },
     dueDate: {
       type: Date,
-      required: true,
+      required: true, // Requerido
     },
     allowLateSubmission: {
       type: Boolean,
-      default: false,
+      default: false, // Valor por defecto: false
     },
     active: {
       type: Boolean,
-      default: true,
+      default: true, // Valor por defecto: true
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Habilita createdAt y updatedAt automáticamente
   }
 );
 
-// Indexes to optimize queries
-TaskSchema.index({ courseId: 1 });
-TaskSchema.index({ subjectId: 1 });
-TaskSchema.index({ createdById: 1 });
-TaskSchema.index({ courseId: 1, subjectId: 1 });
-TaskSchema.index({ active: 1 });
-TaskSchema.index({ dueDate: 1 });
+// Middleware pre-guardado: Validar fechas
+TaskSchema.pre('save', function (next: any) {
+  if (this.dueDate <= this.startDate) {
+    next(new Error('La fecha de entrega debe ser posterior a la fecha de inicio')); // Error si la fecha de entrega no es posterior
+  } else {
+    next();
+  }
+});
+
+// Middleware pre-búsqueda: Filtrar tareas inactivas
+TaskSchema.pre(/^find/, function (this: mongoose.Query<ITask[], ITask>) {
+  this.find({ active: { $ne: false } }); // Excluye tareas inactivas
+});
+
+// Virtual: Está vencida
+TaskSchema.virtual('isOverdue').get(function () {
+  return new Date() > this.dueDate && !this.allowLateSubmission; // True si fecha actual supera fecha de entrega y no permite entregas tardías
+});
+
+// Habilitar virtuales en toJSON
+TaskSchema.set('toJSON', { virtuals: true });
+
+// Índices para optimizar consultas
+TaskSchema.index({ courseId: 1 }); // Índice por ID de curso
+TaskSchema.index({ subjectId: 1 }); // Índice por ID de materia
+TaskSchema.index({ createdById: 1 }); // Índice por creador
+TaskSchema.index({ courseId: 1, subjectId: 1 }); // Índice compuesto por curso y materia
+TaskSchema.index({ active: 1 }); // Índice por estado activo
+TaskSchema.index({ dueDate: 1 }); // Índice por fecha de entrega
+TaskSchema.index({ courseId: 1, dueDate: 1 }); // Índice compuesto por curso y fecha de entrega
+TaskSchema.index({ title: 'text', description: 'text' }); // Índice de texto para búsqueda por título y descripción
 
 // Prevenir que se sobrescriba el modelo si ya existe
 export default mongoose.models.Task ||
-  mongoose.model<ITask>("Task", TaskSchema);
+  mongoose.model<ITask>("Task", TaskSchema); // Exporta el modelo Task
