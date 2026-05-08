@@ -3,7 +3,7 @@
 import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES, USUARIO } from "@/seed/data";
 import { useTheme } from "@/components/providers/ThemeProvider";
-
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 export default function Navbar() {
 
     return (

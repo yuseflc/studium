@@ -42,15 +42,21 @@ const NOTIFICACIONES = [
         time: "Hace 2 horas"
     }
 ];
-const USUARIO = 
-    {
-        id: "usuario-1",
-        name: "María García",
-        email: "maria.garcia@example.com",
-        image: "https://i.pravatar.cc/150?u=maria",
-        role: "estudiante",
-        enrolledCourses: ["curso-1"],
-        notifications: ["notification-1"],
-    }
 
+const USUARIO = {
+  id: "usuario-1",
+  name: "María García",
+  email: "maria.garcia@example.com",
+  image: "https://i.pravatar.cc/150?u=maria",
+  role: "estudiante",
+  enrolledCourses: ["curso-1"],
+  notifications: ["notification-1"],
+  phone: "123-456-7890",
+  birthDate: "01-01-2000",
+  address: "Calle Falsa 123, Ciudad, País"
+};
+
+
+
+// Export mock data for UI
 export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO };
