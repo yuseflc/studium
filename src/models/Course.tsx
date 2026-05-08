@@ -22,14 +22,14 @@ export interface ISubject {
   description?: string;
   order: number;
   units: IUnit[];
-  taskIds: mongoose.Types.ObjectId[]; // References to tasks in this subject
+  taskIds: mongoose.Types.ObjectId[]; // Referencia a las IDs de las tareas asociadas a esta materia
 }
 
 export interface ICourse {
   _id?: mongoose.Types.ObjectId;
   title: string;
   description?: string;
-  ownerId: mongoose.Types.ObjectId; // Teacher or admin who created it
+  ownerId: mongoose.Types.ObjectId; // Profesor / admin que lo haya creado (ID del usuario)
   status: "draft" | "active" | "archived";
   subjects: ISubject[];
   enrolledStudents: mongoose.Types.ObjectId[];
@@ -41,7 +41,7 @@ const ResourceSchema = new mongoose.Schema<IResource>(
   {
     title: {
       type: String,
-      required: [true, "Resource title is required"],
+      required: [true, "El nombre del recurso es requerido"],
       trim: true,
     },
     type: {
@@ -59,12 +59,12 @@ const UnitSchema = new mongoose.Schema<IUnit>(
   {
     title: {
       type: String,
-      required: [true, "Unit title is required"],
+      required: [true, "El título de la unidad es requerido"],
       trim: true,
     },
     content: {
       type: String,
-      required: [true, "Unit content is required"],
+      required: [true, "El contenido de la unidad es requerido"],
     },
     order: {
       type: Number,
@@ -80,7 +80,7 @@ const SubjectSchema = new mongoose.Schema<ISubject>(
   {
     title: {
       type: String,
-      required: [true, "Subject title is required"],
+      required: [true, "El título de la materia es requerido"],
       trim: true,
     },
     description: String,
@@ -107,18 +107,18 @@ const CourseSchema = new mongoose.Schema<ICourse>(
   {
     title: {
       type: String,
-      required: [true, "Course title is required"],
+      required: [true, "El título del curso es requerido"],
       trim: true,
-      maxlength: [200, "Title cannot exceed 200 characters"],
+      maxlength: [200, "El título no puede exceder 200 caracteres"],
     },
     description: {
       type: String,
-      maxlength: [1000, "Description cannot exceed 1000 characters"],
+      maxlength: [1000, "La descripción no puede exceder 1000 caracteres"],
     },
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: [true, "Course owner is required"],
+      required: [true, "El propietario del curso es requerido"],
     },
     status: {
       type: String,
@@ -141,11 +141,20 @@ const CourseSchema = new mongoose.Schema<ICourse>(
   }
 );
 
-// Indexes to optimize queries
+// Virtual: Enrollment count -> Número de estudiantes inscritos
+CourseSchema.virtual('enrollmentCount').get(function () {
+  return this.enrolledStudents?.length || 0;
+});
+
+// Habilita la inclusión de campos virtuales al convertir a JSON
+CourseSchema.set('toJSON', { virtuals: true });
+
+// Indices para optimizar consultas comunes
 CourseSchema.index({ ownerId: 1 });
 CourseSchema.index({ status: 1 });
 CourseSchema.index({ enrolledStudents: 1 });
 CourseSchema.index({ ownerId: 1, status: 1 });
+CourseSchema.index({ title: 'text', description: 'text' });
 
 // Prevenir que se sobrescriba el modelo si ya existe
 export default mongoose.models.Course ||
