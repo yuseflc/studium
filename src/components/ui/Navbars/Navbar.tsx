@@ -1,8 +1,9 @@
 'use client';
 
-import Link from 'next/link';
+import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
+import { NOTIFICACIONES, MENSAJES, USUARIO } from "@/seed/data";
+import { useTheme } from "@/components/providers/ThemeProvider";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-
 export default function Navbar() {
 
     return (
@@ -129,7 +130,7 @@ export default function Navbar() {
 
 
             {/* Lista central */}
-            <div className="navbar-center">
+            <div className="navbar-center hidden lg:flex ">
                 <ul className="menu menu-horizontal px-1">
                     <li>
                         <Link href="/" className="btn btn-ghost">Inicio</Link>
@@ -141,20 +142,12 @@ export default function Navbar() {
                         <Link href="#pricing" className="btn btn-ghost">Precios</Link>
                     </li>
                     <li>
-                        <Link href="#contact" className="btn btn-ghost">Contacto</Link>
+                        <Link href="#about" className="btn btn-ghost">Acerca de</Link>
                     </li>
                 </ul>
-<<<<<<< HEAD
             </div>
 
             {/* Lista izquierda */}
-            <div className="navbar-end">
-                <ThemeSwitcher />
-            </div>
-
-=======
-            </div>
-
             <div className="navbar-end">
                 <ThemeSwitcher />
             </div>
