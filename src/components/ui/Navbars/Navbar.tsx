@@ -1,9 +1,8 @@
 'use client';
 
-import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
-import { NOTIFICACIONES, MENSAJES, USUARIO } from "@/seed/data";
-import { useTheme } from "@/components/providers/ThemeProvider";
+import Link from 'next/link';
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+
 export default function Navbar() {
 
     return (
@@ -33,11 +32,15 @@ export default function Navbar() {
                 </ul>
             </div>
 
-            {/* Lista izquierda */}
             <div className="navbar-end">
                 <ThemeSwitcher />
             </div>
 
+            <a
+            href="/mycourses"
+            className="btn btn-primary ml-4 hidden md:inline-flex">
+                Mis cursos
+            </a>
         </div>
     );
 }
