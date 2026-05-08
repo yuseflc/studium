@@ -31,7 +31,7 @@ export default function CourseNavbar() {
                     </div>
                     <div
                         tabIndex={0}
-                        className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
+                        className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border-base-300">
                         <div className="card-body p-4">
                             <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">Notificaciones</h3>
                             <div className="flex flex-col gap-2 max-h-96 overflow-y-auto py-2">
