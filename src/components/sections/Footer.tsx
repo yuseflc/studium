@@ -1,0 +1,124 @@
+import Link from 'next/link'
+
+import { IconBrandLinkedin, IconBrandTwitter } from "@tabler/icons-react";
+
+
+interface FooterLink {
+    name: string;
+    href: string;
+    disabled?: boolean;
+}
+interface FooterSection {
+    title: string;
+    disabled: boolean;
+    links: FooterLink[]
+}
+const footerSections = [
+    {
+        title: 'Recursos',
+        disabled: false,
+        links: [
+            { name: 'Utilidades', href: '/resources/freebies' },
+            { name: 'Precios', href: '/resources/tools' },
+            { name: 'Guias', href: '/resources/behavior-principles', disabled: true },
+        ],
+    },
+    {
+        title: 'Proyecto',
+        disabled: true,
+        links: [
+            { name: 'Misión', href: '/company/mission', disabled: true },
+            { name: 'Roadmap', href: '/company/ecosystem', disabled: true },
+        ],
+    },
+    {
+        title: 'Integrantes',
+        disabled: false,
+        links: [
+            { name: 'Darío MR', href: 'https://dmrstudio.dev/', disabled: false },
+            { name: 'Yusef', href: 'https://yuseflc.dev/', disabled: false },
+            { name: 'David López', href: '#', disabled: true },
+            { name: 'Eva Cantero', href: '#', disabled: true },
+        ],
+    },
+]
+export const Footer = () => {
+    const currentYear = new Date().getFullYear();
+
+    return (
+        <footer className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm lg:max-w-7xl mx-4 lg:mx-auto">
+            <div className="relative bg-white rounded-3xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-10 md:px-8 flex-1 w-full">
+                    <div className='flex flex-col items-start gap-2'>
+                        <Link
+                            href="/"
+                            className="flex flex-row gap-1 items-center justify-start text-2xl font-display font-extrabold text-base-content"
+                        >
+
+                            Studium
+                        </Link>
+                        <p className='font-medium w-full md:w-4/5 text-base-content'>Organizador eficiente de clases y asignaturas online</p>
+                    </div>
+
+                    <div className='flex flex-col md:mx-4 md:flex-row gap-2 md:gap-20 items-start md:items-start'>
+
+                        {footerSections.map((section: FooterSection) => (
+                            <div key={section.title} className='flex flex-col gap-1 md:gap-4'>
+                                <h4 className={`uppercase font-display text-md font-semibold ${section.disabled ? 'text-neutral/50' : 'text-base-content'}`}>
+                                    {section.title} {(section.disabled) && <span className='inline-flex  ml-1 py-0.5 px-3 bg-base-300 text-xs rounded-xl rotate-3'>proximamente</span>}
+                                </h4>
+                                <div className="flex flex-wrap md:flex-col gap-2 text-sm text-neutral items-start ">
+                                    {section.links.map(link => (
+                                        <Link
+                                            key={link.name}
+                                            href={link.href}
+                                            className={`whitespace-nowrap font-medium ${link.disabled ? 'pointer-events-none text-neutral/50' : 'text-base-content/80'}`}
+                                        >
+                                            {link.name} {link.disabled && <span className='inline-flex ml-1 py-0.5 px-3 bg-base-300 text-xs rounded-xl -rotate-3'>soon</span>}
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                </div>
+            </div>
+            <div className="my-3 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center md:items-center gap-4 text-sm text-neutral w-full max-w-5xl mx-auto">
+                <div className="flex flex-col sm:flex-row gap-2 sm:gap-8 items-center sm:items-center">
+                    <p className="whitespace-nowrap">
+                        ©{currentYear} Studium. Todos los derechos reservados.
+                    </p>
+                    <div className="flex flex-row gap-4">
+                        <Link href="/legal/privacy-policy">Privacy Policy</Link>
+                        <Link href="/legal/tos">Terms &#38; Co</Link>
+                        <Link href="https://www.linkedin.com/in/radu-a-popescu/">
+                            Radu Popescu
+                        </Link>
+                    </div>
+                </div>
+
+                <div className="flex gap-4 items-center">
+                    <a
+                        href="https://www.linkedin.com/in/radu-a-popescu/"
+                        target="_blank"
+                        rel="nofollow noopener"
+                        aria-label="Radu Popescu, Founder of ActivationLed Linkedin"
+                        className="hover:text-gray-900"
+                    >
+                        <IconBrandLinkedin className="w-5 h-5 fill-neutral" />
+                    </a>
+                    <a
+                        href="https://x.com/activation_guy"
+                        target="_blank"
+                        rel="nofollow noopener"
+                        aria-label="X (formerly Twitter)"
+                        className="hover:text-gray-900"
+                    >
+                        <IconBrandTwitter className="w-5 h-5 fill-neutral" />
+                    </a>
+                </div>
+            </div>
+        </footer>
+    );
+};

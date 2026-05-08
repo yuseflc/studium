@@ -1,8 +1,9 @@
 export default function Pricing() {
     return (
-        <section className="flex w-full items-center justify-center py-24 bg-base-100 gap-6">
-            <div className="card w-80 md:w-96 bg-base-100 shadow-xl border border-base-200">
-                <div className="card-body">
+        <section className="flex flex-col lg:flex-row w-full items-center lg:items-stretch justify-center py-24 bg-base-100 gap-6 px-4 space-between">
+
+            <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-base-200">
+                <div className="card-body flex flex-col justify-between">
                     <div className="flex justify-between items-center">
                         <h2 className="text-2xl md:text-3xl font-bold text-base-content">Gratuito</h2>
                         <span className="text-xl font-semibold text-base-content">0 €/mes</span>
@@ -37,8 +38,8 @@ export default function Pricing() {
                 </div>
             </div>
 
-            <div className="card w-80 md:w-96 bg-base-100 shadow-xl border border-base-200">
-                <div className="card-body">
+            <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-primary">
+                <div className="card-body flex flex-col justify-between">
                     <span className="badge badge-md badge-primary w-full text-center">Más elegido</span>
                     <div className="flex justify-between items-center mt-2">
                         <h2 className="text-2xl md:text-3xl font-bold text-base-content">Básico</h2>
@@ -74,8 +75,8 @@ export default function Pricing() {
                 </div>
             </div>
 
-            <div className="card w-80 md:w-96 bg-base-100 shadow-xl border border-base-200">
-                <div className="card-body">
+            <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-secondary">
+                <div className="card-body flex flex-col justify-between">
                     <span className="badge badge-md badge-accent w-full text-center">Para empresas</span>
                     <div className="flex justify-between items-center mt-2">
                         <h2 className="text-2xl md:text-3xl font-bold text-base-content">Premium</h2>
