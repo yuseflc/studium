@@ -10,7 +10,7 @@ export default function CourseCatalogPage() {
                     <div key={c.id} className="card bg-base-100 w-66 shadow-sm">
                         <figure>
                             <img
-                                src={c.imagen ?? "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"}
+                                src={c.imagen}
                                 alt={c.nombre}
                             />
                         </figure>

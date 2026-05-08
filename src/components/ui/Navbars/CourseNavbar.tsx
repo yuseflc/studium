@@ -13,11 +13,6 @@ export default function CourseNavbar() {
                     Studium
                 </a>
             </div>
-            <div className="flex-1 flex justify-start gap-4">
-                <a className="btn btn-ghost text-base-content">Inicio</a>
-                <a className="btn btn-ghost text-base-content">Temas</a>
-                <a className="btn btn-ghost text-base-content">Comunidad</a>
-            </div>
             <div className="flex flex-row gap-3 items-center">
                 {/* Theme Selector */}
                 <ThemeSwitcher />
