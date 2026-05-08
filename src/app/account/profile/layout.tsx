@@ -1,0 +1,15 @@
+"use client";
+import Navbar from "@/components/ui/Navbars/Navbar";
+
+export default function ProfilePageLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <>
+      <Navbar />
+      {children}
+    </>
+  );
+}
