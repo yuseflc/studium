@@ -5,7 +5,7 @@ export default function CourseCatalogPage() {
     return (
         <main className="p-8 bg-base-100 min-h-[calc(100vh-64px)] align-center">
             <h1 className="text-4xl font-bold mb-6">Catálogo de cursos</h1>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-6">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 {CURSOS.map((c: any) => (
                     <div key={c.id} className="card bg-base-100 w-66 shadow-sm">
                         <figure>
