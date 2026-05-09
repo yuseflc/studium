@@ -1,11 +1,19 @@
-'use client';
-
 import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES } from "@/seed/data";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { connectDB, User } from "@/lib/database";
 
-export default function CourseNavbar() {
+export default async function CourseNavbar() {
+    const session = await getServerSession(authOptions);
 
+    if (session?.user?.email) {
+        await connectDB();
+        var user = await User.findOne({ email: session.user.email });
+        // LOGGER NECESARIO AQUI
+        console.log("Usuario de sesión:", user);
+    }
     return (
         <div className="navbar bg-base-100 shadow-sm px-4 flex space-between">
             <div className="flex-1">
@@ -114,11 +122,14 @@ export default function CourseNavbar() {
                     <ul
                         tabIndex={-1}
                         className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                        <li>
-                            <a className="justify-between">
-                                Profile
-                                <span className="badge">New</span>
-                            </a>
+                            <p className="px-4 py-2 text-sm font-medium text-base-content text-center">
+                                {user?.firstName}
+                            </p>
+                            <li>
+                                <a className="justify-between">
+                                    Profile
+                                    <span className="badge">New</span>
+                                </a>
                         </li>
                         <li><a>Settings</a></li>
                         <li><a>Logout</a></li>
