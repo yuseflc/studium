@@ -50,8 +50,8 @@ export default function LoginForm() {
     setIsLoading(true);
     try {
       const result = await signIn('credentials', {
-        username: email,
-        password,
+        email,
+        password: password,
         redirect: false,
       });
       if (result?.error) {
