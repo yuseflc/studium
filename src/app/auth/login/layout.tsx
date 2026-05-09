@@ -5,12 +5,7 @@ export default function LoginLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div 
-      className="min-h-screen w-full"
-      style={{
-        backgroundColor: 'light' ? '#F8FAFC' : '#0F172A'
-      }}
-    >
+    <div className="min-h-screen w-full bg-base-300">
       <Navbar />
       {children}
     </div>
