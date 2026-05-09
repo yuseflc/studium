@@ -1,11 +1,69 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEye, IconEyeOff, IconBrandGoogle } from '@tabler/icons-react';
+import { useSession } from 'next-auth/react';
+
 export default function LoginForm() {
+  // HOOKS
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  // Router y callbackUrl para redirección después del login
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/mycourses';
+
+
+  // Redirigir si ya hay una sesión activa
+  const { data: session } = useSession();
+  useEffect(() => {
+    if (session) {
+      router.push(callbackUrl);
+    }
+  }, [session, router, callbackUrl]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
+
+    try {
+      const result = await signIn('credentials', {
+        username: email,
+        password: password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.ok) {
+        router.push(callbackUrl);
+      }
+    } catch (err) {
+      setError('Error al iniciar sesión');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    try {
+      await signIn('google', { redirect: true, callbackUrl });
+    } catch (err) {
+      setError('Error al iniciar sesión con Google');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
 
   return (
@@ -16,7 +74,16 @@ export default function LoginForm() {
             Iniciar Sesión
           </h2>
 
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            {/* Error Message */}
+            {error && (
+              <div className="alert alert-error">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-error-content">{error}</span>
+                </div>
+              </div>
+            )}
+
             {/* Email */}
             <div className="form-control space-y-2">
               <label className="label">
@@ -67,12 +134,21 @@ export default function LoginForm() {
             </div>
 
             {/* Botón login */}
-            <button type="submit" className="btn btn-primary w-full">
-              Ingresar
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isLoading}
+            >
+              {isLoading ? 'Cargando...' : 'Ingresar'}
             </button>
 
             {/* Botón Google */}
-            <button type="button" className="btn btn-outline w-full gap-2">
+            <button
+              type="button"
+              className="btn btn-outline w-full gap-2"
+              onClick={handleGoogleSignIn}
+              disabled={isLoading}
+            >
               <IconBrandGoogle size={20} />
               Ingresar con Google
             </button>
