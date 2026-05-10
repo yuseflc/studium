@@ -15,16 +15,11 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
-import Link from 'next/link'; // Mejora navegación
+import Link from 'next/link'; // Navegación interna sin recargar la página
 
-/**
- * Formulario de login para Studium
- * - Accesible y optimizado según Vercel React Best Practices
- * - Sin lógica inline, sin componentes anidados
- * - Comentarios explicativos en cada bloque
- */
+
 export default function LoginForm() {
-  // Estado para los campos del formulario y control de UI
+  // Campos del formulario y estados de interacción
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,9 +30,10 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/mycourses';
-  const { data: session, status } = useSession();
+  // callbackUrl permite regresar al destino original luego de iniciar sesión.
+  const { status } = useSession();
 
-  // Redirección automática si el usuario ya está autenticado
+  // Redirecciona a la ruta de destino tras iniciar sesión o si ya está autenticado.
   useEffect(() => {
     if (status === 'authenticated') {
       router.push(callbackUrl);
@@ -54,7 +50,7 @@ export default function LoginForm() {
     setIsLoading(true);
     try {
       const result = await signIn('credentials', {
-        email,
+        username: email,
         password,
         redirect: false,
       });
@@ -78,39 +74,40 @@ export default function LoginForm() {
     signIn('google', { callbackUrl });
   };
 
+  // Renderiza el formulario de inicio de sesión completo con controles, estado y opciones sociales.
   return (
     // Layout principal centrado y responsivo
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12">
-      <div className="card w-full max-w-md bg-base-100 shadow-2xl border border-base-300">
-        <div className="card-body p-8">
+    <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
+      <div className="card w-full max-w-sm bg-base-100 shadow-2xl border border-base-300 rounded-2xl">
+        <div className="card-body p-5 space-y-2">
           {/* Cabecera centrada */}
-          <div className="flex flex-col items-center mb-6">
-            <h2 className="card-title text-3xl font-bold italic">
+          <div className="text-center space-y-1">
+            <h2 className="text-3xl font-bold italic text-base-content tracking-tighter leading-tight">
               STUDIUM<span className="text-primary">.</span>
             </h2>
-            <p className="text-base-content/50 font-semibold uppercase text-xs mt-2 tracking-widest">Sign In</p>
+            <p className="text-base-content/50 font-semibold uppercase text-[10px] tracking-widest">Iniciar sesión</p>
           </div>
 
           {/* Formulario de login */}
-          <form className="space-y-5" onSubmit={handleSubmit}>
+          <form className="space-y-2" onSubmit={handleSubmit}>
             {/* Mensaje de error */}
             {error && (
-              <div className="alert alert-error py-2 shadow-sm text-sm">
+              <div className="alert alert-error py-2 px-2 text-[11px] rounded-lg shadow-sm">
                 <span>{error}</span>
               </div>
             )}
 
-            {/* Campo Mail */}
-            <div className="form-control w-full">
-              <label className="label py-1 mb-1">
-                <span className="label-text font-medium text-base-content/70">Mail</span>
+            {/* Campo Email */}
+            <div className="form-control space-y-2">
+              <label htmlFor="login-email" className="label">
+                <span className="label-text text-base-content/70">Email</span>
               </label>
               <input
-                name="email"
+                id="login-email"
                 type="email"
                 autoComplete="email"
-                placeholder="nombre@ejemplo.com"
-                className="input input-bordered w-full focus:ring-0 focus:border-none transition-all"
+                placeholder="tu@ejemplo.com"
+                className="input input-bordered h-10 w-full bg-base-100 border-base-300 text-base-content focus:outline-none focus:border-primary transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -118,17 +115,18 @@ export default function LoginForm() {
             </div>
 
             {/* Campo Contraseña */}
-            <div className="form-control w-full">
-              <label className="label py-0 mb-1">
-                <span className="label-text font-medium text-base-content/70">Contraseña</span>
+            <div className="form-control space-y-2">
+              <label className="label">
+                <span className="label-text text-base-content/70">Contraseña</span>
               </label>
               <div className="relative">
                 <input
+                  id="login-password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="input input-bordered w-full pr-12 focus:ring-0 focus:border-none transition-all"
+                  className="input input-bordered h-10 w-full pr-12 bg-base-100 border-base-300 text-base-content focus:outline-none focus:border-primary transition-all"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -136,35 +134,35 @@ export default function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
                   aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
-                  {showPassword ? <IconEye size={20} /> : <IconEyeOff size={20} />}
+                  {showPassword ? <IconEye size={18} /> : <IconEyeOff size={18} />}
                 </button>
               </div>
               <div className="flex justify-end mt-1">
-                <Link href="#" className="text-xs link link-primary no-underline hover:underline">
+                <Link href="#" className="text-[11px] link link-primary no-underline hover:underline">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>
             </div>
 
-            {/* Botón de login */}
+            {/* Botón login */}
             <button
               type="submit"
-              className={`btn btn-primary w-full shadow-lg shadow-primary/20 ${isLoading ? 'loading' : ''}`}
+              className="btn btn-primary btn-sm w-full"
               disabled={isLoading}
             >
-              {!isLoading && 'Ingresar'}
+              {isLoading ? 'Cargando...' : 'Ingresar'}
             </button>
 
             {/* Separador visual */}
-            <div className="divider text-xs text-base-content/40">O CONTINÚA CON</div>
+            <div className="divider text-[10px] text-base-content/40">O CONTINÚA CON</div>
 
             {/* Botón Google accesible y optimizado */}
             <button
               type="button"
-              className="btn btn-outline w-full gap-3 font-medium border-base-content/10 hover:bg-base-200 transition-colors focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:outline-none"
+              className="btn btn-outline btn-sm w-full gap-2 font-medium border-base-content/10 hover:bg-base-200 transition-colors focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:outline-none"
               onClick={handleGoogleSignIn}
               disabled={isLoading}
               aria-label="Iniciar sesión con Google"
