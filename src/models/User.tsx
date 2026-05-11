@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { NextRequest, NextResponse } from "next/server";
 
 // Interfaz para el perfil del usuario
 export interface IProfile {
