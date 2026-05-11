@@ -4,6 +4,7 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB, User } from "@/lib/database";
+import LogoutButton from "./LogoutButton";
 
 export default async function CourseNavbar() {
     const session = await getServerSession(authOptions);
@@ -132,7 +133,7 @@ export default async function CourseNavbar() {
                                 </a>
                         </li>
                         <li><a>Settings</a></li>
-                        <li><a>Logout</a></li>
+                        <li><LogoutButton /></li>
                     </ul>
                 </div>
             </div>
