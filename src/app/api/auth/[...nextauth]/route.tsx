@@ -18,17 +18,17 @@ export const authOptions: NextAuthOptions = {
         CredentialsProvider({
             name: "Credentials",
             credentials: {
-                username: { label: "Email", type: "text", placeholder: "ejemplo@studium.com" },
+                email: { label: "Email", type: "text", placeholder: "ejemplo@studium.com" },
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials, req) {
-                if (!credentials?.username || !credentials?.password) {
+                if (!credentials?.email || !credentials?.password) {
                     throw new Error("Email y contraseña requeridos");
                 }
 
                 try {
                     await connectDB();
-                    const user = await User.findOne({ email: credentials.username }).select('+password');
+                    const user = await User.findOne({ email: credentials.email }).select('+password');
 
                     if (!user) {
                         throw new Error("Usuario no encontrado");
