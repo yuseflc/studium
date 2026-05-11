@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 import { protectedRoutes } from "@/config/protectedRoutes";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Verificar si la ruta está protegida
