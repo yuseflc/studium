@@ -34,7 +34,7 @@ const CURSOS = [
     id: "course-6",
     nombre: "Digitalización",
     descripcion: "Aprende procesos de transformación digital, herramientas SaaS y técnicas para optimizar workflows.",
-    imagen: "https://images.unsplash.com/photo-1526378721914-8fb5b3a8f8a6?auto=format&fit=crop&w=800&q=60"
+    imagen: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=60"
   }
 ];
 const MENSAJES = [
