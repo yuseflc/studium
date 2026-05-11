@@ -4,6 +4,7 @@ import Course from "@/models/Course";
 import Task from "@/models/Task";
 import Submission from "@/models/Submission";
 import Session from "@/models/Session";
+import { LOGGER } from "@/config/logger";
 
 declare global {
   var mongooseConnection: {
@@ -45,7 +46,7 @@ export async function connectDB() {
     cached.promise = mongoose
       .connect(String(MONGODB_URI), opts)
       .then((mongoose) => {
-        console.log('MongoDB conectado exitosamente');
+        LOGGER.debug('MongoDB conectado exitosamente');
         return mongoose;
       })
       .catch((error) => {

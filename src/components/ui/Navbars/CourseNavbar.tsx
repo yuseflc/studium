@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB, User } from "@/lib/database";
 import LogoutButton from "./LogoutButton";
+import { LOGGER } from "@/config/logger";
 
 export default async function CourseNavbar() {
     const session = await getServerSession(authOptions);
@@ -13,7 +14,7 @@ export default async function CourseNavbar() {
         await connectDB();
         var user = await User.findOne({ email: session.user.email });
         // LOGGER NECESARIO AQUI
-        console.log("Usuario de sesión:", user);
+        LOGGER.info("Usuario de sesión:", user);
     }
     return (
         <div className="navbar bg-transparent hover:bg-base-100/50 backdrop-blur-sm shadow-sm px-4 top-0 sticky z-50 transition-all">
