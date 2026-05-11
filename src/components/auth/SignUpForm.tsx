@@ -60,8 +60,8 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-base-300 rounded-2xl">
-      <div className="card-body p-5 space-y-2">
+    <div className="mt-25 card w-full max-w-sm bg-base-100 shadow-xl border border-base-300 rounded-2xl">
+      <div className="card-body p-6 space-y-3">
         <div className="text-center space-y-1">
           <h2 className="text-3xl font-black italic text-base-content tracking-tighter leading-tight">
             STUDIUM<span className="text-primary">.</span>
@@ -119,6 +119,34 @@ export default function SignUpForm() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+              >
+                {showPassword ? <IconEye size={18} /> : <IconEyeOff size={18} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="form-control space-y-2">
+            <label htmlFor="signup-password" className="label">
+              <span className="label-text text-base-content/70">Repetir contraseña</span>
+            </label>
+            <div className="relative">
+              <input
+                id="signup-password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                className="input input-bordered h-10 w-full pr-12 bg-base-100 border-base-300 text-base-content focus:outline-none focus:border-primary transition-all"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
