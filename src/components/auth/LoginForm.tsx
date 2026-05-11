@@ -76,7 +76,7 @@ export default function LoginForm() {
 
   // Renderiza el formulario de inicio de sesión completo con controles, estado y opciones sociales.
   return (
-    // Layout principal centrado y responsivo
+    // Layout principal centrado y responsive
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-10">
       <div className="card w-full max-w-sm bg-base-100 shadow-2xl border border-base-300 rounded-2xl">
         <div className="card-body p-5 space-y-2">
