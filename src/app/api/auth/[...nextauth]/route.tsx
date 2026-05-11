@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/database'
 import User from '@/models/User'
 import Session from '@/models/Session'
 import crypto from 'crypto'
+import { LOGGER } from '@/config/logger'
 
 const secret = process.env.NEXTAUTH_SECRET;
 // Si no hay secret, lanzar error para evitar problemas de seguridad
@@ -96,9 +97,9 @@ export const authOptions: NextAuthOptions = {
                         expires,
                     });
 
-                    console.log(`Sesión creada para el usuario: ${user.email}`);
+                    LOGGER.info(`Sesión creada para el usuario: ${user.email}`);
                 } catch (error) {
-                    console.error('Error creando registro de sesión:', error);
+                    LOGGER.error('Error creando registro de sesión:', error);
                 }
             }
         },
@@ -107,7 +108,7 @@ export const authOptions: NextAuthOptions = {
             try {
                 await connectDB();
                 await Session.deleteMany({ expires: { $lt: new Date() } });
-                console.log('Sesiones expiradas limpiadas');
+                LOGGER.info('Sesiones expiradas limpiadas');
             } catch (error) {
                 console.error('EError limpiando sesiones expiradas:', error);
             }
