@@ -1,4 +1,5 @@
-import { USUARIO } from "@/seed/data";
+import { USUARIO, CURSOS } from "@/seed/data";
+import { IconUser, IconMail, IconPhone, IconCalendar, IconHome, IconKey} from "@tabler/icons-react";
 
 export default function ProfilePage() {
     return (
@@ -6,25 +7,44 @@ export default function ProfilePage() {
             <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 p-3 pb-0 w-full max-w-3xl">
                 <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 p-3 pb-0 w-full max-w-3xl">
                     <div className="avatar flex items-start">
-                        <div className="w-24 rounded-full mr-4">
+                        <div className="w-24 rounded-full mr-7 mt-4">
                             <img src="https://i.pravatar.cc/150?u=maria" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold">{USUARIO.name}</h1>
-                            <p className="mt-1 text-gray-400 text-sm leading-5">Biografía: [Espacio para la biografía del usuario]</p>
+                            <h1 className="text-2xl font-bold mt-12">{USUARIO.name}</h1>
                         </div>
                     </div>
                 </div>
 
                 <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
                     <div className="card-body">
-                        <h2 className="badge badge badge-warning badge-xl m-2">Detalles del Usuario</h2>
-                        <p><strong>Nombre:</strong> {USUARIO.name}</p>
-                        <p><strong>Email:</strong> {USUARIO.email}</p>
-                        <p><strong>Teléfono:</strong> {USUARIO.phone}</p>
-                        <p><strong>Fecha de nacimiento:</strong> {USUARIO.birthDate}</p>
-                        <p><strong>Dirección:</strong> {USUARIO.address}</p>
-                        <p><strong>Género:</strong> Masculino</p>
+                        <h2 className="badge badge-soft badge-warning badge-xl m-2 border border-primary font-bold">Detalles del Usuario</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 --font-manrope">
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                                <IconUser size={30} />
+                                <input type="text" placeholder={USUARIO.name} readOnly className="input input-ghost w-full" />
+                            </label>
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                                <IconMail size={30} />
+                                <input type="text" placeholder={USUARIO.email} readOnly className="input input-ghost w-full" />
+                            </label>
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                                <IconPhone size={30} />
+                                <input type="text" placeholder={USUARIO.phone} readOnly className="input input-ghost w-full" />
+                            </label>
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                                <IconCalendar size={30} />
+                                <input type="text" placeholder={USUARIO.birthDate} readOnly className="input input-ghost w-full" />
+                            </label>
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                                <IconHome size={30} />
+                                <input type="text" placeholder={USUARIO.address} readOnly className="input input-ghost w-full" />
+                            </label>
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                                <IconKey size={30} />
+                                <input type="text" placeholder={USUARIO.role} readOnly className="input input-ghost w-full" />
+                            </label>
+                        </div>
                     </div>
 
 
@@ -34,41 +54,19 @@ export default function ProfilePage() {
                     <div className="card-body">
                         <h2 className="badge badge-soft badge-warning badge-xl m-2 border border-primary font-bold">Cursos</h2>
                         <div className="grid grid-cols-1 gap-4 justify-items-center">
-                            <div className="card bg-base-100 w-full max-w-3xl shadow-sm">
-                                <div className="card-body">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <h2 className="card-title">Curso 1</h2>
-                                            <p>Descripción corta del curso 1.</p>
+                            {CURSOS.slice(0, 3).map((curso) => (
+                                <div key={curso.id} className="card bg-base-100 w-full max-w-3xl shadow-sm">
+                                    <div className="card-body">
+                                        <div className="flex items-center justify-between gap-4">
+                                            <div>
+                                                <h2 className="card-title">{curso.nombre}</h2>
+                                                <p>{curso.descripcion}</p>
+                                            </div>
+                                            <button className="btn btn-warning btn-sm">Entrar</button>
                                         </div>
-                                        <button className="btn btn-primary btn-sm">Entrar</button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <div className="card bg-base-100 w-full max-w-3xl shadow-sm">
-                                <div className="card-body">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <h2 className="card-title">Curso 2</h2>
-                                            <p>Descripción corta del curso 2.</p>
-                                        </div>
-                                        <button className="btn btn-primary btn-sm">Entrar</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="card bg-base-100 w-full max-w-3xl shadow-sm">
-                                <div className="card-body">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div>
-                                            <h2 className="card-title">Curso 3</h2>
-                                            <p>Descripción corta del curso 3.</p>
-                                        </div>
-                                        <button className="btn btn-primary btn-sm">Entrar</button>
-                                    </div>
-                                </div>
-                            </div>
+                            ))}
                         </div>
                     </div>
                 </div >
