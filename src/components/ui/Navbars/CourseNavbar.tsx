@@ -13,8 +13,7 @@ export default async function CourseNavbar() {
     if (session?.user?.email) {
         await connectDB();
         var user = await User.findOne({ email: session.user.email });
-        // LOGGER NECESARIO AQUI
-        LOGGER.info("Usuario de sesión:", user);
+        LOGGER.info(`Usuario de sesión: ${session.user.email}`);
     }
     return (
         <div className="navbar bg-transparent hover:bg-base-100/50 backdrop-blur-sm shadow-sm px-4 top-0 sticky z-50 transition-all">
