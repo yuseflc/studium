@@ -8,6 +8,21 @@ export interface IProfile {
   bio?: string; // Biografía
 }
 
+// Interfaz para cuentas de terceros (por ahora deshabilitado)
+/*
+export interface IThirdParty {
+  provider: "google" | "github" | string; // Proveedor externo
+  externalId: string; // ID del usuario en el proveedor externo
+  accessToken?: string; // Token de acceso
+  refreshToken?: string; // Token de refresco
+  expiresAt?: Date; // Fecha de expiración del token
+  email?: string; // Email del proveedor (puede diferir del email principal)
+  name?: string; // Nombre del proveedor
+  profilePicture?: string; // Foto de perfil del proveedor
+  connectedAt: Date; // Fecha de conexión
+}
+  */
+
 // Interfaz para el usuario
 export interface IUser {
   _id?: mongoose.Types.ObjectId;
@@ -19,6 +34,7 @@ export interface IUser {
   profile: IProfile; // Perfil
   enrolledCourses: mongoose.Types.ObjectId[]; // Cursos donde el usuario está inscrito (estudiante)
   createdCourses: mongoose.Types.ObjectId[]; // Cursos creados por el usuario (profesor/admin)
+  //thirdparty: IThirdParty[]; // Cuentas de terceros vinculadas (Google, GitHub, etc.)
   createdAt: Date; // Fecha de creación
   updatedAt: Date; // Fecha de actualización
   comparePassword?(candidatePassword: string): Promise<boolean>; // Método para comparar contraseñas
@@ -127,6 +143,7 @@ UserSchema.index({ role: 1 }); // Índice por rol
 UserSchema.index({ enrolledCourses: 1 }); // Índice por cursos inscritos
 UserSchema.index({ createdCourses: 1 }); // Índice por cursos creados
 UserSchema.index({ active: 1, role: 1 }); // Índice compuesto por activo y rol
+//UserSchema.index({ "thirdparty.provider": 1, "thirdparty.externalId": 1 }); // Índice para búsquedas de terceros
 
 // Prevenir que se sobrescriba el modelo si ya existe
 export default mongoose.models.User ||

@@ -12,8 +12,9 @@ export default async function CourseNavbar() {
 
     if (session?.user?.email) {
         await connectDB();
-        var user = await User.findOne({ email: session.user.email });
-        LOGGER.info(`Usuario de sesión: ${session.user.email}`);
+        // Los errores de tipado son normales por que la sesion de NextAuth (por defecto) solo tiene 3 campos y yo he agregado el id
+        var user = await User.findOne({ _id: session.user.id });
+        LOGGER.info(`Usuario de sesión: ${session.user.id} - ${session.user.email} - ${session.user.name}`);
     }
     return (
         <div className="navbar bg-transparent hover:bg-base-100/50 backdrop-blur-sm shadow-sm px-4 top-0 sticky z-50 transition-all">
