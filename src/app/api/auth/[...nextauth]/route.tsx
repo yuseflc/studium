@@ -53,8 +53,8 @@ export const authOptions: NextAuthOptions = {
             }
         }),
         GoogleProvider({
-            clientId: process.env.GOOGLE_ID as string,
-            clientSecret: process.env.GOOGLE_SECRET as string
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
         })
     ],
     session: {
@@ -66,6 +66,9 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async jwt({ token, user, account }) {
+            // Falta agregar logica para manejar usuarios que inician sesión con Google por primera vez (crear usuario en BD)
+
+            // Solo para el provider de credenciales, se agrega el id del usuario a la sesión JWT
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
