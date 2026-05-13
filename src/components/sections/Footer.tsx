@@ -37,8 +37,8 @@ const footerSections = [
         links: [
             { name: 'Darío MR', href: 'https://dmrstudio.dev/', disabled: false },
             { name: 'Yusef', href: 'https://yuseflc.dev/', disabled: false },
-            { name: 'David López', href: '#', disabled: true },
-            { name: 'Eva Cantero', href: '#', disabled: true },
+            { name: 'David López', href: '#', disabled: false },
+            { name: 'Eva Cantero', href: '#', disabled: false },
         ],
     },
 ]
@@ -46,8 +46,8 @@ export const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm lg:max-w-7xl mx-4 lg:mx-auto">
-            <div className="relative bg-white rounded-3xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
+        <footer id="about" className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm lg:max-w-7xl mx-4 lg:mx-auto">
+            <div className="relative bg-base-100 rounded-3xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-10 md:px-8 flex-1 w-full">
                     <div className='flex flex-col items-start gap-2'>
                         <Link
