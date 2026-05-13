@@ -18,7 +18,7 @@ export default function Navbar() {
             <div className="navbar-center hidden lg:flex ">
                 <ul className="menu menu-horizontal px-1">
                     <li>
-                        <Link href="/" className="btn btn-ghost">Inicio</Link>
+                        <Link href="#top" className="btn btn-ghost">Inicio</Link>
                     </li>
                     <li>
                         <Link href="#features" className="btn btn-ghost">Herramientas</Link>
@@ -54,7 +54,7 @@ export default function Navbar() {
                         <div className="menu bg-base-200 min-h-full w-80 p-6 text-base-content">
                             <h2 className="text-xl font-bold mb-4">Menú</h2>
                             <ul className="flex flex-col gap-2">
-                                <li><Link href="/" onClick={() => document.getElementById('my-drawer-5')?.click()}>Inicio</Link></li>
+                                <li><Link href="#top" onClick={() => document.getElementById('my-drawer-5')?.click()}>Inicio</Link></li>
                                 <li><Link href="#features" onClick={() => document.getElementById('my-drawer-5')?.click()}>Herramientas</Link></li>
                                 <li><Link href="#pricing" onClick={() => document.getElementById('my-drawer-5')?.click()}>Precios</Link></li>
                                 <li><Link href="#about" onClick={() => document.getElementById('my-drawer-5')?.click()}>Acerca de</Link></li>
