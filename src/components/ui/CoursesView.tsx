@@ -24,19 +24,19 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                                     className="w-full h-full object-cover transition-transform"
                                 />
                                 {/* Overlay para facilitar lectura del nombre */}
-                                <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
-
-                                <span className="absolute bottom-2 left-4 text-[10px] text-white font-bold uppercase tracking-widest drop-shadow-md">
-                                    Ignacio Miguel Mateos
-                                </span>
+                                <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
 
                                 <div className="absolute top-2 right-2 opacity-0 border border-white group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-2 group-hover:translate-y-0 translate-y-2 bg-black/50 p-1.5 rounded-full">
                                     <IconArrowUpRight size={20} className="text-white" />
                                 </div>
                             </figure>
 
+                            <span className="badge absolute -bottom-3 left-20 text-xs font-bold uppercase tracking-widest drop-shadow-md z-40">
+                                Ignacio Miguel Mateos
+                            </span>
+
                             {/* Avatar movido fuera del figure para evitar recortes y problemas de z-index */}
-                            <div className="absolute -bottom-8 right-4 w-16 h-16 rounded-full border-4 border-base-100 overflow-hidden z-30 bg-base-300 shadow-lg">
+                            <div className="absolute -bottom-8 left-2 w-16 h-16 rounded-full border-4 border-base-100 overflow-hidden z-30 bg-base-300 shadow-lg">
                                 <img
                                     src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
                                     alt="Ignacio Miguel Mateos"
@@ -64,7 +64,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                                             </Link>
                                         </li>
                                         <li>
-                                            <button className="text-error hover:bg-error/10">
+                                            <button className="text-error hover:bg-error/10" onClick={() => alert("Funcionalidad de cancelación de registro aún no implementada")}>
                                                 Cancelar registro
                                             </button>
                                         </li>
