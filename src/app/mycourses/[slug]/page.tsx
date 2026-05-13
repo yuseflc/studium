@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB, User } from "@/lib/database";
 import { notFound } from "next/navigation";
+import CourseView from "@/components/ui/CourseView";
 
 export default async function MyCoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -30,4 +31,11 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     console.error("Error fetching user data:", error);
   }
 
+  return (
+    <div className="min-h-[70vh]">
+      <div className="max-w-8xl mx-auto">
+        <CourseView courseData={curso} isTeacher={isTeacher} />
+      </div>
+    </div>
+  );
 }
