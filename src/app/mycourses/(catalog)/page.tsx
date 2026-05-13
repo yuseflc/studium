@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { connectDB, User } from "@/lib/database";
-import CoursesView from "@/components/ui/CoursesView";
+import CoursesView from "@/components/ui/CourseMenuView";
 
 export default async function CourseCatalogPage() {
     let isTeacher = false;
@@ -18,6 +18,7 @@ export default async function CourseCatalogPage() {
     } catch (error) {
         console.error("Error fetching user:", error);
     }
+    // Retorna la vista de los cursos controlando si es profesor o no (para añadir cursos)
     return <CoursesView isTeacher={isTeacher} />;
 }
 
