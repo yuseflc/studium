@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/database'
 import User from '@/models/User'
 import Session from '@/models/Session'
 import crypto from 'crypto'
+import { LOGGER } from '@/config/logger'
 
 const secret = process.env.NEXTAUTH_SECRET;
 // Si no hay secret, lanzar error para evitar problemas de seguridad
@@ -52,8 +53,8 @@ export const authOptions: NextAuthOptions = {
             }
         }),
         GoogleProvider({
-            clientId: process.env.GOOGLE_ID as string,
-            clientSecret: process.env.GOOGLE_SECRET as string
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
         })
     ],
     session: {
@@ -65,6 +66,9 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async jwt({ token, user, account }) {
+            // Falta agregar logica para manejar usuarios que inician sesión con Google por primera vez (crear usuario en BD)
+
+            // Solo para el provider de credenciales, se agrega el id del usuario a la sesión JWT
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
@@ -96,9 +100,9 @@ export const authOptions: NextAuthOptions = {
                         expires,
                     });
 
-                    console.log(`Sesión creada para el usuario: ${user.email}`);
+                    LOGGER.info(`Sesión creada para el usuario: ${user.email}`);
                 } catch (error) {
-                    console.error('Error creando registro de sesión:', error);
+                    LOGGER.error('Error creando registro de sesión:', error);
                 }
             }
         },
@@ -107,7 +111,7 @@ export const authOptions: NextAuthOptions = {
             try {
                 await connectDB();
                 await Session.deleteMany({ expires: { $lt: new Date() } });
-                console.log('Sesiones expiradas limpiadas');
+                LOGGER.info('Sesiones expiradas limpiadas');
             } catch (error) {
                 console.error('EError limpiando sesiones expiradas:', error);
             }
