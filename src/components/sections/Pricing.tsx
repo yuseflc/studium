@@ -1,7 +1,6 @@
 export default function Pricing() {
     return (
-<<<<<<< HEAD
-        <section className="flex flex-col lg:flex-row w-full items-center lg:items-stretch justify-center py-24 bg-base-100 gap-6 px-4 space-between">
+        <section id="pricing" className="flex flex-col lg:flex-row w-full items-center lg:items-stretch justify-center py-24 bg-base-100 gap-6 px-4 space-between">
 
             <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-base-200">
                 <div className="card-body flex flex-col justify-between">
