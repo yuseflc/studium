@@ -38,13 +38,16 @@ export default async function CourseNavbar() {
                         tabIndex={0}
                         className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border-base-300">
                         <div className="card-body p-4">
-                            <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">Notificaciones</h3>
+
+
+
+                            <h3 className="text-base font-bold text-base-content border-b border-base-300 pb-2">Notificaciones</h3>
                             <div className="flex flex-col gap-2 max-h-96 overflow-y-auto py-2">
                                 {NOTIFICACIONES.length === 0 ? (
                                     <p className="text-sm text-base-content/60 text-center py-4">No tienes nuevas notificaciones.</p>
                                 ) : (
                                     NOTIFICACIONES.map((notification) => (
-                                        <div key={notification.id} className="group relative flex flex-col gap-1 p-3 rounded-lg bg-base-200 transition-colors border border-base-400 hover:bg-base-300">
+                                        <div key={notification.id} className="group relative flex flex-col gap-1 p-3 rounded-lg transition-colors hover:bg-base-200">
                                             <div className="flex justify-between items-start">
                                                 <span className="text-sm font-semibold text-base-content">{notification.title}</span>
                                                 <button className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity text-base-content">
@@ -54,6 +57,9 @@ export default async function CourseNavbar() {
                                             <p className="text-xs text-base-content/70 leading-relaxed">
                                                 {notification.description}
                                             </p>
+                                            <div className="flex justify-end mt-2">
+                                                <span className="text-[10px] text-base-content/50">{notification.time}</span>
+                                            </div>
                                         </div>
                                     ))
                                 )}
@@ -66,6 +72,7 @@ export default async function CourseNavbar() {
                         </div>
                     </div>
                 </div>
+
                 <div className="dropdown dropdown-end">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
                         <div className="indicator">
@@ -92,11 +99,15 @@ export default async function CourseNavbar() {
                                             <div className="flex flex-col flex-1 gap-0.5">
                                                 <div className="flex justify-between items-center">
                                                     <span className="text-sm font-semibold text-base-content">{message.sender}</span>
-                                                    <span className="text-[10px] text-base-content/50">{message.time}</span>
+                                                    {/* El tiempo ya no está aquí */}
                                                 </div>
                                                 <p className="text-xs text-base-content/70 line-clamp-2 leading-snug">
                                                     {message.content}
                                                 </p>
+                                                {/* El tiempo ahora está aquí, después del contenido */}
+                                                <div className="flex justify-end mt-1">
+                                                    <span className="text-[10px] text-base-content/50">{message.time}</span>
+                                                </div>
                                             </div>
                                             <button className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity absolute right-1 top-1">
                                                 <IconX size={12} />
