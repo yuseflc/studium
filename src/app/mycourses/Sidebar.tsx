@@ -25,7 +25,7 @@ export default function Sidebar() {
         `}
       >
         {/* Header */}
-        <div className="p-3 border-b border-base-300 shadow-sm/10">
+        <div className="p-3 border-b border-base-300">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <BookOpen className="text-primary" />
             <span>Mis Cursos</span>
@@ -42,10 +42,10 @@ export default function Sidebar() {
               <Link
                 key={curso.id}
                 href={`/mycourses/${curso.id}`}
-                className="group flex items-center justify-between p-2 rounded-s hover:bg-base-200 transition-colors"
+                className="group flex items-center justify-between p-2 rounded-s hover:bg-base-300 transition-colors text-sm rounded-xl"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium max-w-[180px]">
+                  <span className="text-sm font-semibold max-w-[180px]">
                     {curso.nombre}
                   </span>
                 </div>
@@ -56,24 +56,24 @@ export default function Sidebar() {
         </div>
 
         {/* Footer Links */}
-        <div className="p-4 border-t border-base-300 bg-base-200/50 shadow-[0_-1px_3px_0_rgba(0,0,0,0.05)]">
+        <div className="p-4 border-t border-base-300 bg-base-200/50">
           <nav className="flex flex-col gap-1">
             <Link
               href="/account/profile"
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-base-300 transition-colors text-sm font-medium"
+              className="flex items-center gap-3 p-2 rounded-xl hover:bg-base-300 transition-colors text-sm font-semibold"
             >
               <User size={18} />
               <span>Mi cuenta</span>
             </Link>
             <Link
               href="/settings"
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-base-300 transition-colors text-sm font-medium"
+              className="flex items-center gap-3 p-2 rounded-xl hover:bg-base-300 transition-colors text-sm font-semibold"
             >
               <Settings size={18} />
               <span>Ajustes</span>
             </Link>
             <button
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-error/10 hover:text-error transition-colors text-sm font-medium mt-2 w-full text-left"
+              className="flex items-center gap-3 p-2 rounded-xl hover:bg-error/10 hover:text-error transition-colors text-sm font-semibold mt-2 w-full text-left"
             >
               <LogOut size={18} />
               <span>Cerrar sesión</span>
