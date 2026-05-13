@@ -256,7 +256,17 @@ export async function getCourseGrades(courseId: mongoose.Types.ObjectId | string
       $project: {
         _id: 0,
         studentId: '$_id', // Renombra campo
-        name: { $concat: ['$student.firstName', ' ', '$student.profile.lastName'] }, // Concatena nombre completo
+        name: {
+          $trim: {
+            input: {
+              $concat: [
+                { $ifNull: ['$student.firstName', ''] },
+                ' ',
+                { $ifNull: ['$student.profile.lastName', ''] },
+              ],
+            },
+          },
+        },
         avgGrade: { $round: ['$avgGrade', 2] }, // Redondea promedio a 2 decimales
         submissionCount: 1,
         totalPoints: 1,

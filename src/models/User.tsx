@@ -28,7 +28,7 @@ export interface IUser {
   _id?: mongoose.Types.ObjectId;
   email: string; // Correo electrónico
   firstName: string; // Nombre
-  password: string; // Contraseña
+  password?: string; // Contraseña (Opcional para Google)
   role: "student" | "teacher" | "admin"; // Rol: estudiante, profesor, administrador
   active: boolean; // Activo
   profile: IProfile; // Perfil
@@ -63,7 +63,7 @@ const UserSchema = new mongoose.Schema<IUser>(
     },
     password: {
       type: String,
-      required: [true, "La contraseña es requerida"], // Contraseña requerida
+      required: false, // CAMBIADO: Ahora es opcional para permitir el registro con Google
       minlength: [6, "La contraseña debe tener al menos 6 caracteres"], // Longitud mínima
       select: false, // No devuelve la contraseña por defecto
     },
@@ -107,10 +107,18 @@ const UserSchema = new mongoose.Schema<IUser>(
 );
 
 // Middleware pre-guardado: Encriptar contraseña antes de guardar
-UserSchema.pre('save', async function () {
-  if (this.isModified('password')) { // Si la contraseña fue modificada
+UserSchema.pre('save', async function (next) {
+  // CAMBIADO: Solo encripta si existe una contraseña y ha sido modificada (evita errores con Google)
+  if (!this.password || !this.isModified('password')) {
+    return next();
+  }
+
+  try {
     const salt = await bcrypt.genSalt(10); // Genera salt
     this.password = await bcrypt.hash(this.password, salt); // Encripta la contraseña
+    next();
+  } catch (error: any) {
+    next(error);
   }
 });
 
@@ -134,6 +142,7 @@ UserSchema.set('toJSON', { virtuals: true });
 
 // Método para comparar contraseñas
 UserSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+  if (!this.password) return false; // Si no hay contraseña (usuario Google), no se puede comparar
   return bcrypt.compare(candidatePassword, this.password); // Compara la contraseña candidata con la almacenada
 };
 
