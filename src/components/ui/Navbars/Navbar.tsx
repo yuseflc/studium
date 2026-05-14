@@ -133,17 +133,15 @@ export default function Navbar() {
             {/* Lista central */}
             <div className="navbar-center">
                 <ul className="menu menu-horizontal px-1">
+                    
                     <li>
-                        <Link href="#top" className="btn btn-ghost">Inicio</Link>
+                        <Link href="#top" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); }}>Inicio</Link>
                     </li>
                     <li>
-                        <Link href="#features" className="btn btn-ghost">Herramientas</Link>
+                        <Link href="#features" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>Herramientas</Link>
                     </li>
                     <li>
-                        <Link href="#pricing" className="btn btn-ghost">Precios</Link>
-                    </li>
-                    <li>
-                        <Link href="#contact" className="btn btn-ghost">Contacto</Link>
+                        <Link href="#pricing" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Precios</Link>
                     </li>
                 </ul>
             </div>
@@ -171,9 +169,9 @@ export default function Navbar() {
                         <div className="menu bg-base-200 min-h-full w-80 p-6 text-base-content">
                             <h2 className="text-xl font-bold mb-4">Menú</h2>
                             <ul className="flex flex-col gap-2">
-                                <li><Link href="#top" onClick={() => document.getElementById('my-drawer-5')?.click()}>Inicio</Link></li>
-                                <li><Link href="#features" onClick={() => document.getElementById('my-drawer-5')?.click()}>Herramientas</Link></li>
-                                <li><Link href="#pricing" onClick={() => document.getElementById('my-drawer-5')?.click()}>Precios</Link></li>
+                                <li><Link href="#top" onClick={(e) => { e.preventDefault(); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Inicio</Link></li>
+                                <li><Link href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Herramientas</Link></li>
+                                <li><Link href="#pricing" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Precios</Link></li>
                                 <li><Link href="#about" onClick={() => document.getElementById('my-drawer-5')?.click()}>Acerca de</Link></li>
                                 <div className="divider"></div>
                                 <li><Link href="/mycourses" className="btn btn-primary text-white">Mis cursos</Link></li>
