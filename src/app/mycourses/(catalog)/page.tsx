@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth.config";
+import { authOptions } from "@/config/auth.config";
 import { connectDB, User } from "@/lib/database";
 import CoursesView from "@/components/ui/CourseMenuView";
 

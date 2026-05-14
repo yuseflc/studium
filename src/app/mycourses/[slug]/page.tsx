@@ -2,7 +2,7 @@
 
 import { CURSOS } from "@/seed/data";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth.config";
+import { authOptions } from "@/config/auth.config";
 import { connectDB, User } from "@/lib/database";
 import { notFound } from "next/navigation";
 import CourseView from "@/components/ui/CourseView";

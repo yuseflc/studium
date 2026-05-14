@@ -2,7 +2,7 @@ import { type NextAuthOptions, type DefaultSession } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { connectDB } from '@/lib/database'
-import User from '@/models/User'
+import User, { IUser } from '@/models/User'
 import Session from '@/models/Session'
 import crypto from 'crypto'
 import { LOGGER } from '@/config/logger'
@@ -23,6 +23,8 @@ declare module 'next-auth/jwt' {
 }
 
 const secret = process.env.NEXTAUTH_SECRET;
+
+const googleOauthConfigured = process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET;
 if (!secret) {
     throw new Error('NEXTAUTH_SECRET is not defined');
 }
@@ -81,9 +83,47 @@ export const authOptions: NextAuthOptions = {
     callbacks: {
         async jwt({ token, user, account }) {
             // Falta agregar logica para manejar usuarios que inician sesión con Google por primera vez (crear usuario en BD)
+            if (googleOauthConfigured && account?.provider === 'google' && user) {
+                try {
+                    await connectDB();
+                    let existingUser: IUser | null = await User.findOne({ email: user.email });
 
-            // Solo para el provider de credenciales, se agrega el id del usuario a la sesión JWT
-            if (user) {
+                    if (!existingUser) {
+                        //Registramos nuevo usuario en la bbdd y agregamos el thirdparty
+                        const thirdPartyData = {
+                            provider: 'google',
+                            externalId: user.id,
+                            accessToken: account.access_token,
+                            refreshToken: account.refresh_token,
+                            expiresAt: account.expires_at ? new Date(account.expires_at * 1000) : undefined,
+                            email: user.email,
+                            name: user.name,
+                            profilePicture: user.image,
+                        };
+                        existingUser = await User.create({
+                            email: user.email,
+                            password: crypto.randomBytes(32).toString('hex'), // Contraseña aleatoria para usuarios OAuth
+                            firstName: user.name?.split(" ")?.[0] || 'Usuario',
+                            profile: {
+                                lastName: user.name?.split(" ")?.slice(1).join(" ") || '',
+                                profilePicture: user.image,
+                            },
+                            role: 'student',
+                            thirdparty: [thirdPartyData],
+                        });
+                        LOGGER.info(`Nuevo usuario creado a través de Google OAuth: ${existingUser?.email}`);
+                    } else {
+                        LOGGER.info(`Usuario existente autenticado a través de Google OAuth: ${existingUser?.email}`);
+                    }
+                    token.id = existingUser?._id?.toString();
+                    token.email = existingUser?.email;
+                    token.iat = Math.floor(Date.now() / 1000);
+
+                } catch (error: Error | any) {
+                    LOGGER.error('Error manejando usuario de Google OAuth:', error);
+                }
+            } else if (user && !account?.provider) {
+                // Solo para el provider de credenciales (sin account provider)
                 token.id = user.id;
                 token.email = user.email;
                 token.iat = Math.floor(Date.now() / 1000);
@@ -92,7 +132,6 @@ export const authOptions: NextAuthOptions = {
         },
         async session({ session, token }) {
             if (session.user && token) {
-                // Error de tipado aquí, pero se asume que token tiene id y email
                 session.user.id = token.id as string;
                 session.user.email = token.email as string;
             }
@@ -101,6 +140,7 @@ export const authOptions: NextAuthOptions = {
     },
     events: {
         async signIn({ user, account }) {
+
             // Crear registro de sesión en BD cuando inician sesión
             if (user?.email) {
                 try {
@@ -115,7 +155,7 @@ export const authOptions: NextAuthOptions = {
                     });
 
                     LOGGER.info(`Sesión creada para el usuario: ${user.email}`);
-                } catch (error : any) {
+                } catch (error: Error | any) {
                     LOGGER.error('Error creando registro de sesión:', error);
                 }
             }
@@ -126,8 +166,8 @@ export const authOptions: NextAuthOptions = {
                 await connectDB();
                 await Session.deleteMany({ expires: { $lt: new Date() } });
                 LOGGER.info('Sesiones expiradas limpiadas');
-            } catch (error) {
-                console.error('EError limpiando sesiones expiradas:', error);
+            } catch (error: any) {
+                LOGGER.error(`Error limpiando sesiones expiradas: ${error}`);
             }
         }
     },

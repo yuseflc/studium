@@ -4,10 +4,11 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 
 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth.config";
+import { authOptions } from "@/config/auth.config";
 
 import { connectDB, User } from "@/lib/database";
 import LogoutButton from "./LogoutButton";
+import ProfileImage from "./ProfileImage";
 import { LOGGER } from "@/config/logger";
 
 export default async function CourseNavbar() {
@@ -127,9 +128,10 @@ export default async function CourseNavbar() {
                 <div className="dropdown dropdown-end text-base-content">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
-                            <img
-                                alt="Tailwind CSS Navbar component"
-                                src="https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original" />
+                            <ProfileImage 
+                                src={user?.profile.profilePicture}
+                                alt={user?.firstName || "Profile"}
+                            />
                         </div>
                     </div>
                     <ul
