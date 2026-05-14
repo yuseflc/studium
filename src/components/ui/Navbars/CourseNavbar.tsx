@@ -1,18 +1,22 @@
 import { IconBell, IconMessageCircle, IconX } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES } from "@/seed/data";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import { useSession } from "next-auth/react";
+
+
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth.config";
+
 import { connectDB, User } from "@/lib/database";
 import LogoutButton from "./LogoutButton";
 import { LOGGER } from "@/config/logger";
 
 export default async function CourseNavbar() {
-    const session = await useSession();
-    if (session.status === "authenticated") {
+    const session = await getServerSession(authOptions);
+    if (session?.user) {
         await connectDB();
         // Los errores de tipado son normales por que la sesion de NextAuth (por defecto) solo tiene 3 campos y yo he agregado el id
-        var user = await User.findOne({ _id: session.data.user.id });
-        LOGGER.info(`Usuario de sesión: ${session.data.user.id} - ${session.data.user.email} - ${session.data.user.name}`);
+        var user = await User.findOne({ _id: session.user.id });
+        LOGGER.info(`Usuario de sesión: ${session.user.id} - ${session.user.email} - ${session.user.name}`);
     }
     return (
         <div className="navbar bg-transparent hover:bg-base-100/50 backdrop-blur-sm shadow-sm px-4 top-0 sticky z-50 transition-all">
