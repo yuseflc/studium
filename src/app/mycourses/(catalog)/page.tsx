@@ -1,16 +1,18 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth.config";
 import { connectDB, User } from "@/lib/database";
 import CoursesView from "@/components/ui/CourseMenuView";
+
+export const dynamic = "force-dynamic"; // Forzar que esta página sea renderizada en cada solicitud
 
 export default async function CourseCatalogPage() {
     let isTeacher = false;
 
     try {
         const session = await getServerSession(authOptions);
-        if (session?.user?.email) {
+        if (session?.user?.id) {
             await connectDB();
-            const user = await User.findOne({ email: session.user.email });
+            const user = await User.findOne({ _id: session.user.id });
             if (user) {
                 isTeacher = user.role === "teacher";
             }

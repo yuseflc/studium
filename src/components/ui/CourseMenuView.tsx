@@ -64,7 +64,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                                             </button>
                                         </li>
                                         <li>
-                                            <button className="text-error hover:bg-error/10" onClick={() => document.getElementById('no_implementado')?.showModal()}>
+                                            <button className="text-error hover:bg-error/10" onClick={() => (document.getElementById('no_implementado') as HTMLDialogElement)?.showModal()}>
                                                 Cancelar registro
                                             </button>
 

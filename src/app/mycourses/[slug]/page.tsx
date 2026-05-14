@@ -2,10 +2,14 @@
 
 import { CURSOS } from "@/seed/data";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth.config";
 import { connectDB, User } from "@/lib/database";
 import { notFound } from "next/navigation";
 import CourseView from "@/components/ui/CourseView";
+
+
+export const dynamic = "force-dynamic"; // Forzar que esta página sea renderizada en cada solicitud
+
 
 export default async function MyCoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -19,10 +23,10 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
 
   try {
     const session = await getServerSession(authOptions);
-    // Si hay email conecta a la bd y busca el user
-    if (session?.user?.email) {
+    // Si hay sesión conecta a la bd y busca el user
+    if (session?.user?.id) {
       await connectDB();
-      const user = await User.findOne({ email: session.user.email });
+      const user = await User.findOne({ _id: session.user.id });
       if (user) {
         isTeacher = user.role === "teacher";
       }
