@@ -141,7 +141,7 @@ export default function LoginForm() {
                 </button>
               </div>
               <div className="flex justify-end mt-1">
-                <Link href="#" className="text-[11px] link link-primary no-underline hover:underline">
+                <Link href="/auth/forgot-password" className="text-[11px] link link-primary no-underline hover:underline">
                   ¿Olvidaste tu contraseña?
                 </Link>
               </div>

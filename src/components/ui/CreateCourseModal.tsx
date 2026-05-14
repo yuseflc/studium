@@ -119,10 +119,7 @@ export default function CreateCourseModal() {
           
           {/* Cabecera */}
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-2xl flex items-center gap-2">
-              <IconBook className="text-primary" />
-              Crear Nuevo Curso
-            </h3>
+            <h3 className="font-bold text-2xl">Crear clase</h3>
             <button 
               onClick={closeModal}
               className="btn btn-sm btn-circle btn-ghost"
@@ -143,14 +140,14 @@ export default function CreateCourseModal() {
             
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold">Título del curso *</span>
+                <span className="label-text font-bold">Nombre de la clase<span className="text-error">*</span></span>
               </label>
               <input 
                 name="title" 
                 type="text" 
                 value={formData.title}
                 onChange={handleChange}
-                placeholder="Ej: Master en Next.js desde cero" 
+                placeholder="Nombre de la clase" 
                 className="input input-bordered w-full" 
                 required 
               />
@@ -158,85 +155,59 @@ export default function CreateCourseModal() {
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold">Descripción *</span>
-              </label>
-              <textarea 
-                name="description" 
-                value={formData.description}
-                onChange={handleChange}
-                className="textarea textarea-bordered h-24" 
-                placeholder="¿De qué trata tu curso?"
-                required
-              ></textarea>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-bold">Categoría *</span>
-                </label>
-                <select 
-                  name="category" 
-                  value={formData.category}
-                  onChange={handleChange}
-                  className="select select-bordered w-full"
-                  required
-                >
-                  <option value="">Selecciona una categoría</option>
-                  {CATEGORIES.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-bold">Precio (€)</span>
-                </label>
-                <input 
-                  name="price" 
-                  type="number" 
-                  value={formData.price}
-                  onChange={handleChange}
-                  placeholder="0.00" 
-                  step="0.01"
-                  min="0"
-                  className="input input-bordered w-full" 
-                />
-              </div>
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold">URL de imagen de portada</span>
+                <span className="label-text font-bold">Sección</span>
               </label>
               <input 
-                name="imageUrl" 
-                type="url" 
-                value={formData.imageUrl}
+                name="description" 
+                type="text" 
+                value={formData.description}
                 onChange={handleChange}
-                placeholder="https://ejemplo.com/imagen.jpg" 
+                placeholder="Sección" 
                 className="input input-bordered w-full" 
               />
             </div>
 
-            {/* Preview */}
-            {previewImage && (
-              <div className="mt-4">
-                <p className="text-sm font-semibold mb-2">Vista previa:</p>
-                <img 
-                  src={previewImage} 
-                  alt="preview" 
-                  className="w-full h-32 object-cover rounded"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 
-                      "https://via.placeholder.com/400x160?text=Imagen+no+válida";
-                  }}
-                />
-              </div>
-            )}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-bold">Nivel(es)</span>
+              </label>
+              <input 
+                name="category" 
+                type="text" 
+                value={formData.category}
+                onChange={handleChange}
+                placeholder="Nivel(es)" 
+                className="input input-bordered w-full" 
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-bold">Asignatura</span>
+              </label>
+              <input 
+                name="imageUrl" 
+                type="text" 
+                value={formData.imageUrl}
+                onChange={handleChange}
+                placeholder="Asignatura" 
+                className="input input-bordered w-full" 
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-bold">Aula</span>
+              </label>
+              <input 
+                name="price" 
+                type="text" 
+                value={formData.price}
+                onChange={handleChange}
+                placeholder="Aula" 
+                className="input input-bordered w-full" 
+              />
+            </div>
 
             {/* Acciones del Modal */}
             <div className="modal-action mt-8">
@@ -258,7 +229,7 @@ export default function CreateCourseModal() {
                     Creando...
                   </>
                 ) : (
-                  "Publicar Curso"
+                  "Crear"
                 )}
               </button>
             </div>
@@ -267,7 +238,7 @@ export default function CreateCourseModal() {
 
         {/* Clic fuera para cerrar */}
         <form method="dialog" className="modal-backdrop">
-          <button onClick={closeModal}>close</button>
+          <button onClick={closeModal}>cerrar</button>
         </form>
       </dialog>
     </>
