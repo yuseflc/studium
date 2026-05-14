@@ -101,7 +101,7 @@ export const authOptions: NextAuthOptions = {
                     });
 
                     LOGGER.info(`Sesión creada para el usuario: ${user.email}`);
-                } catch (error : Error) {
+                } catch (error : any) {
                     LOGGER.error('Error creando registro de sesión:', error);
                 }
             }
