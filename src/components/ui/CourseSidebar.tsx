@@ -6,7 +6,7 @@ interface CourseSidebarProps {
 
 export default function CourseSidebar({ isTeacher }: CourseSidebarProps) {
     return (
-        <aside className="w-full lg:w-80 border-r border-base-300 bg-base-100/30 lg:h-screen lg:overflow-y-auto lg:sticky lg:top-0">
+        <aside className="w-full lg:w-72 border-r border-base-300 bg-base-100/30 lg:h-screen lg:overflow-y-auto lg:sticky lg:top-0">
             <div className="p-4 border-b border-base-300 bg-base-100/50">
                 <h3 className="font-bold text-sm uppercase tracking-wider text-base-content/50">Contenido del Curso</h3>
             </div>
