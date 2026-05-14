@@ -58,15 +58,17 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                                     </div>
                                     <ul tabIndex={0} className="dropdown-content z-[20] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
                                         <li>
-                                            <Link href={`/mycourses/${c.id}`} className="flex justify-between">
+                                            <button onClick={() => window.location.href = `/mycourses/${c.id}`} className="flex justify-between">
                                                 Acceder al curso
                                                 <IconArrowUpRight size={16} />
-                                            </Link>
+                                            </button>
                                         </li>
                                         <li>
-                                            <button className="text-error hover:bg-error/10" onClick={() => alert("Funcionalidad de cancelación de registro aún no implementada")}>
+                                            <button className="text-error hover:bg-error/10" onClick={() => document.getElementById('no_implementado')?.showModal()}>
                                                 Cancelar registro
                                             </button>
+
+
                                         </li>
                                     </ul>
                                 </div>
@@ -75,6 +77,16 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                     </Link>
                 ))}
             </div>
+
+            <dialog id="no_implementado" className="modal">
+                <div className="modal-box border border-red-200 bg-red-50">
+                    <h3 className="font-bold text-lg">Funcionalidad no implementada</h3>
+                    <p className="py-4">Esta funcionalidad aún no ha sido implementada.</p>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button className="cursor-default">cerrar</button>
+                </form>
+            </dialog>
         </main>
     )
 }
