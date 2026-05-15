@@ -30,6 +30,7 @@ export interface ICourse {
   title: string;
   description?: string;
   ownerId: mongoose.Types.ObjectId; // Profesor / admin que lo haya creado (ID del usuario)
+  teachers: mongoose.Types.ObjectId[]; // IDs de los profesores asociados al curso (además del owner)
   status: "draft" | "active" | "archived";
   subjects: ISubject[];
   enrolledStudents: mongoose.Types.ObjectId[];
@@ -120,6 +121,12 @@ const CourseSchema = new mongoose.Schema<ICourse>(
       ref: "User",
       required: [true, "El propietario del curso es requerido"],
     },
+    teachers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     status: {
       type: String,
       enum: ["draft", "active", "archived"],
@@ -151,6 +158,7 @@ CourseSchema.set('toJSON', { virtuals: true });
 
 // Indices para optimizar consultas comunes
 CourseSchema.index({ ownerId: 1 });
+CourseSchema.index({ teachers: 1 });
 CourseSchema.index({ status: 1 });
 CourseSchema.index({ enrolledStudents: 1 });
 CourseSchema.index({ ownerId: 1, status: 1 });

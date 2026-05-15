@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/lib/database/database";
 import { User } from "@/models/index";
-import { logError, logInfo } from "@/config/logger";
+import { logInfo } from "@/config/logger";
 import { signupSchema, type SignupInput } from "@/lib/validators/validators";
 import { validateRequest, validationErrorResponse } from "@/lib/validators/api-validation";
+import {
+  createdResponse,
+  conflictResponse,
+  internalErrorResponse
+} from "@/lib/api/response-handler";
 
 /**
  * POST /api/auth/signup
@@ -58,14 +63,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
         if (existingUser) {
             logInfo("Intento de registro con email existente", { email });
-            return NextResponse.json(
-                {
-                    error: "Validación fallida",
-                    details: {
-                        email: ["Este email ya está registrado"]
-                    }
-                },
-                { status: 409 }
+            return conflictResponse(
+                "Este email ya está registrado",
+                { email: ["Este email ya está registrado"] }
             );
         }
 
@@ -92,27 +92,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
 
         // 6. Retornar respuesta exitosa (sin incluir contraseña)
-        return NextResponse.json(
+        return createdResponse(
             {
-                message: "Usuario registrado exitosamente",
-                user: {
-                    id: newUser._id.toString(),
-                    email: newUser.email,
-                    firstName: newUser.firstName,
-                    role: newUser.role
-                }
+                id: newUser._id.toString(),
+                email: newUser.email,
+                firstName: newUser.firstName,
+                role: newUser.role
             },
-            { status: 201 }
+            "Usuario registrado exitosamente"
         );
 
     } catch (error) {
-        logError("Error en ruta de signup", error as Error, {
-            endpoint: "/api/auth/signup"
-        });
-
-        return NextResponse.json(
-            { error: "Error interno del servidor. Por favor intenta de nuevo más tarde." },
-            { status: 500 }
+        return internalErrorResponse(
+            "Error registrando el usuario. Por favor intenta de nuevo más tarde.",
+            error
         );
     }
 }

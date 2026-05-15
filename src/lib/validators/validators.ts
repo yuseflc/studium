@@ -110,3 +110,71 @@ export const updateProfileSchema = z.object({
 });
 
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
+
+// ============ ESQUEMAS DE CURSOS ============
+
+/**
+ * Validación para crear un nuevo curso
+ */
+export const createCourseSchema = z.object({
+  title: z
+    .string()
+    .min(3, "El título del curso debe tener al menos 3 caracteres")
+    .max(200, "El título del curso no puede exceder 200 caracteres")
+    .transform((val) => val.trim()),
+  description: z
+    .string()
+    .max(1000, "La descripción no puede exceder 1000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+  status: z
+    .enum(["draft", "active", "archived"])
+    .optional()
+    .default("draft"),
+});
+
+export type CreateCourseInput = z.infer<typeof createCourseSchema>;
+
+/**
+ * Validación para actualizar un curso
+ */
+export const updateCourseSchema = z.object({
+  title: z
+    .string()
+    .min(3, "El título del curso debe tener al menos 3 caracteres")
+    .max(200, "El título del curso no puede exceder 200 caracteres")
+    .transform((val) => val.trim())
+    .optional(),
+  description: z
+    .string()
+    .max(1000, "La descripción no puede exceder 1000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+  status: z
+    .enum(["draft", "active", "archived"])
+    .optional(),
+});
+
+export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;
+
+/**
+ * Validación para añadir un profesor al curso
+ */
+export const addTeacherSchema = z.object({
+  teacherId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de profesor inválido"),
+});
+
+export type AddTeacherInput = z.infer<typeof addTeacherSchema>;
+
+/**
+ * Validación para matricular un estudiante
+ */
+export const enrollStudentSchema = z.object({
+  studentId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de estudiante inválido"),
+});
+
+export type EnrollStudentInput = z.infer<typeof enrollStudentSchema>;
