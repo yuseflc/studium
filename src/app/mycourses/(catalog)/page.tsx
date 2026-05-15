@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
-import { connectDB, User } from "@/lib/database";
+import { connectDB } from "@/lib/database/database";
+import { User } from "@/models/index";
 import CoursesView from "@/components/ui/CourseMenuView";
 
 export const dynamic = "force-dynamic"; // Forzar que esta página sea renderizada en cada solicitud

@@ -2,7 +2,7 @@ import User from '@/models/User';
 import Course from '@/models/Course';
 import Task from '@/models/Task';
 import Submission from '@/models/Submission';
-import { connectDB } from '@/lib/database';
+import { connectDB } from '@/lib/database/database';
 
 
 

@@ -1,7 +1,7 @@
 import { type NextAuthOptions, type DefaultSession } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { connectDB } from '@/lib/database'
+import { connectDB } from '@/lib/database/database'
 import User, { IUser } from '@/models/User'
 import Session from '@/models/Session'
 import crypto from 'crypto'

@@ -6,7 +6,8 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 
-import { connectDB, User } from "@/lib/database";
+import { connectDB } from "@/lib/database/database";
+import { User } from "@/models/index";
 import LogoutButton from "./LogoutButton";
 import ProfileImage from "./ProfileImage";
 import { LOGGER } from "@/config/logger";
@@ -90,7 +91,7 @@ export default async function CourseNavbar() {
                                     <p className="text-sm text-base-content/60 text-center py-4">No tienes nuevos mensajes.</p>
                                 ) : (
                                     MENSAJES.map((message) => (
-                                        
+
                                         <div key={message.id} className="group relative flex gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer">
                                             <div className="avatar">
                                                 <div className="w-10 h-10 rounded-full">
@@ -128,7 +129,7 @@ export default async function CourseNavbar() {
                 <div className="dropdown dropdown-end text-base-content">
                     <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                         <div className="w-10 rounded-full">
-                            <ProfileImage 
+                            <ProfileImage
                                 src={user?.profile.profilePicture}
                                 alt={user?.firstName || "Profile"}
                             />

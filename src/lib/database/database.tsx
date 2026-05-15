@@ -65,6 +65,3 @@ export async function connectDB() {
 
   return cached.conn;
 }
-
-// Exportar modelos de manera centralizada
-export { User, Course, Task, Submission, Session };
