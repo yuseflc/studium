@@ -1,5 +1,3 @@
-import React from 'react';
-
 const Hero = () => {
     return (
         <div id="top" className="hero min-h-screen bg-base-200">

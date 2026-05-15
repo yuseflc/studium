@@ -4,8 +4,6 @@ import Task from '@/models/Task';
 import Submission from '@/models/Submission';
 import { connectDB } from '@/lib/database/database';
 
-
-
 /**
  * MongoDB Seed Function: Initialize database with sample data
  * Run this function to populate MongoDB with initial data for development/testing
