@@ -13,9 +13,9 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                 <h1 className="text-4xl font-bold">Catálogo de cursos</h1>
                 {isTeacher && <CreateCourseModal />}
             </div>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 relative z-10">
                 {CURSOS.map((c: any) => (
-                    <Link key={c.id} href={`/mycourses/${c.id}`} className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all group relative flex flex-col">
+                    <Link key={c.id} href={`/mycourses/${c.id}`} className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all group relative flex flex-col z-20">
                         <div className="relative">
                             <figure className="aspect-video relative overflow-hidden rounded-t-xl">
                                 <img
@@ -47,7 +47,10 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
 
                         <div className="card-body p-4 pt-10 flex flex-col relative z-10">
                             <h2 className="card-title text-lg leading-tight flex-grow">{c.nombre}</h2>
-                            <div className="card-actions justify-end mt-auto" onClick={(e) => e.preventDefault()}>
+                            <div className="card-actions justify-end mt-auto" onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                            }}>
                                 <div className="dropdown dropdown-end">
                                     <div
                                         tabIndex={0}
@@ -58,10 +61,10 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                                     </div>
                                     <ul tabIndex={0} className="dropdown-content z-[20] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
                                         <li>
-                                            <button onClick={() => window.location.href = `/mycourses/${c.id}`} className="flex justify-between">
+                                            <Link href={`/mycourses/${c.id}`} className="flex justify-between">
                                                 Acceder al curso
                                                 <IconArrowUpRight size={16} />
-                                            </button>
+                                            </Link>
                                         </li>
                                         <li>
                                             <button className="text-error hover:bg-error/10" onClick={() => (document.getElementById('no_implementado') as HTMLDialogElement)?.showModal()}>

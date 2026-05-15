@@ -11,12 +11,12 @@ export default function CourseSidebar({ isTeacher }: CourseSidebarProps) {
                 <h3 className="font-bold text-sm uppercase tracking-wider text-base-content/50">Contenido del Curso</h3>
             </div>
 
-            <div className="flex flex-col p-2 gap-1">
+            <div className="flex flex-col p-2 gap-1 relative z-50">
                 {/* Ejemplo de Unidades */}
                 {[1, 2, 3, 4, 5, 6].map((ut) => (
-                    <div key={ut} className="">
-                        <details className="group" open={ut >= 5}>
-                            <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none">
+                    <div key={ut} className="relative z-50">
+                        <details className="group relative z-50" open={ut >= 5}>
+                            <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative z-50">
                                 <div className="flex items-center gap-3">
                                     <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
                                     <span className="font-bold text-sm truncate max-w-[200px]">
