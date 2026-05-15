@@ -91,7 +91,7 @@ export default function CreateCourseModal() {
         return;
       }
 
-      console.log("✅ Curso creado exitosamente:", data);
+      console.log("Curso creado exitosamente:", data);
       closeModal();
       router.refresh();
     } catch (err: any) {
@@ -140,7 +140,7 @@ export default function CreateCourseModal() {
             
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold">Nombre de la clase<span className="text-error">*</span></span>
+                <span className="label-text font-bold">Nombre de la clase<span className="text-error"> *</span></span>
               </label>
               <input 
                 name="title" 
@@ -148,66 +148,26 @@ export default function CreateCourseModal() {
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="Nombre de la clase" 
-                className="input input-bordered w-full" 
+                className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none" 
                 required 
               />
             </div>
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold">Sección</span>
+                <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
               </label>
               <input 
                 name="description" 
                 type="text" 
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Sección" 
-                className="input input-bordered w-full" 
+                placeholder="Descripción del curso" 
+                className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none" 
+                required
               />
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold">Nivel(es)</span>
-              </label>
-              <input 
-                name="category" 
-                type="text" 
-                value={formData.category}
-                onChange={handleChange}
-                placeholder="Nivel(es)" 
-                className="input input-bordered w-full" 
-              />
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold">Asignatura</span>
-              </label>
-              <input 
-                name="imageUrl" 
-                type="text" 
-                value={formData.imageUrl}
-                onChange={handleChange}
-                placeholder="Asignatura" 
-                className="input input-bordered w-full" 
-              />
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold">Aula</span>
-              </label>
-              <input 
-                name="price" 
-                type="text" 
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="Aula" 
-                className="input input-bordered w-full" 
-              />
-            </div>
 
             {/* Acciones del Modal */}
             <div className="modal-action mt-8">
