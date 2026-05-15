@@ -61,10 +61,10 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                                     </div>
                                     <ul tabIndex={0} className="dropdown-content z-[20] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
                                         <li>
-                                            <Link href={`/mycourses/${c.id}`} className="flex justify-between">
+                                            <button onClick={() => location.href = `/mycourses/${c.id}`} className="flex justify-between">
                                                 Acceder al curso
                                                 <IconArrowUpRight size={16} />
-                                            </Link>
+                                            </button>
                                         </li>
                                         <li>
                                             <button className="text-error hover:bg-error/10" onClick={() => (document.getElementById('no_implementado') as HTMLDialogElement)?.showModal()}>
