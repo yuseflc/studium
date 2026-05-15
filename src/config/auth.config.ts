@@ -48,13 +48,14 @@ export const authOptions: NextAuthOptions = {
                     const user = await User.findOne({ email: credentials.email }).select('+password');
 
                     if (!user) {
-                        throw new Error("Usuario no encontrado");
+                        throw new Error("Usuario o contraseña incorrectos");
                     }
 
                     const isPasswordValid = await user.comparePassword(credentials.password);
 
+                    //Importante: no dar pistas sobre si el email o la contraseña son incorrectos, por seguridad...
                     if (!isPasswordValid) {
-                        throw new Error("Contraseña incorrecta");
+                        throw new Error("Usuario o contraseña incorrectos");
                     }
 
                     return {

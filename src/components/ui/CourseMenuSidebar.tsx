@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { motion, stagger } from "framer-motion";
+import { motion } from "framer-motion";
 export default function Sidebar() {
   const [open, setOpen] = useState(false);
 
@@ -74,14 +74,9 @@ export default function Sidebar() {
         </div>
 
         {/* Cursos */}
-        <div
-          className="flex-1 overflow-y-auto p-4">
-          <p className="text-xs font-semibold text-base-content/50 uppercase tracking-wider mb-4 px-2">
-            Cursos Disponibles
-          </p>
-          <nav
-            className="flex flex-col gap-1"
-          >
+        <div className="flex-1 overflow-y-auto p-4">
+
+          <nav className="flex flex-col gap-1">
             {CURSOS.map((curso) => (
               <motion.div
                 key={curso.id}
