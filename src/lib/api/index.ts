@@ -1,12 +1,13 @@
 /**
  * Exports centralizados para utilidades de API
- * 
+ *
  * Uso:
  * import {
  *   successResponse,
  *   createdResponse,
  *   validationErrorResponse,
- *   withErrorHandling
+ *   withErrorHandling,
+ *   withErrorHandlingParams,
  * } from '@/lib/api';
  */
 
@@ -21,7 +22,7 @@ export {
     unauthorizedResponse,
     forbiddenResponse,
     internalErrorResponse,
-    databaseErrorResponse
+    databaseErrorResponse,
 } from './response-handler';
 
 // Types
@@ -29,7 +30,7 @@ export type {
     ApiSuccessResponse,
     ApiErrorResponse,
     PaginatedData,
-    ValidationErrorDetail
+    ValidationErrorDetail,
 } from './types';
 
 export { ErrorType, HTTP_STATUS } from './types';
@@ -37,12 +38,13 @@ export { ErrorType, HTTP_STATUS } from './types';
 // Middleware & utilities
 export {
     withErrorHandling,
+    withErrorHandlingParams,
     generateRequestId,
     extractAuthToken,
-    isValidJson
+    isValidJson,
 } from './middleware';
 
-export type { RouteHandler } from './middleware';
+export type { RouteHandler, RouteHandlerWithParams } from './middleware';
 
 // Auth helpers
 export {
@@ -50,5 +52,5 @@ export {
     getAuthUserId,
     requireAuth,
     extractUserId,
-    requireAuthMiddleware
+    requireAuthMiddleware,
 } from './auth-helpers';

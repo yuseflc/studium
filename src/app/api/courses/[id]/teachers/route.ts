@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
-import { Course, User } from '@/models/index';
+import Course from '@/models/Course';
+import User from '@/models/User';
 import { logInfo } from '@/config/logger';
-import { validateRequest, validationErrorResponse } from '@/lib/validators/api-validation';
+import { validateRequest } from '@/lib/validators/api-validation';
 import {
   successResponse,
-  validationErrorResponse as validateErrorResponse,
+  validationErrorResponse,
   notFoundResponse,
   forbiddenResponse,
   conflictResponse,
@@ -15,94 +16,96 @@ import {
 import { addTeacherSchema, type AddTeacherInput } from '@/lib/validators/validators';
 import mongoose from 'mongoose';
 import { extractUserId } from '@/lib/api/auth-helpers';
+import { withErrorHandlingParams } from '@/lib/api/middleware';
 
 /**
  * POST /api/courses/[id]/teachers
  * Añade un profesor al curso
- * 
+ *
  * Body esperado:
  * ```
  * {
  *   teacherId: string (ID de MongoDB válido)
  * }
  * ```
- * 
+ *
  * Respuestas:
  * - 200: Profesor añadido exitosamente
  * - 400: Validación fallida
+ * - 401: No autenticado
  * - 403: No tienes permisos para añadir profesores
  * - 404: Curso o profesor no encontrado
  * - 409: El profesor ya está asignado
  * - 500: Error del servidor
  */
-async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const { id } = await Promise.resolve(params);
+export const POST = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    const { id } = await context.params;
 
-    // Validar ObjectId del curso
+    // Validar ObjectId del curso (sync check antes de cualquier await)
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return validationErrorResponse({ id: ['ID de curso inválido'] });
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
     }
 
-    // Validar datos
-    const validationResult = await validateRequest<AddTeacherInput>(
-      request,
-      addTeacherSchema,
-      'addTeacher'
-    );
+    // Lanzar operaciones independientes en paralelo
+    const dbPromise = connectDB();
+    const [validationResult, userId] = await Promise.all([
+      validateRequest<AddTeacherInput>(request, addTeacherSchema, 'addTeacher'),
+      extractUserId(request),
+    ]);
 
     if (!validationResult.success) {
-      return validateErrorResponse(validationResult.errors);
+      return validationErrorResponse(validationResult.errors, requestId);
+    }
+
+    if (!userId) {
+      return unauthorizedResponse(requestId);
     }
 
     const { teacherId } = validationResult.data;
-    const userId = await extractUserId(request);
 
-    if (!userId) {
-      return unauthorizedResponse();
-    }
+    await dbPromise;
 
-    await connectDB();
-
-    // 1. Verificar que el curso existe
-    const course = await Course.findById(id);
+    // Paralelizar queries de curso y profesor (son independientes)
+    const [course, teacher] = await Promise.all([
+      Course.findById(id),
+      User.findById(teacherId).lean(),
+    ]);
 
     if (!course) {
-      return notFoundResponse('Curso');
+      return notFoundResponse('Curso', requestId);
     }
 
-    // 2. Verificar permisos: solo el propietario puede añadir profesores
+    // Solo el propietario puede añadir profesores
     if (course.ownerId.toString() !== userId) {
-      return forbiddenResponse();
+      return forbiddenResponse(requestId);
     }
-
-    // 3. Verificar que el profesor existe
-    const teacher = await User.findById(teacherId).lean();
 
     if (!teacher) {
-      return notFoundResponse('Profesor');
+      return notFoundResponse('Profesor', requestId);
     }
 
-    // 4. Verificar que el profesor no esté ya asignado
-    if (course.teachers.some((t: mongoose.Types.ObjectId) => t.toString() === teacherId)) {
+    // Verificar que el profesor no esté ya asignado
+    if (course.teachers.some(
+      (t: mongoose.Types.ObjectId) => t.toString() === teacherId
+    )) {
       return conflictResponse(
         'El profesor ya está asignado a este curso',
-        { teacherId }
+        { teacherId },
+        requestId
       );
     }
 
-    // 5. Verificar que no sea el propietario
+    // Verificar que no sea el propietario
     if (course.ownerId.toString() === teacherId) {
       return conflictResponse(
         'El propietario del curso no puede ser añadido como profesor adicional',
-        { teacherId }
+        { teacherId },
+        requestId
       );
     }
 
-    // 6. Añadir profesor
+    // Añadir profesor
     course.teachers.push(new mongoose.Types.ObjectId(teacherId));
     course.updatedAt = new Date();
     await course.save();
@@ -111,6 +114,7 @@ async function POST(
       courseId: id,
       teacherId,
       addedBy: userId,
+      requestId,
     });
 
     return successResponse(
@@ -119,61 +123,67 @@ async function POST(
         teacherId,
         teachersCount: course.teachers.length,
       },
-      'Profesor añadido exitosamente'
+      'Profesor añadido exitosamente',
+      200,
+      requestId
     );
-
-  } catch (error) {
-    return internalErrorResponse('Error añadiendo el profesor', error);
-  }
-}
+  },
+  'POST /courses/[id]/teachers'
+);
 
 /**
  * DELETE /api/courses/[id]/teachers
  * Elimina un profesor del curso
- * 
+ *
  * Query parameters:
  * - teacherId: string (ID del profesor a eliminar)
- * 
+ *
  * Respuestas:
  * - 200: Profesor eliminado exitosamente
+ * - 400: Validación fallida
+ * - 401: No autenticado
  * - 403: No tienes permisos
  * - 404: Curso o profesor no encontrado
  * - 500: Error del servidor
  */
-async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const { id } = await Promise.resolve(params);
+export const DELETE = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    const { id } = await context.params;
     const { searchParams } = new URL(request.url);
     const teacherId = searchParams.get('teacherId');
 
+    // Validaciones sync baratas primero
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
+    }
+
     if (!teacherId) {
-      return validationErrorResponse({ teacherId: ['ID del profesor requerido'] });
+      return validationErrorResponse({ teacherId: ['ID del profesor requerido'] }, requestId);
     }
 
     if (!mongoose.Types.ObjectId.isValid(teacherId)) {
-      return validationErrorResponse({ teacherId: ['ID del profesor inválido'] });
+      return validationErrorResponse({ teacherId: ['ID del profesor inválido'] }, requestId);
     }
 
-    const userId = await extractUserId(request);
+    // Auth + DB en paralelo
+    const [userId] = await Promise.all([
+      extractUserId(request),
+      connectDB(),
+    ]);
 
     if (!userId) {
-      return unauthorizedResponse();
+      return unauthorizedResponse(requestId);
     }
-
-    await connectDB();
 
     const course = await Course.findById(id);
 
     if (!course) {
-      return notFoundResponse('Curso');
+      return notFoundResponse('Curso', requestId);
     }
 
     // Solo el propietario puede eliminar profesores
     if (course.ownerId.toString() !== userId) {
-      return forbiddenResponse();
+      return forbiddenResponse(requestId);
     }
 
     // Verificar que el profesor está en la lista
@@ -182,7 +192,7 @@ async function DELETE(
     );
 
     if (teacherIndex === -1) {
-      return notFoundResponse('Profesor en este curso');
+      return notFoundResponse('Profesor en este curso', requestId);
     }
 
     // Eliminar profesor
@@ -194,6 +204,7 @@ async function DELETE(
       courseId: id,
       teacherId,
       removedBy: userId,
+      requestId,
     });
 
     return successResponse(
@@ -202,12 +213,10 @@ async function DELETE(
         teacherId,
         teachersCount: course.teachers.length,
       },
-      'Profesor eliminado exitosamente'
+      'Profesor eliminado exitosamente',
+      200,
+      requestId
     );
-
-  } catch (error) {
-    return internalErrorResponse('Error eliminando el profesor', error);
-  }
-}
-
-export { POST, DELETE };
+  },
+  'DELETE /courses/[id]/teachers'
+);

@@ -1,89 +1,108 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
-import { Course, User } from '@/models/index';
+import Course from '@/models/Course';
+import User from '@/models/User';
 import { logInfo } from '@/config/logger';
-import { validateRequest, validationErrorResponse } from '@/lib/validators/api-validation';
+import { validateRequest } from '@/lib/validators/api-validation';
 import {
   successResponse,
-  validationErrorResponse as validateErrorResponse,
+  validationErrorResponse,
   notFoundResponse,
-  forbiddenResponse,
   conflictResponse,
   internalErrorResponse,
   unauthorizedResponse,
+  forbiddenResponse,
 } from '@/lib/api/response-handler';
 import { enrollStudentSchema, type EnrollStudentInput } from '@/lib/validators/validators';
 import mongoose from 'mongoose';
 import { extractUserId } from '@/lib/api/auth-helpers';
+import { withErrorHandlingParams } from '@/lib/api/middleware';
 
 /**
  * POST /api/courses/[id]/enroll
  * Matricula un estudiante en un curso
- * 
+ *
  * Body esperado:
  * ```
  * {
  *   studentId: string (ID de MongoDB válido)
  * }
  * ```
- * 
+ *
  * Respuestas:
  * - 200: Estudiante matriculado exitosamente
  * - 400: Validación fallida
+ * - 401: No autenticado
+ * - 403: Sin permisos para matricular
  * - 404: Curso o estudiante no encontrado
  * - 409: El estudiante ya está matriculado
  * - 500: Error del servidor
  */
-async function POST(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const { id } = await Promise.resolve(params);
+export const POST = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    const { id } = await context.params;
 
-    // Validar ObjectId del curso
+    // Validar ObjectId del curso (cheap sync check antes de cualquier await)
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return validationErrorResponse({ id: ['ID de curso inválido'] });
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
     }
 
-    // Validar datos
-    const validationResult = await validateRequest<EnrollStudentInput>(
-      request,
-      enrollStudentSchema,
-      'enrollStudent'
-    );
+    // Lanzar operaciones independientes en paralelo
+    const dbPromise = connectDB();
+    const [validationResult, userId] = await Promise.all([
+      validateRequest<EnrollStudentInput>(request, enrollStudentSchema, 'enrollStudent'),
+      extractUserId(request),
+    ]);
 
     if (!validationResult.success) {
-      return validateErrorResponse(validationResult.errors);
+      return validationErrorResponse(validationResult.errors, requestId);
+    }
+
+    if (!userId) {
+      return unauthorizedResponse(requestId);
     }
 
     const { studentId } = validationResult.data;
 
-    await connectDB();
+    await dbPromise;
 
-    // 1. Verificar que el curso existe
-    const course = await Course.findById(id);
+    // Paralelizar queries de curso y estudiante (son independientes)
+    const [course, student] = await Promise.all([
+      Course.findById(id),
+      User.findById(studentId).lean(),
+    ]);
 
     if (!course) {
-      return notFoundResponse('Curso');
+      return notFoundResponse('Curso', requestId);
     }
-
-    // 2. Verificar que el estudiante existe
-    const student = await User.findById(studentId).lean();
 
     if (!student) {
-      return notFoundResponse('Estudiante');
+      return notFoundResponse('Estudiante', requestId);
     }
 
-    // 3. Verificar que el estudiante no está ya matriculado
-    if (course.enrolledStudents.some((s: mongoose.Types.ObjectId) => s.toString() === studentId)) {
+    // Verificar permisos: owner, teacher, o auto-matrícula
+    const isOwner = course.ownerId.toString() === userId;
+    const isTeacher = course.teachers.some(
+      (t: mongoose.Types.ObjectId) => t.toString() === userId
+    );
+    const isSelfEnroll = studentId === userId;
+
+    if (!isOwner && !isTeacher && !isSelfEnroll) {
+      return forbiddenResponse(requestId);
+    }
+
+    // Verificar que el estudiante no está ya matriculado
+    if (course.enrolledStudents.some(
+      (s: mongoose.Types.ObjectId) => s.toString() === studentId
+    )) {
       return conflictResponse(
         'El estudiante ya está matriculado en este curso',
-        { studentId }
+        { studentId },
+        requestId
       );
     }
 
-    // 4. Matricular al estudiante
+    // Matricular al estudiante
     course.enrolledStudents.push(new mongoose.Types.ObjectId(studentId));
     course.updatedAt = new Date();
     await course.save();
@@ -91,6 +110,8 @@ async function POST(
     logInfo('Estudiante matriculado en curso', {
       courseId: id,
       studentId,
+      enrolledBy: userId,
+      requestId,
     });
 
     return successResponse(
@@ -99,12 +120,10 @@ async function POST(
         studentId,
         enrollmentCount: course.enrolledStudents.length,
       },
-      'Estudiante matriculado exitosamente'
+      'Estudiante matriculado exitosamente',
+      200,
+      requestId
     );
-
-  } catch (error) {
-    return internalErrorResponse('Error matriculando al estudiante', error);
-  }
-}
-
-export { POST };
+  },
+  'POST /courses/[id]/enroll'
+);

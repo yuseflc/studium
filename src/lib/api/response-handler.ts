@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { ApiSuccessResponse, ApiErrorResponse, ErrorType, HTTP_STATUS } from './types';
-import { logError, logInfo } from '@/config/logger';
+import { logError } from '@/config/logger';
 
 /**
  * Generador de ID único para requests (para trazabilidad)
@@ -34,8 +34,6 @@ export function successResponse<T = unknown>(
             requestId: finalRequestId,
         },
     };
-
-    logInfo(message, { requestId: finalRequestId });
 
     return NextResponse.json(response, { status: statusCode });
 }

@@ -1,46 +1,74 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { internalErrorResponse } from './response-handler';
 import { logError } from '@/config/logger';
 
 /**
- * Tipo para funciones manejadoras de rutas
+ * Tipo para funciones manejadoras de rutas sin params dinámicos
  */
-export type RouteHandler<T = any> = (
+export type RouteHandler = (
     request: NextRequest,
     requestId: string
-) => Promise<Response>;
+) => Promise<NextResponse>;
 
 /**
- * Envuelve un manejador de ruta con manejo centralizado de errores
- * 
+ * Tipo para funciones manejadoras de rutas con params dinámicos
+ */
+export type RouteHandlerWithParams<P extends Record<string, string> = Record<string, string>> = (
+    request: NextRequest,
+    context: { params: Promise<P> },
+    requestId: string
+) => Promise<NextResponse>;
+
+/**
+ * Envuelve un manejador de ruta (sin params) con manejo centralizado de errores y requestId.
+ *
  * @param handler - Función manejadora de la ruta
- * @param method - Método HTTP (GET, POST, etc.)
+ * @param method  - Nombre del método para logging (ej: "GET /courses")
  */
 export function withErrorHandling(
     handler: RouteHandler,
     method: string = 'API'
-): RouteHandler {
-    return async (request: NextRequest, requestId: string) => {
+): (request: NextRequest) => Promise<NextResponse> {
+    return async (request: NextRequest) => {
+        const requestId = generateRequestId();
         try {
             return await handler(request, requestId);
         } catch (error) {
             const err = error instanceof Error ? error : new Error(String(error));
             logError(`Error en ${method}`, err, { requestId });
-
-            return internalErrorResponse(
-                `Error en la operación: ${err.message}`,
-                err,
-                requestId
-            );
+            return internalErrorResponse(`Error en la operación: ${err.message}`, err, requestId);
         }
     };
 }
 
 /**
- * Genera un ID único para request
+ * Envuelve un manejador de ruta con params dinámicos (ej: [id]) con manejo centralizado
+ * de errores y requestId.
+ *
+ * @param handler - Función manejadora de la ruta
+ * @param method  - Nombre del método para logging (ej: "GET /courses/[id]")
+ */
+export function withErrorHandlingParams<P extends Record<string, string> = Record<string, string>>(
+    handler: RouteHandlerWithParams<P>,
+    method: string = 'API'
+): (request: NextRequest, context: { params: Promise<P> }) => Promise<NextResponse> {
+    return async (request: NextRequest, context: { params: Promise<P> }) => {
+        const requestId = generateRequestId();
+        try {
+            return await handler(request, context, requestId);
+        } catch (error) {
+            const err = error instanceof Error ? error : new Error(String(error));
+            logError(`Error en ${method}`, err, { requestId });
+            return internalErrorResponse(`Error en la operación: ${err.message}`, err, requestId);
+        }
+    };
+}
+
+/**
+ * Genera un ID único para el request (para trazabilidad)
  */
 export function generateRequestId(): string {
-    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 /**
@@ -59,9 +87,9 @@ export function extractAuthToken(request: NextRequest): string | null {
 }
 
 /**
- * Valida que el request sea JSON válido
+ * Valida que el request tenga Content-Type application/json
  */
-export async function isValidJson(request: NextRequest): Promise<boolean> {
+export function isValidJson(request: NextRequest): boolean {
     const contentType = request.headers.get('content-type');
-    return contentType?.includes('application/json') || false;
+    return contentType?.includes('application/json') ?? false;
 }

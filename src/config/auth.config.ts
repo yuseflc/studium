@@ -69,10 +69,13 @@ export const authOptions: NextAuthOptions = {
                 }
             }
         }),
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID as string,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
-        })
+        // Solo incluir GoogleProvider si las variables de entorno están configuradas
+        ...(googleOauthConfigured
+            ? [GoogleProvider({
+                clientId: process.env.GOOGLE_CLIENT_ID as string,
+                clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+              })]
+            : []),
     ],
     session: {
         strategy: 'jwt',

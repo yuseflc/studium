@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
-import { Course, User } from '@/models/index';
+import Course from '@/models/Course';
+import User from '@/models/User';
 import { logInfo } from '@/config/logger';
-import { validateRequest, validationErrorResponse } from '@/lib/validators/api-validation';
+import { validateRequest } from '@/lib/validators/api-validation';
 import {
   successResponse,
-  validationErrorResponse as validateErrorResponse,
+  validationErrorResponse,
   notFoundResponse,
   forbiddenResponse,
   internalErrorResponse,
@@ -13,27 +14,26 @@ import {
 } from '@/lib/api/response-handler';
 import { updateCourseSchema, type UpdateCourseInput } from '@/lib/validators/validators';
 import { extractUserId } from '@/lib/api/auth-helpers';
+import { withErrorHandlingParams } from '@/lib/api/middleware';
 import mongoose from 'mongoose';
 
 /**
  * GET /api/courses/[id]
  * Obtiene los detalles completos de un curso específico
- * 
+ *
  * Respuestas:
  * - 200: Curso obtenido exitosamente
+ * - 400: ID inválido
  * - 404: Curso no encontrado
  * - 500: Error del servidor
  */
-async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const { id } = await Promise.resolve(params);
+export const GET = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    const { id } = await context.params;
 
-    // Validar que sea un ObjectId válido
+    // Validar ObjectId (sync check antes de cualquier await)
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return validationErrorResponse({ id: ['ID de curso inválido'] });
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
     }
 
     await connectDB();
@@ -44,10 +44,10 @@ async function GET(
       .populate('enrolledStudents', 'email firstName');
 
     if (!course) {
-      return notFoundResponse('Curso');
+      return notFoundResponse('Curso', requestId);
     }
 
-    logInfo('Curso obtenido', { courseId: id });
+    logInfo('Curso obtenido', { courseId: id, requestId });
 
     return successResponse(
       {
@@ -63,18 +63,18 @@ async function GET(
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
       },
-      'Curso obtenido exitosamente'
+      'Curso obtenido exitosamente',
+      200,
+      requestId
     );
-
-  } catch (error) {
-    return internalErrorResponse('Error obteniendo el curso', error);
-  }
-}
+  },
+  'GET /courses/[id]'
+);
 
 /**
  * PATCH /api/courses/[id]
  * Actualiza un curso existente
- * 
+ *
  * Body esperado:
  * ```
  * {
@@ -83,51 +83,48 @@ async function GET(
  *   status?: "draft" | "active" | "archived"
  * }
  * ```
- * 
+ *
  * Respuestas:
  * - 200: Curso actualizado exitosamente
  * - 400: Validación fallida
+ * - 401: No autenticado
  * - 403: No tienes permisos para actualizar este curso
  * - 404: Curso no encontrado
  * - 500: Error del servidor
  */
-async function PATCH(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const { id } = await Promise.resolve(params);
+export const PATCH = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    const { id } = await context.params;
 
-    // Validar ObjectId
+    // Sync check barato primero
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return validationErrorResponse({ id: ['ID de curso inválido'] });
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
     }
 
-    // Validar datos
-    const validationResult = await validateRequest<UpdateCourseInput>(
-      request,
-      updateCourseSchema,
-      'updateCourse'
-    );
+    // Lanzar operaciones independientes en paralelo
+    const dbPromise = connectDB();
+    const [validationResult, userId] = await Promise.all([
+      validateRequest<UpdateCourseInput>(request, updateCourseSchema, 'updateCourse'),
+      extractUserId(request),
+    ]);
 
     if (!validationResult.success) {
-      return validateErrorResponse(validationResult.errors);
+      return validationErrorResponse(validationResult.errors, requestId);
+    }
+
+    if (!userId) {
+      return unauthorizedResponse(requestId);
     }
 
     const updateData = validationResult.data;
-    const userId = await extractUserId(request);
 
-    if (!userId) {
-      return unauthorizedResponse();
-    }
-
-    await connectDB();
+    await dbPromise;
 
     // Obtener curso actual
     const course = await Course.findById(id);
 
     if (!course) {
-      return notFoundResponse('Curso');
+      return notFoundResponse('Curso', requestId);
     }
 
     // Verificar permisos: solo el propietario o un profesor pueden editar
@@ -137,7 +134,7 @@ async function PATCH(
     );
 
     if (!isOwner && !isTeacher) {
-      return forbiddenResponse();
+      return forbiddenResponse(requestId);
     }
 
     // Actualizar campos
@@ -148,7 +145,7 @@ async function PATCH(
     course.updatedAt = new Date();
     await course.save();
 
-    logInfo('Curso actualizado', { courseId: id, updatedBy: userId });
+    logInfo('Curso actualizado', { courseId: id, updatedBy: userId, requestId });
 
     return successResponse(
       {
@@ -158,69 +155,68 @@ async function PATCH(
         status: course.status,
         updatedAt: course.updatedAt,
       },
-      'Curso actualizado exitosamente'
+      'Curso actualizado exitosamente',
+      200,
+      requestId
     );
-
-  } catch (error) {
-    return internalErrorResponse('Error actualizando el curso', error);
-  }
-}
+  },
+  'PATCH /courses/[id]'
+);
 
 /**
  * DELETE /api/courses/[id]
  * Elimina un curso
- * 
+ *
  * Respuestas:
  * - 200: Curso eliminado exitosamente
+ * - 400: ID inválido
+ * - 401: No autenticado
  * - 403: No tienes permisos para eliminar este curso
  * - 404: Curso no encontrado
  * - 500: Error del servidor
  */
-async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-): Promise<NextResponse> {
-  try {
-    const { id } = await Promise.resolve(params);
+export const DELETE = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    const { id } = await context.params;
 
-    // Validar ObjectId
+    // Sync check barato primero
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return validationErrorResponse({ id: ['ID de curso inválido'] });
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
     }
 
-    const userId = await extractUserId(request);
+    // Auth + DB en paralelo
+    const [userId] = await Promise.all([
+      extractUserId(request),
+      connectDB(),
+    ]);
 
     if (!userId) {
-      return unauthorizedResponse();
+      return unauthorizedResponse(requestId);
     }
-
-    await connectDB();
 
     // Obtener curso
     const course = await Course.findById(id);
 
     if (!course) {
-      return notFoundResponse('Curso');
+      return notFoundResponse('Curso', requestId);
     }
 
     // Solo el propietario puede eliminar el curso
     if (course.ownerId.toString() !== userId) {
-      return forbiddenResponse();
+      return forbiddenResponse(requestId);
     }
 
     // Eliminar el curso
     await Course.findByIdAndDelete(id);
 
-    logInfo('Curso eliminado', { courseId: id, deletedBy: userId });
+    logInfo('Curso eliminado', { courseId: id, deletedBy: userId, requestId });
 
     return successResponse(
       null,
-      'Curso eliminado exitosamente'
+      'Curso eliminado exitosamente',
+      200,
+      requestId
     );
-
-  } catch (error) {
-    return internalErrorResponse('Error eliminando el curso', error);
-  }
-}
-
-export { GET, PATCH, DELETE };
+  },
+  'DELETE /courses/[id]'
+);
