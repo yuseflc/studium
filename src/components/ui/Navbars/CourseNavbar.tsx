@@ -15,7 +15,6 @@ export default async function CourseNavbar() {
 
     if (session?.user) {
         await connectDB();
-        // Los errores de tipado son normales por que la sesion de NextAuth (por defecto) solo tiene 3 campos y yo he agregado el id
         user = await User.findOne({ _id: session.user.id });
         LOGGER.info(`Usuario de sesión: ${session.user.id} - ${session.user.email} - ${session.user.name}`);
     }
@@ -35,7 +34,6 @@ export default async function CourseNavbar() {
                     </a>
                 </div>
                 <div className="flex flex-row gap-3 items-center">
-                    {/* Theme Selector - Hidden on mobile, moved to drawer */}
                     <div className="hidden md:block">
                         <ThemeSwitcher />
                     </div>
@@ -100,7 +98,6 @@ export default async function CourseNavbar() {
                                         <p className="text-sm text-base-content/60 text-center py-4">No tienes nuevos mensajes.</p>
                                     ) : (
                                         MENSAJES.map((message) => (
-
                                             <div key={message.id} className="group relative flex gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer">
                                                 <div className="avatar">
                                                     <div className="w-10 h-10 rounded-full">
@@ -110,12 +107,10 @@ export default async function CourseNavbar() {
                                                 <div className="flex flex-col flex-1 gap-0.5">
                                                     <div className="flex justify-between items-center">
                                                         <span className="text-sm font-semibold text-base-content">{message.sender}</span>
-                                                        {/* El tiempo ya no está aquí */}
                                                     </div>
                                                     <p className="text-xs text-base-content/70 line-clamp-2 leading-snug">
                                                         {message.content}
                                                     </p>
-                                                    {/* El tiempo ahora está aquí, después del contenido */}
                                                     <div className="flex justify-end mt-1">
                                                         <span className="text-[10px] text-base-content/50">{message.time}</span>
                                                     </div>
@@ -135,7 +130,7 @@ export default async function CourseNavbar() {
                             </div>
                         </div>
                     </div>
-                    {/* Desktop Profile */}
+
                     <div className="hidden md:block">
                         <div className="dropdown dropdown-end text-base-content">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
@@ -163,7 +158,6 @@ export default async function CourseNavbar() {
                         </div>
                     </div>
 
-                    {/* Mobile Menu Button (Hamburger) */}
                     <label htmlFor="mobile-menu-drawer" className="btn btn-ghost btn-circle md:hidden text-base-content">
                         <IconMenu2 />
                     </label>
@@ -175,50 +169,56 @@ export default async function CourseNavbar() {
                 <input id="mobile-menu-drawer" type="checkbox" className="drawer-toggle" />
                 <div className="drawer-side h-full overflow-hidden pointer-events-auto">
                     <label htmlFor="mobile-menu-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-                    <div className="menu p-4 w-80 min-h-full bg-base-100 text-base-content flex flex-col shadow-2xl border-l border-base-300">
-                        {/* 1. Usuario */}
-                        <div className="flex flex-col items-center py-6 border-b border-base-200">
-                            <div className="avatar mb-2">
-                                <div className="w-14 rounded-full overflow-hidden">
-                                    <ProfileImage
-                                        src={user?.profile.profilePicture}
-                                        alt={user?.firstName || "Profile"}
-                                    />
-                                </div>
-                            </div>
-                            <span className="font-bold text-base mb-4">{user?.firstName || "Usuario"}</span>
-                            <ul className="w-full menu menu-vertical gap-1 p-0 text-sm">
-                                <li><a href="/account/profile" className="justify-start py-3 px-6">Profile</a></li>
-                                <li><a className="justify-start py-3 px-6">Settings</a></li>
-                                <li className="text-error">
-                                    <div className="justify-start py-3 px-6 w-full">
-                                        <LogoutButton />
+                    
+                    {/* Contenedor con altura fija y scroll */}
+                    <div className="w-80 h-full bg-base-100 text-base-content shadow-2xl border-l border-base-300 flex flex-col overflow-y-auto overflow-x-hidden">
+                        
+                        {/* Contenido interno con padding y margen inferior para asegurar scroll */}
+                        <div className="flex-1 p-4 pb-20">
+                            {/* 1. Usuario */}
+                            <div className="flex flex-col items-center py-8 border-b border-base-200">
+                                <div className="avatar mb-4">
+                                    <div className="w-28 h-28 rounded-full overflow-hidden">
+                                        <ProfileImage
+                                            src={user?.profile.profilePicture}
+                                            alt={user?.firstName || "Profile"}
+                                        />
                                     </div>
-                                </li>
-                            </ul>
-                        </div>
-
-                        {/* 2. Cursos Acordeón */}
-                        <div className="py-2 border-b border-base-200">
-                            <div className="collapse collapse-arrow">
-                                <input type="checkbox" />
-                                <div className="collapse-title font-bold text-xs opacity-60 tracking-tighter">
-                                    CURSOS DISPONIBLES
                                 </div>
-                                <div className="collapse-content p-0 text-sm">
-                                    <ul className="menu menu-sm w-full">
-                                        {cursosDisponibles.map((curso, idx) => (
-                                            <li key={idx}><a className="py-2">{curso}</a></li>
-                                        ))}
-                                    </ul>
+                                <span className="font-bold text-xl mb-6">{user?.firstName || "Usuario"}</span>
+                                <ul className="w-full menu menu-vertical gap-3 p-0 text-lg">
+                                    <li><a href="/account/profile" className="justify-start py-3 px-6">Profile</a></li>
+                                    <li><a className="justify-start py-3 px-6">Settings</a></li>
+                                    <li className="text-error">
+                                        <div className="justify-start py-3 px-6 w-full">
+                                            <LogoutButton />
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            {/* 2. Cursos Acordeón */}
+                            <div className="py-4 border-b border-base-200">
+                                <div className="collapse collapse-arrow">
+                                    <input type="checkbox" />
+                                    <div className="collapse-title font-bold text-lg opacity-70 tracking-tighter">
+                                        CURSOS DISPONIBLES
+                                    </div>
+                                    <div className="collapse-content p-0 text-base">
+                                        <ul className="menu menu-md w-full">
+                                            {cursosDisponibles.map((curso, idx) => (
+                                                <li key={idx}><a className="py-2 text-base">{curso}</a></li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* 3. Theme Switcher */}
-                        <div className="mt-auto py-6 flex flex-col items-center gap-3 border-t border-base-200">
-                            <span className="text-[10px] opacity-50 uppercase font-bold tracking-widest">Modo de pantalla</span>
-                            <ThemeSwitcher />
+                            {/* 3. Theme Switcher - Siempre debajo de los cursos */}
+                            <div className="py-6 flex flex-col items-center gap-3 mt-4">
+                                <span className="text-sm opacity-50 uppercase font-bold tracking-widest">Modo de pantalla</span>
+                                <ThemeSwitcher />
+                            </div>
                         </div>
                     </div>
                 </div>
