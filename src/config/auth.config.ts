@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
                     }
 
                     return {
-                        id: user._id.toString(),
+                        id: user._id,
                         email: user.email,
                         name: user.firstName,
                         image: user.profile?.profilePicture || null,
@@ -69,13 +69,10 @@ export const authOptions: NextAuthOptions = {
                 }
             }
         }),
-        // Solo incluir GoogleProvider si las variables de entorno están configuradas
-        ...(googleOauthConfigured
-            ? [GoogleProvider({
-                clientId: process.env.GOOGLE_CLIENT_ID as string,
-                clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
-              })]
-            : []),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID as string,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET as string
+        })
     ],
     session: {
         strategy: 'jwt',
@@ -86,7 +83,13 @@ export const authOptions: NextAuthOptions = {
     },
     callbacks: {
         async jwt({ token, user, account }) {
-            // Falta agregar logica para manejar usuarios que inician sesión con Google por primera vez (crear usuario en BD)
+            // Asignar id cuando el usuario se autentica por primera vez (todos los providers)
+            if (user) {
+                token.id = user.id;
+                token.email = user.email;
+            }
+
+            // Manejar Google OAuth - crear usuario en BD si no existe
             if (googleOauthConfigured && account?.provider === 'google' && user) {
                 try {
                     await connectDB();
@@ -119,25 +122,24 @@ export const authOptions: NextAuthOptions = {
                     } else {
                         LOGGER.info(`Usuario existente autenticado a través de Google OAuth: ${existingUser?.email}`);
                     }
-                    token.id = existingUser?._id?.toString();
+                    // Actualizar token con el ID del usuario en BD
+                    token.id = existingUser?._id.toString();
                     token.email = existingUser?.email;
-                    token.iat = Math.floor(Date.now() / 1000);
 
                 } catch (error: Error | any) {
                     LOGGER.error('Error manejando usuario de Google OAuth:', error);
                 }
-            } else if (user && !account?.provider) {
-                // Solo para el provider de credenciales (sin account provider)
-                token.id = user.id;
-                token.email = user.email;
-                token.iat = Math.floor(Date.now() / 1000);
             }
             return token;
         },
         async session({ session, token }) {
-            if (session.user && token) {
-                session.user.id = token.id as string;
-                session.user.email = token.email as string;
+            if (session.user) {
+                if (token?.id) {
+                    session.user.id = token.id as string;
+                }
+                if (token?.email) {
+                    session.user.email = token.email as string;
+                }
             }
             return session;
         }

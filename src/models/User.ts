@@ -25,7 +25,7 @@ export interface IThirdParty {
 
 // Interfaz para el usuario
 export interface IUser {
-  _id?: mongoose.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   email: string; // Correo electrónico
   firstName: string; // Nombre
   password: string; // Contraseña

@@ -1,9 +1,4 @@
 import mongoose from "mongoose";
-import User from "@/models/User";
-import Course from "@/models/Course";
-import Task from "@/models/Task";
-import Submission from "@/models/Submission";
-import Session from "@/models/Session";
 import { LOGGER } from "@/config/logger";
 
 declare global {
