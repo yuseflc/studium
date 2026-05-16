@@ -171,9 +171,9 @@ export default async function CourseNavbar() {
             </div>
 
             {/* --- DRAWER SISTEMA (Mobile Menu) --- */}
-            <div className="drawer drawer-end absolute top-16 left-0 w-full h-[calc(100vh-64px)]">
+            <div className="drawer drawer-end fixed top-16 left-0 w-full h-[calc(100vh-64px)] pointer-events-none">
                 <input id="mobile-menu-drawer" type="checkbox" className="drawer-toggle" />
-                <div className="drawer-side h-full overflow-hidden">
+                <div className="drawer-side h-full overflow-hidden pointer-events-auto">
                     <label htmlFor="mobile-menu-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
                     <div className="menu p-4 w-80 min-h-full bg-base-100 text-base-content flex flex-col shadow-2xl border-l border-base-300">
                         {/* 1. Usuario */}

@@ -28,11 +28,11 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         <p className="text-base-content/70">{courseData?.descripcion}</p>
                     </div>
 
-                    {/* Navegación por pestañas */}
-                    <div className="flex border-b border-base-300 mb-6 overflow-x-auto">
+                    <div className="flex border-b border-base-300 mb-6 overflow-x-auto relative z-10">
                         <button
+                            type="button"
                             onClick={() => setActiveTab("content")}
-                            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors ${activeTab === "content"
+                            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "content"
                                     ? "border-primary text-primary font-semibold"
                                     : "border-transparent text-base-content/60 hover:text-base-content"
                                 }`}
@@ -41,8 +41,9 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                             Curso
                         </button>
                         <button
+                            type="button"
                             onClick={() => setActiveTab("participants")}
-                            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors ${activeTab === "participants"
+                            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "participants"
                                     ? "border-primary text-primary font-semibold"
                                     : "border-transparent text-base-content/60 hover:text-base-content"
                                 }`}
@@ -51,8 +52,9 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                             Participantes
                         </button>
                         <button
+                            type="button"
                             onClick={() => setActiveTab("grades")}
-                            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors ${activeTab === "grades"
+                            className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "grades"
                                     ? "border-primary text-primary font-semibold"
                                     : "border-transparent text-base-content/60 hover:text-base-content"
                                 }`}
