@@ -7,6 +7,7 @@ import {
     GraduationCap
 } from "lucide-react";
 import CourseSidebar from "./CourseSidebar";
+import CourseContent from "./CourseContent";
 
 interface CourseViewProps {
     courseData: any;
@@ -18,7 +19,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
 
     return (
         <div className="flex flex-col lg:flex-row">
-            <CourseSidebar isTeacher={isTeacher} />
+            <CourseSidebar isTeacher={isTeacher} subjects={courseData?.subjects || []} />
 
             <main className="flex-1 p-6 lg:p-8">
                 <div className="max-w-8xl mx-auto">
@@ -67,9 +68,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                     {/* Vistas Renderizadas */}
                     <div className="space-y-6">
                         {activeTab === "content" && (
-                            <div className="card bg-base-100 border border-base-300 p-6 text-center">
-                                <p className="text-base-content/60">Lista de tareas y examenes no disponible aun.</p>
-                            </div>
+                            <CourseContent subjects={courseData?.subjects || []} />
                         )}
 
                         {activeTab === "participants" && (

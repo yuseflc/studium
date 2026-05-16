@@ -1,10 +1,45 @@
 import { CheckSquare, ChevronRight, Circle } from "lucide-react";
 
-interface CourseSidebarProps {
-    isTeacher: boolean;
+/**
+ * Interface para los recursos del sidebar
+ */
+interface Resource {
+    _id?: string;
+    title: string;
+    type: "link" | "file" | "text";
 }
 
-export default function CourseSidebar({ isTeacher }: CourseSidebarProps) {
+/**
+ * Interface para las unidades en el sidebar
+ */
+interface Unit {
+    _id?: string;
+    title: string;
+    content: string;
+    order: number;
+    resources?: Resource[];
+}
+
+/**
+ * Interface para las materias en el sidebar
+ */
+interface Subject {
+    _id?: string;
+    title: string;
+    description?: string;
+    order: number;
+    units: Unit[];
+}
+
+/**
+ * Props del componente Sidebar
+ */
+interface CourseSidebarProps {
+    isTeacher: boolean; // Indica si el usuario actual es profesor
+    subjects: Subject[]; // Lista de materias a mostrar
+}
+
+export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProps) {
     return (
         <aside className="w-full lg:w-72 border-r border-base-300 bg-base-100/30 lg:h-[calc(100vh-64px)] lg:overflow-y-auto lg:sticky lg:top-16">
             <div className="p-4 border-b border-base-300 bg-base-100/50">
@@ -12,39 +47,59 @@ export default function CourseSidebar({ isTeacher }: CourseSidebarProps) {
             </div>
 
             <div className="flex flex-col p-2 gap-1 relative">
-                {/* Ejemplo de Unidades */}
-                {[1, 2, 3, 4, 5, 6].map((ut) => (
-                    <div key={ut} className="relative">
-                        <details className="group relative" open={ut >= 5}>
-                            <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
-                                <div className="flex items-center gap-3">
-                                    <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
-                                    <span className="font-bold text-sm truncate max-w-[200px]">
-                                        UT{ut}: {
-                                            "Nombre de la Unidad"
-                                        }
-                                    </span>
-                                </div>
-                            </summary>
-                            <div className="pb-2">
-                                <ul className="space-y-1 mt-1">
-                                    <li className="flex items-center gap-3 px-8 py-2 hover:bg-base-200 cursor-pointer text-sm text-base-content/70 rounded-lg transition-colors mx-2">
-                                        <Circle size={11} className="text-base-content/30" />
-                                        <span>Tema {ut}</span>
-                                    </li>
-                                    {ut === 6 && (
-                                        <li className="flex items-center gap-3 px-8 py-2 hover:bg-base-200 cursor-pointer text-sm text-base-content/70 rounded-lg transition-colors mx-2">
-                                            <Circle size={10} className="text-base-content/30" />
-                                            <span className="truncate">Actividad 1: Ejercicio JavaScript</span>
-                                        </li>
-                                    )}
-                                </ul>
+                {subjects && subjects.length > 0 ? (
+                    subjects
+                        .sort((a, b) => a.order - b.order) // Ordenar materias por prioridad
+                        .map((subject) => (
+                            <div key={subject._id || subject.title} className="relative">
+                                {/* Componente de acordeón nativo de HTML */}
+                                <details className="group relative">
+                                    <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
+                                        <div className="flex items-center gap-3">
+                                            {/* Icono que rota cuando el elemento está abierto */}
+                                            <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
+                                            <span className="font-bold text-sm truncate max-w-[200px]">
+                                                {subject.title}
+                                            </span>
+                                        </div>
+                                    </summary>
+                                    <div className="pb-2">
+                                        <ul className="space-y-1 mt-1">
+                                            {subject.units && subject.units.length > 0 ? (
+                                                subject.units
+                                                    .sort((a, b) => a.order - b.order)
+                                                    .flatMap(u => u.resources || [])
+                                                    .map((resource) => (
+                                                        <li
+                                                            key={resource._id || resource.title}
+                                                            onClick={() => {
+                                                                const element = document.getElementById(subject._id || subject.title);
+                                                                if (element) {
+                                                                    element.scrollIntoView({ behavior: 'smooth' });
+                                                                }
+                                                            }}
+                                                            className="flex items-center gap-3 px-8 py-2 hover:bg-base-200 cursor-pointer text-sm text-base-content/70 rounded-lg transition-colors mx-2"
+                                                        >
+                                                            <CheckSquare size={14} className="text-base-content/30" />
+                                                            <span className="truncate">{resource.title}</span>
+                                                        </li>
+                                                    ))
+                                            ) : (
+                                                <li className="px-8 py-2 text-xs italic text-base-content/40">Sin unidades</li>
+                                            )}
+                                        </ul>
+                                    </div>
+                                </details>
                             </div>
-                        </details>
+                        ))
+                ) : (
+                    <div className="p-4 text-center text-sm text-base-content/40 italic">
+                        No hay contenido disponible
                     </div>
-                ))}
+                )}
             </div>
 
+            {/* Sección exclusiva para profesores */}
             {isTeacher && (
                 <div className="p-4">
                     <button className="btn btn-outline btn-primary btn-sm w-full gap-2">
