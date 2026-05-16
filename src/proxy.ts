@@ -1,32 +1,34 @@
-import { getToken } from "next-auth/jwt";
-import { NextRequest, NextResponse } from "next/server";
-import { protectedRoutes } from "@/config/protectedRoutes";
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export async function proxy(request: NextRequest) {
-    const { pathname } = request.nextUrl;
+export default withAuth(
+    function middleware(request) {
+        const token = request.nextauth.token;
+        const { pathname } = request.nextUrl;
 
-    // Verificar si la ruta está protegida
-    const isProtectedRoute = protectedRoutes.some(route => pathname.startsWith(route));
+        // Lógica personalizada si la necesitas en el futuro
+        // Ejemplo: control por roles
+        // if (pathname.startsWith("/admin") && token?.role !== "admin") {
+        //     return NextResponse.redirect(new URL("/unauthorized", request.url));
+        // }
 
-    if (isProtectedRoute) {
-        const secret = process.env.NEXTAUTH_SECRET;
-
-        if (!secret) {
-            console.error("NEXTAUTH_SECRET no está configurado");
-            return NextResponse.redirect(new URL("/auth/login", request.url));
-        }
-
-        const token = await getToken({ req: request, secret });
-
-        if (!token) {
-            const loginUrl = new URL("/auth/login", request.url);
-            loginUrl.searchParams.set("callbackUrl", request.url);
-            return NextResponse.redirect(loginUrl);
-        }
+        return NextResponse.next();
+    },
+    {
+        callbacks: {
+            authorized: ({ token }) => !!token,
+        },
+        pages: {
+            signIn: "/auth/login",
+        },
     }
-    return NextResponse.next();
-}
+);
 
 export const config = {
-    matcher: ["/account/:path*", "/mycourses/:path*", "/course/:path*", "/api/courses/:path*"],
+    matcher: [
+        "/account/:path*",
+        "/mycourses/:path*",
+        "/course/:path*",
+        "/api/courses/:path*"
+    ],
 };
