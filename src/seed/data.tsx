@@ -146,34 +146,34 @@ const CURSOS = [
   }
 ];
 const MENSAJES = [
-    {
-        id: "mensaje-1",
-        sender: "Juan Pérez",
-        content: "Hola, ¿podrías revisar el material de la semana 3?",
-        time: "Hace 5 min",
-        avatar: "https://i.pravatar.cc/150?u=juan"
-    },
-    {
-        id: "mensaje-2",
-        sender: "María García",
-        content: "Gracias por la ayuda con el ejercicio de matemáticas.",
-        time: "Hace 1 hora",
-        avatar: "https://i.pravatar.cc/150?u=maria"
-    }
+  {
+    id: "mensaje-1",
+    sender: "Juan Pérez",
+    content: "Hola, ¿podrías revisar el material de la semana 3?",
+    time: "Hace 5 min",
+    avatar: "https://i.pravatar.cc/150?u=juan"
+  },
+  {
+    id: "mensaje-2",
+    sender: "María García",
+    content: "Gracias por la ayuda con el ejercicio de matemáticas.",
+    time: "Hace 1 hora",
+    avatar: "https://i.pravatar.cc/150?u=maria"
+  }
 ];
 const NOTIFICACIONES = [
-    {
-        id: "notificacion-1",
-        title: "Nuevo curso disponible",
-        description: "El curso de Inteligencia Artificial ya está disponible. ¡Inscríbete ahora!",
-        time: "Hace 10 min"
-    },
-    {
-        id: "notificacion-2",
-        title: "Recordatorio de tarea",
-        description: "No olvides entregar tu tarea de programación antes del viernes.",
-        time: "Hace 2 horas"
-    }
+  {
+    id: "notificacion-1",
+    title: "Nuevo curso disponible",
+    description: "El curso de Inteligencia Artificial ya está disponible. ¡Inscríbete ahora!",
+    time: "Hace 10 min"
+  },
+  {
+    id: "notificacion-2",
+    title: "Recordatorio de tarea",
+    description: "No olvides entregar tu tarea de programación antes del viernes.",
+    time: "Hace 2 horas"
+  }
 ];
 
 const USUARIO = {
@@ -189,7 +189,48 @@ const USUARIO = {
   address: "Calle Falsa 123, Ciudad, País"
 };
 
-
+const PARTICIPANTES = [
+  {
+    id: "p1",
+    nombre: "Ignacio",
+    apellidos: "Miguel Mateos",
+    email: "ignacio.miguel@studium.com",
+    rol: "profesor",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+  },
+  {
+    id: "p2",
+    nombre: "Eva",
+    apellidos: "Cantero Abad",
+    email: "eva.cantero@studium.com",
+    rol: "estudiante",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+  },
+  {
+    id: "p3",
+    nombre: "David",
+    apellidos: "Lopez Ferreras",
+    email: "daid.lopez@studium.com",
+    rol: "estudiante",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+  },
+  {
+    id: "p4",
+    nombre: "Yusef",
+    apellidos: "Laroussi de la Calle",
+    email: "yusef.laroussi@studium.com",
+    rol: "estudiante",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+  },
+  {
+    id: "p5",
+    nombre: "Dario",
+    apellidos: "Muñoz Rodríguez",
+    email: "dario.munoz@studium.com",
+    rol: "estudiante",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+  }
+];
 
 // Export mock data for UI
-export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO };
+export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO, PARTICIPANTES };

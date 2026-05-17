@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import CourseSidebar from "./CourseSidebar";
 import CourseContent from "./CourseContent";
+import CourseParticipants from "./CourseParticipants";
+import { PARTICIPANTES } from "@/seed/data";
 
 interface CourseViewProps {
     courseData: any;
@@ -72,9 +74,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         )}
 
                         {activeTab === "participants" && (
-                            <div className="card bg-base-100 border border-base-300 p-6 text-center">
-                                <p className="text-base-content/60">Lista de participantes no disponible aun.</p>
-                            </div>
+                            <CourseParticipants participants={PARTICIPANTES} />
                         )}
 
                         {activeTab === "grades" && (
