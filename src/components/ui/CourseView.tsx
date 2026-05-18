@@ -7,7 +7,7 @@ import {
     GraduationCap,
     Settings
 } from "lucide-react";
-import CourseSidebar from "./CourseSidebar";
+import CourseSidebar from "./Navbars/CourseSidebar";
 import CourseContent from "./CourseContent";
 import CourseParticipants from "./CourseParticipants";
 import { PARTICIPANTES } from "@/seed/data";

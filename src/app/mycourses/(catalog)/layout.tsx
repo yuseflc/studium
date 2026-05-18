@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Sidebar from "@/components/ui/CourseMenuSidebar";
+import Sidebar from "@/components/ui/Navbars/CourseMenuSidebar";
 import CourseNavbar from "@/components/ui/Navbars/CourseNavbar";
 export const metadata: Metadata = {
   title: "Studium UI | Menu",
