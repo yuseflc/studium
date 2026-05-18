@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
 import { User, Course } from "@/models/index";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import CourseView from "@/components/ui/CourseView";
 import { ICourse } from "@/models/Course";
 
@@ -24,12 +24,12 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     
     // Si no encuentra, intenta buscar en el seed
     if (!curso) {
-      return Response.redirect("/mycourses");
+      redirect("/mycourses");
     }
 
   } catch (error) {
     console.error("Error fetching course from MongoDB:", error);
-    return Response.redirect("/mycourses");
+    redirect("/mycourses");
   }
 
   let isTeacher : boolean = false;
