@@ -158,6 +158,10 @@ export const POST = withErrorHandling(
       return notFoundResponse('Usuario', requestId);
     }
 
+    //En un futuro será si es miembro pago o si pertenece a una organización, pero por ahora sólo los profesores pueden crear cursos
+    if(user.role != "teacher"){
+      return unauthorizedResponse(requestId);
+    }
     // Crear el curso
     const newCourse = new Course({
       title,
