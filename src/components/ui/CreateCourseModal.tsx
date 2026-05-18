@@ -2,31 +2,19 @@
 
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
-import { IconPlus, IconX, IconBook } from '@tabler/icons-react';
+import { IconPlus, IconX, IconBook, IconCheck } from '@tabler/icons-react';
 
-const CATEGORIES = [
-  { id: "web-design", label: "Diseño Web" },
-  { id: "web-dev", label: "Desarrollo Web" },
-  { id: "backend", label: "Backend" },
-  { id: "frontend", label: "Frontend" },
-  { id: "devops", label: "DevOps" },
-  { id: "scripts", label: "Scripting" },
-  { id: "digital", label: "Digitalización" },
-];
-
-export default function CreateCourseModal() {
+export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated?: () => void }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [courseId, setCourseId] = useState<string>("");
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category: "",
-    imageUrl: "",
-    price: "",
   });
 
   const openModal = () => {
@@ -42,12 +30,10 @@ export default function CreateCourseModal() {
     setFormData({
       title: "",
       description: "",
-      category: "",
-      imageUrl: "",
-      price: "",
     });
-    setPreviewImage(null);
     setError("");
+    setSuccess(false);
+    setCourseId("");
   };
 
   const handleChange = (
@@ -60,9 +46,12 @@ export default function CreateCourseModal() {
       ...prev,
       [name]: value,
     }));
+  };
 
-    if (name === "imageUrl") {
-      setPreviewImage(value);
+  const handleNavigateToCourse = () => {
+    if (courseId) {
+      closeModal();
+      router.push(`/mycourses/${courseId}`);
     }
   };
 
@@ -72,31 +61,35 @@ export default function CreateCourseModal() {
     setLoading(true);
 
     try {
-      if (!formData.title || !formData.description || !formData.category) {
+      if (!formData.title || !formData.description) {
         setError("Por favor completa todos los campos requeridos");
         setLoading(false);
         return;
       }
 
-      const response = await fetch("/api/courses/create", {
+      const response = await fetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.error || "Error al crear el curso");
+        setError(data.error || data.message || "Error al crear el curso");
+        setLoading(false);
         return;
       }
 
-      console.log("Curso creado exitosamente:", data);
-      closeModal();
-      router.refresh();
+      // Éxito: mostrar mensaje y guardar el ID del curso
+      setSuccess(true);
+      setCourseId(data.data?.id);
+      setLoading(false);
     } catch (err: any) {
       setError(err.message || "Error al crear el curso");
-    } finally {
       setLoading(false);
     }
   };
@@ -119,7 +112,9 @@ export default function CreateCourseModal() {
           
           {/* Cabecera */}
           <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-2xl">Crear clase</h3>
+            <h3 className="font-bold text-2xl">
+              {success ? "¡Curso creado!" : "Crear clase"}
+            </h3>
             <button 
               onClick={closeModal}
               className="btn btn-sm btn-circle btn-ghost"
@@ -128,72 +123,113 @@ export default function CreateCourseModal() {
             </button>
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="alert alert-error mb-6">
-              <span>{error}</span>
+          {/* Estado: Éxito */}
+          {success ? (
+            <div className="space-y-6 py-4">
+              <div className="flex flex-col items-center gap-4">
+                <div className="rounded-full bg-success/20 p-4">
+                  <IconCheck size={40} className="text-success" />
+                </div>
+                <div className="text-center">
+                  <p className="text-lg font-semibold">¡Curso creado correctamente!</p>
+                  <p className="text-sm text-base-content/70 mt-1">
+                    Ahora puedes comenzar a agregar contenido a tu curso
+                  </p>
+                </div>
+              </div>
+
+              {/* Acciones - Éxito */}
+              <div className="modal-action gap-2">
+                <button 
+                  type="button"
+                  onClick={closeModal}
+                  className="btn btn-ghost"
+                >
+                  Cerrar
+                </button>
+                <button 
+                  type="button"
+                  onClick={handleNavigateToCourse}
+                  className="btn btn-primary gap-2"
+                >
+                  <IconBook size={18} />
+                  Ir al curso ahora
+                </button>
+              </div>
             </div>
+          ) : (
+            /* Estado: Formulario */
+            <>
+              {/* Error Message */}
+              {error && (
+                <div className="alert alert-error mb-6">
+                  <span>{error}</span>
+                </div>
+              )}
+
+              {/* Formulario */}
+              <form onSubmit={handleSubmit} className="space-y-4">
+                
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-bold">Nombre de la clase<span className="text-error"> *</span></span>
+                  </label>
+                  <input 
+                    name="title" 
+                    type="text" 
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="Nombre de la clase" 
+                    className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none" 
+                    required 
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
+                  </label>
+                  <textarea
+                    name="description" 
+                    value={formData.description}
+                    onChange={handleChange}
+                    placeholder="Descripción del curso" 
+                    className="textarea w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+                    rows={3}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* Acciones del Modal */}
+                <div className="modal-action mt-8">
+                  <button 
+                    type="button"
+                    onClick={closeModal}
+                    className="btn btn-ghost"
+                    disabled={loading}
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="btn btn-primary px-8"
+                  >
+                    {loading ? (
+                      <>
+                        <span className="loading loading-spinner loading-sm"></span>
+                        Creando...
+                      </>
+                    ) : (
+                      "Crear"
+                    )}
+                  </button>
+                </div>
+              </form>
+            </>
           )}
-
-          {/* Formulario */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold">Nombre de la clase<span className="text-error"> *</span></span>
-              </label>
-              <input 
-                name="title" 
-                type="text" 
-                value={formData.title}
-                onChange={handleChange}
-                placeholder="Nombre de la clase" 
-                className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none" 
-                required 
-              />
-            </div>
-
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
-              </label>
-              <input 
-                name="description" 
-                type="text" 
-                value={formData.description}
-                onChange={handleChange}
-                placeholder="Descripción del curso" 
-                className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none" 
-                required
-              />
-            </div>
-
-
-            {/* Acciones del Modal */}
-            <div className="modal-action mt-8">
-              <button 
-                type="button"
-                onClick={closeModal}
-                className="btn btn-ghost"
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                disabled={loading}
-                className="btn btn-primary px-8"
-              >
-                {loading ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Creando...
-                  </>
-                ) : (
-                  "Crear"
-                )}
-              </button>
-            </div>
-          </form>
         </div>
 
         {/* Clic fuera para cerrar */}
