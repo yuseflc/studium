@@ -1,4 +1,6 @@
+"use client";
 import { CheckSquare, ChevronRight, Circle } from "lucide-react";
+import { motion } from "framer-motion";
 
 /**
  * Interface para los recursos del sidebar
@@ -40,8 +42,49 @@ interface CourseSidebarProps {
 }
 
 export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProps) {
+    // Variantes motion para contenedor
+    const containerVariants = {
+        hidden: {
+            x: "-100%",
+            opacity: 0
+        },
+        visible: {
+            x: 0,
+            opacity: 1,
+            transition: {
+                duration: 0.1,
+                when: "beforeChildren",
+                delayChildren: 0.2,
+                staggerChildren: 0.1,
+            },
+        }
+    };
+
+    // Variantes para cada materia (Hijo)
+    const itemVariants = {
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: {
+                y: { stiffness: 1000, velocity: -100 },
+            },
+        },
+        hidden: {
+            y: -50,
+            opacity: 0,
+            transition: {
+                y: { stiffness: 1000 },
+            },
+        },
+    };
+
     return (
-        <aside className="w-full lg:w-72 border-r border-base-300 bg-base-100/30 lg:h-[calc(100vh-64px)] lg:overflow-y-auto lg:sticky lg:top-16">
+        <motion.aside
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            className="w-full lg:w-72 border-r border-base-300 bg-base-100/30 lg:h-[calc(100vh-64px)] lg:overflow-y-auto lg:sticky lg:top-16"
+        >
             <div className="p-4 border-b border-base-300 bg-base-100/50">
                 <h3 className="font-bold text-sm uppercase tracking-wider text-base-content/50">Contenido del Curso</h3>
             </div>
@@ -51,7 +94,11 @@ export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProp
                     subjects
                         .sort((a, b) => a.order - b.order) // Ordenar materias por prioridad
                         .map((subject) => (
-                            <div key={subject._id || subject.title} className="relative">
+                            <motion.div
+                                key={subject._id || subject.title}
+                                variants={itemVariants}
+                                className="relative"
+                            >
                                 {/* Componente de acordeón nativo de HTML */}
                                 <details className="group relative">
                                     <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
@@ -90,7 +137,7 @@ export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProp
                                         </ul>
                                     </div>
                                 </details>
-                            </div>
+                            </motion.div>
                         ))
                 ) : (
                     <div className="p-4 text-center text-sm text-base-content/40 italic">
@@ -108,6 +155,6 @@ export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProp
                     </button>
                 </div>
             )}
-        </aside>
+        </motion.aside>
     );
 }
