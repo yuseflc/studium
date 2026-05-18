@@ -134,10 +134,11 @@ export default async function CourseNavbar() {
                     <div className="hidden md:block">
                         <div className="dropdown dropdown-end text-base-content">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                                <div className="w-10 rounded-full">
+                                <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
                                     <ProfileImage
                                         src={user?.profile.profilePicture}
                                         alt={user?.firstName || "Profile"}
+                                        className="w-full h-full object-cover rounded-full"
                                     />
                                 </div>
                             </div>
@@ -178,19 +179,20 @@ export default async function CourseNavbar() {
                             {/* 1. Usuario */}
                             <div className="flex flex-col items-center py-8 border-b border-base-200">
                                 <div className="avatar mb-4">
-                                    <div className="w-28 h-28 rounded-full overflow-hidden">
+                                    <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
                                         <ProfileImage
                                             src={user?.profile.profilePicture}
                                             alt={user?.firstName || "Profile"}
+                                            className="w-full h-full object-cover rounded-full"
                                         />
                                     </div>
                                 </div>
                                 <span className="font-bold text-xl mb-6">{user?.firstName || "Usuario"}</span>
-                                <ul className="w-full menu menu-vertical gap-3 p-0 text-lg">
-                                    <li><a href="/account/profile" className="justify-start py-3 px-6">Profile</a></li>
-                                    <li><a className="justify-start py-3 px-6">Settings</a></li>
-                                    <li className="text-error">
-                                        <div className="justify-start py-3 px-6 w-full">
+                                <ul className="w-full menu menu-vertical gap-1 p-0 text-base">
+                                    <li><a href="/account/profile" className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">Profile</a></li>
+                                    <li><a className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">Settings</a></li>
+                                    <li>
+                                        <div className="justify-start py-3 px-6 w-full text-error font-bold active:bg-error/10 rounded-xl transition-colors cursor-pointer">
                                             <LogoutButton />
                                         </div>
                                     </li>
@@ -201,13 +203,17 @@ export default async function CourseNavbar() {
                             <div className="py-4 border-b border-base-200">
                                 <div className="collapse collapse-arrow">
                                     <input type="checkbox" />
-                                    <div className="collapse-title font-bold text-lg opacity-70 tracking-tighter">
+                                    <div className="collapse-title font-extrabold text-base text-base-content tracking-tight uppercase">
                                         CURSOS DISPONIBLES
                                     </div>
                                     <div className="collapse-content p-0 text-base">
-                                        <ul className="menu menu-md w-full">
+                                        <ul className="menu menu-md w-full gap-1">
                                             {cursosDisponibles.map((curso, idx) => (
-                                                <li key={idx}><a className="py-2 text-base">{curso}</a></li>
+                                                <li key={idx}>
+                                                    <a className="py-2.5 px-4 text-base-content/80 font-medium active:bg-base-300 rounded-lg transition-all">
+                                                        {curso}
+                                                    </a>
+                                                </li>
                                             ))}
                                         </ul>
                                     </div>
