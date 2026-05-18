@@ -1,44 +1,15 @@
 "use client";
 import { CheckSquare, ChevronRight, Circle } from "lucide-react";
 import { motion } from "framer-motion";
+import { ISubject } from "@/models/Course";
 
-/**
- * Interface para los recursos del sidebar
- */
-interface Resource {
-    _id?: string;
-    title: string;
-    type: "link" | "file" | "text";
-}
-
-/**
- * Interface para las unidades en el sidebar
- */
-interface Unit {
-    _id?: string;
-    title: string;
-    content: string;
-    order: number;
-    resources?: Resource[];
-}
-
-/**
- * Interface para las materias en el sidebar
- */
-interface Subject {
-    _id?: string;
-    title: string;
-    description?: string;
-    order: number;
-    units: Unit[];
-}
 
 /**
  * Props del componente Sidebar
  */
 interface CourseSidebarProps {
     isTeacher: boolean; // Indica si el usuario actual es profesor
-    subjects: Subject[]; // Lista de materias a mostrar
+    subjects: ISubject[]; // Lista de materias a mostrar
 }
 
 export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProps) {
@@ -95,7 +66,7 @@ export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProp
                         .sort((a, b) => a.order - b.order) // Ordenar materias por prioridad
                         .map((subject) => (
                             <motion.div
-                                key={subject._id || subject.title}
+                                key={subject._id?.toString()}
                                 variants={itemVariants}
                                 className="relative"
                             >
@@ -118,9 +89,9 @@ export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProp
                                                     .flatMap(u => u.resources || [])
                                                     .map((resource) => (
                                                         <li
-                                                            key={resource._id || resource.title}
+                                                            key={resource._id?.toString()}
                                                             onClick={() => {
-                                                                const element = document.getElementById(subject._id || subject.title);
+                                                                const element = document.getElementById(subject._id?.toString() || "");
                                                                 if (element) {
                                                                     element.scrollIntoView({ behavior: 'smooth' });
                                                                 }

@@ -10,46 +10,13 @@ import {
   GraduationCap,
   ChevronDown
 } from "lucide-react";
-
-/**
- * Representa un recurso individual dentro de una unidad (enlace, archivo, texto o tarea)
- */
-interface Resource {
-  _id?: string;
-  title: string;
-  type: "link" | "file" | "text" | "task" | "exam" | "doc";
-  url?: string;
-  description?: string;
-  status?: "pending" | "late" | "completed";
-}
-
-/**
- * Representa una unidad de aprendizaje con su contenido y recursos adicionales
- */
-interface Unit {
-  _id?: string;
-  title: string;
-  content: string;
-  order: number;
-  resources?: Resource[];
-}
-
-/**
- * Representa una materia o tema principal que agrupa varias unidades
- */
-interface Subject {
-  _id?: string;
-  title: string;
-  description?: string;
-  order: number;
-  units: Unit[];
-}
+import { IResource, ISubject } from "@/models/Course";
 
 /**
  * Propiedades del componente CourseContent
  */
 interface CourseContentProps {
-  subjects: Subject[];
+  subjects: ISubject[];
 }
 
 export default function CourseContent({ subjects }: CourseContentProps) {
@@ -82,12 +49,12 @@ export default function CourseContent({ subjects }: CourseContentProps) {
         .sort((a, b) => a.order - b.order)
         .map((subject) => {
           const subjectId = subject._id || subject.title;
-          const isOpen = openSubjects[subjectId] !== false; // Abierto por defecto
+          const isOpen = openSubjects[subjectId.toString()] !== false; // Abierto por defecto
 
           return (
             <div
-              key={subjectId}
-              id={subjectId}
+              key={subjectId.toString()}
+              id={subjectId.toString()}
               className="scroll-mt-24"
             >
               {/* Cabecera del Tema (Título y Línea Larga) */}
@@ -101,7 +68,7 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                     </h3>
                     <motion.button
                       type="button"
-                      onClick={() => toggleSubject(subjectId)}
+                      onClick={() => toggleSubject(subjectId.toString())}
                       animate={{ rotate: isOpen ? 0 : -90 }}
                       transition={{ duration: 0.2 }}
                       className="text-base-content/30 hover:text-primary hover:bg-base-200 p-1 rounded-full transition-colors cursor-pointer flex items-center justify-center"
@@ -134,23 +101,23 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                         {subject.units
                           .sort((a, b) => a.order - b.order)
                           .flatMap((unit) => unit.resources || [])
-                          .map((resource) => (
+                          .map((resource : IResource) => (
                             <div
-                              key={resource._id || resource.title}
+                              key={resource._id?.toString()}
                               className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
                             >
                               {/* Icono circular a la izquierda - Color Amarillo del proyecto */}
                               <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
-                                {resource.type === "task" && (
+                                {resource.type === "link" && (
                                   <StickyNote size={18} className="fill-yellow-600/10" />
                                 )}
-                                {resource.type === "doc" && (
+                                {resource.type === "file" && (
                                   <Bookmark size={18} className="fill-yellow-600/10" />
                                 )}
-                                {resource.type === "exam" && (
+                                {resource.type === "text" && (
                                   <GraduationCap size={18} />
                                 )}
-                                {resource.type !== "task" && resource.type !== "doc" && resource.type !== "exam" && (
+                                {resource.type !== "link" && resource.type !== "file" && resource.type !== "text" && (
                                   <FileText size={18} />
                                 )}
                               </div>

@@ -11,25 +11,26 @@ import CourseSidebar from "./Navbars/CourseSidebar";
 import CourseContent from "./CourseContent";
 import CourseParticipants from "./CourseParticipants";
 import { PARTICIPANTES } from "@/seed/data";
+import { ICourse } from "@/models/Course";
 
 interface CourseViewProps {
-    courseData: any;
+    courseData: ICourse;
     isTeacher: boolean;
 }
 
-export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
+export default function CourseView({ courseData , isTeacher }: CourseViewProps) {
     const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
 
     return (
         <div className="flex flex-col lg:flex-row">
-            <CourseSidebar isTeacher={isTeacher} subjects={courseData?.subjects || []} />
+            <CourseSidebar isTeacher={isTeacher} subjects={courseData.subjects || []} />
 
             <main className="flex-1 p-6 lg:p-8">
                 <div className="max-w-8xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold mb-2">{courseData?.nombre || "Cargando curso..."}  {courseData?.status == "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
-                        <p className="text-base-content/70">{courseData?.descripcion}</p>
+                        <h1 className="text-3xl font-bold mb-2">{courseData.title || "Cargando curso..."}  {courseData.status == "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
+                        {(courseData.description ? <p className="text-base-content/70">{courseData.description}</p> : <p className="text-base-content/60 italic">Sin descripción disponible.</p>)}
                     </div>
 
                     <div className="flex border-b border-base-300 mb-6 overflow-x-auto relative z-10">
@@ -37,8 +38,8 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                             type="button"
                             onClick={() => setActiveTab("content")}
                             className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "content"
-                                    ? "border-primary text-primary font-semibold"
-                                    : "border-transparent text-base-content/60 hover:text-base-content"
+                                ? "border-primary text-primary font-semibold"
+                                : "border-transparent text-base-content/60 hover:text-base-content"
                                 }`}
                         >
                             <BookOpen size={18} />
@@ -48,8 +49,8 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                             type="button"
                             onClick={() => setActiveTab("participants")}
                             className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "participants"
-                                    ? "border-primary text-primary font-semibold"
-                                    : "border-transparent text-base-content/60 hover:text-base-content"
+                                ? "border-primary text-primary font-semibold"
+                                : "border-transparent text-base-content/60 hover:text-base-content"
                                 }`}
                         >
                             <Users size={18} />
@@ -59,8 +60,8 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                             type="button"
                             onClick={() => setActiveTab("grades")}
                             className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "grades"
-                                    ? "border-primary text-primary font-semibold"
-                                    : "border-transparent text-base-content/60 hover:text-base-content"
+                                ? "border-primary text-primary font-semibold"
+                                : "border-transparent text-base-content/60 hover:text-base-content"
                                 }`}
                         >
                             <GraduationCap size={18} />
@@ -71,8 +72,8 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                 type="button"
                                 onClick={() => setActiveTab("settings")}
                                 className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "settings"
-                                        ? "border-primary text-primary font-semibold"
-                                        : "border-transparent text-base-content/60 hover:text-base-content"
+                                    ? "border-primary text-primary font-semibold"
+                                    : "border-transparent text-base-content/60 hover:text-base-content"
                                     }`}
                             >
                                 <Settings size={18} />
