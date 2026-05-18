@@ -531,5 +531,19 @@ const CALIFICACIONES: IGrade[] = [
   }
 ];
 
+const RESOURCES = [
+  {
+    id: "res-1",
+    title: "Tarea 1",
+    type: "task",
+    status: "pending, completed, late",
+    description: "Descripción de la tarea 1",
+    url: "#",
+      courseId: "course-1",
+      subjectId: "tema-1",
+      unitId: "u1t1"
+  }
+];
+
 // Export mock data for UI
 export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO, PARTICIPANTES, CALIFICACIONES, SEED_SUBJECTS, SEED_UNITS, SEED_RESOURCES };
