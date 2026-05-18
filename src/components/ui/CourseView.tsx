@@ -4,7 +4,8 @@ import { useState } from "react";
 import {
     BookOpen,
     Users,
-    GraduationCap
+    GraduationCap,
+    Settings
 } from "lucide-react";
 import CourseSidebar from "./CourseSidebar";
 import CourseContent from "./CourseContent";
@@ -17,7 +18,7 @@ interface CourseViewProps {
 }
 
 export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
-    const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades">("content");
+    const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
 
     return (
         <div className="flex flex-col lg:flex-row">
@@ -65,6 +66,19 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                             <GraduationCap size={18} />
                             Calificaciones
                         </button>
+                        {isTeacher && (
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab("settings")}
+                                className={`pb-3 px-4 flex items-center gap-2 border-b-2 transition-colors shrink-0 ${activeTab === "settings"
+                                        ? "border-primary text-primary font-semibold"
+                                        : "border-transparent text-base-content/60 hover:text-base-content"
+                                    }`}
+                            >
+                                <Settings size={18} />
+                                Ajustes
+                            </button>
+                        )}
                     </div>
 
                     {/* Vistas Renderizadas */}
@@ -80,6 +94,13 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         {activeTab === "grades" && (
                             <div className="card bg-base-100 border border-base-300 p-6 text-center">
                                 <p className="text-base-content/60">Lista de calificaciones no disponble aun.</p>
+                            </div>
+                        )}
+
+                        {activeTab === "settings" && isTeacher && (
+                            <div className="card bg-base-100 border border-base-300 p-6">
+                                <h2 className="text-xl font-bold mb-4">Ajustes del Curso</h2>
+                                <p className="text-base-content/60">Configuración del curso por implementar.</p>
                             </div>
                         )}
                     </div>
