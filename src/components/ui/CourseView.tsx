@@ -10,6 +10,7 @@ import {
 import CourseSidebar from "./Navbars/CourseSidebar";
 import CourseContent from "./CourseContent";
 import CourseParticipants from "./CourseParticipants";
+import CreateTaskModal from "./CreateTaskModal";
 import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
 
