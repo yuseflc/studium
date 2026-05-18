@@ -27,49 +27,48 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
     });
 
     return (
-        <div className="card bg-base-100 border border-base-300 overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="table">
-                    <thead>
-                        <tr className="text-base-content/70">
-                            <th>Nombre</th>
-                            <th>Rol</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {sortedParticipants.map((p) => (
-                            <tr key={p.id} className="hover:bg-primary/5 transition-colors group">
-                                <td>
-                                    <div className="flex items-center gap-3">
-                                        <div className="avatar px-0">
-                                            <div className="rounded-full h-10 w-10 bg-slate-200 flex items-center justify-center overflow-hidden border border-slate-300">
-                                                {p.avatar ? (
-                                                    <img src={p.avatar} alt={`${p.nombre} ${p.apellidos}`} />
-                                                ) : (
-                                                    <User size={20} className="text-slate-500" />
-                                                )}
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div className="font-bold flex items-center gap-2 group-hover:text-primary transition-colors">
-                                                {p.nombre} {p.apellidos}
-                                            </div>
-                                            <div className="text-sm text-base-content/60 lowercase">{p.email}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span className="capitalize text-base-content/60">
+        <div className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+                {sortedParticipants.map((p) => (
+                    <div 
+                        key={p.id} 
+                        className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-1 group cursor-pointer aspect-square flex items-center justify-center"
+                    >
+                        <div className="flex flex-col items-center text-center gap-1 w-full p-1">
+                            <div className="avatar">
+                                <div className="rounded-full h-20 w-20 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
+                                    {p.avatar ? (
+                                        <img src={p.avatar} alt={`${p.nombre} ${p.apellidos}`} className="object-cover" />
+                                    ) : (
+                                        <User size={24} className="text-slate-400" />
+                                    )}
+                                </div>
+                            </div>
+                            
+                            <div className="space-y-0 w-full px-1">
+                                <div className="font-bold text-md text-base-content/90 leading-tight line-clamp-2 active:overflow-visible group-hover:text-primary transition-colors">
+                                    {p.nombre} {p.apellidos}
+                                </div>
+                                <div className="text-sm text-base-content/50 lowercase truncate mt-0.5">
+                                    {p.email}
+                                </div>
+                                <div className="pt-1 flex justify-center">
+                                    <span className={`text-xs uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-md ${
+                                        p.rol === "profesor" 
+                                        ? "bg-primary/10 text-primary" 
+                                        : "bg-base-200 text-base-content/60"
+                                    }`}>
                                         {p.rol}
                                     </span>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
             </div>
+            
             {sortedParticipants.length === 0 && (
-                <div className="p-8 text-center text-base-content/50">
+                <div className="card bg-base-100 border border-base-300 p-12 text-center text-base-content/50 italic">
                     No hay participantes registrados en este curso.
                 </div>
             )}

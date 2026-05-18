@@ -210,7 +210,7 @@ const PARTICIPANTES = [
     id: "p3",
     nombre: "David",
     apellidos: "Lopez Ferreras",
-    email: "daid.lopez@studium.com",
+    email: "david.lopez@studium.com",
     rol: "estudiante",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
   },
@@ -227,6 +227,14 @@ const PARTICIPANTES = [
     nombre: "Dario",
     apellidos: "Muñoz Rodríguez",
     email: "dario.munoz@studium.com",
+    rol: "estudiante",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
+  },
+  {
+    id: "p6",
+    nombre: "Pepe",
+    apellidos: "Muñoz Rodríguez",
+    email: "pepe.munoz@studium.com",
     rol: "estudiante",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
   }
