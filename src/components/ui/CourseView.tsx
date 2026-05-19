@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import {
     BookOpen,
     Users,
@@ -10,6 +11,7 @@ import {
 import CourseSidebar from "./Navbars/CourseSidebar";
 import CourseContent from "./CourseContent";
 import CourseParticipants from "./CourseParticipants";
+import GradesView from "./GradesView";
 import CreateTaskModal from "./CreateTaskModal";
 import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
@@ -21,10 +23,16 @@ interface CourseViewProps {
     isTeacher: boolean;
 }
 
-export default function CourseView({ courseData, courseStructure, isTeacher }: CourseViewProps) {
+export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
+    const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
 
-    const subjects = courseStructure?.subjects || [];
+    const subjects = courseData?.subjects || [];
+
+    // Extraer todas las tareas del curso de forma plana
+    const allTasks = courseData?.subjects?.flatMap(subject => 
+        (subject as any).tasks || []
+    ) || [];
 
     return (
         <div className="flex flex-col lg:flex-row">
@@ -98,9 +106,12 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         )}
 
                         {activeTab === "grades" && (
-                            <div className="card bg-base-100 border border-base-300 p-6 text-center">
-                                <p className="text-base-content/60">Lista de calificaciones no disponble aun.</p>
-                            </div>
+                            <GradesView 
+                                participants={PARTICIPANTES} 
+                                tasks={allTasks}
+                                isTeacher={isTeacher}
+                                currentUserEmail={session?.user?.email || ""}
+                            />
                         )}
 
                         {activeTab === "settings" && isTeacher && (

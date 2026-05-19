@@ -8,7 +8,8 @@ import {
   StickyNote,
   Bookmark,
   GraduationCap,
-  ChevronDown
+  ChevronDown,
+  ClipboardList
 } from "lucide-react";
 import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
@@ -106,8 +107,43 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    {subject.units && subject.units.length > 0 ? (
+                    {((subject.units && subject.units.length > 0) || ((subject as any).tasks && (subject as any).tasks.length > 0)) ? (
                       <div className="flex flex-col gap-3 ml-2 lg:ml-4 pb-4">
+                        {/* Renderizar Tareas del Subject si existen */}
+                        {(subject as any).tasks && (subject as any).tasks.map((task: any) => (
+                          <div
+                            key={task.id}
+                            className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
+                          >
+                            {/* Icono de Tarea - Estilo igual a otros recursos */}
+                            <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
+                              <ClipboardList size={18} className="fill-yellow-600/10" />
+                            </div>
+
+                            {/* Detalle de la tarea */}
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
+                                  {task.title}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-xs text-base-content/50 truncate">
+                                  {task.dueDate instanceof Date 
+                                    ? `Fecha de entrega: ${task.dueDate.toLocaleDateString()}` 
+                                    : (task.description || "Nueva tarea publicada")}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Botón de opciones a la derecha */}
+                            <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Renderizar Recursos de Unidades */}
                         {subject.units
                           .sort((a, b) => a.order - b.order)
                           .flatMap((unit) => unit.resources || [])

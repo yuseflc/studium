@@ -184,6 +184,78 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    // Materias/Temas que componen el curso
+    subjects: [
+      {
+        _id: "general" as any,
+        title: "General",
+        description: "Información general y avisos del curso.",
+        order: 0,
+        taskIds: [],
+        // Unidades de contenido dentro de la materia
+        units: [
+          {
+            _id: "info-1" as any,
+            title: "Guía Docente",
+            content: "Descarga aquí la guía docente del curso 2023/24.",
+            order: 1,
+            resources: [
+              { _id: "task-guia" as any, title: "Consultar Guía Docente", type: "text", description: "Documentación obligatoria" }
+            ]
+          },
+          {
+            _id: "info-2" as any,
+            title: "Foro de Avisos",
+            content: "Consulta los últimos avisos del profesor.",
+            order: 2,
+            resources: [
+              { _id: "task-foro" as any, title: "Revisar Foro de Avisos", type: "text", description: "Nuevas notificaciones" }
+            ]
+          }
+        ]
+      },
+      {
+        _id: "tema-1" as any,
+        title: "Tema 1: Fundamentos UX",
+        description: "Introducción a la experiencia de usuario.",
+        order: 1,
+        taskIds: [],
+        units: [
+          {
+            _id: "u1t1" as any,
+            title: "Principios de Diseño",
+            content: "Exploración de los 10 principios de Nielsen.",
+            order: 1,
+            resources: [
+              { _id: "res-1" as any, title: "Guía de Principios UX", type: "link", url: "#", description: "Documentación oficial" },
+            ]
+          }
+        ],
+        tasks: [
+          { id: "t1", title: "Análisis de Heurísticas de Nielsen", dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
+          { id: "t2", title: "Prototipo de Baja Fidelidad", dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) }
+        ] as any
+      },
+      {
+        _id: "tema-2" as any,
+        title: "Tema 2: Tipografía y Color",
+        description: "Uso del color y tipografía en interfaces.",
+        order: 2,
+        taskIds: [],
+        units: [
+          {
+            _id: "u1t2" as any,
+            title: "Psicología del Color",
+            content: "Cómo afectan los colores a la percepción del usuario.",
+            order: 1,
+            resources: []
+          }
+        ],
+        tasks: [
+          { id: "t3", title: "Paleta de Colores Accesible", dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) }
+        ] as any
+      }
+    ]
   },
   {
     _id: "course-2" as any,
@@ -359,5 +431,73 @@ const PARTICIPANTES = [
   }
 ];
 
+export interface IGrade {
+  id: string;
+  studentName: string;
+  studentEmail: string;
+  avatar: string;
+  taskTitle: string;
+  category: string;
+  score: number;
+  maxScore: number;
+  status: "graded" | "pending" | "late";
+  submittedAt: string;
+  feedback?: string;
+}
+
+const CALIFICACIONES: IGrade[] = [
+  {
+    id: "g-pass",
+    studentName: "Yusef Laroussi",
+    studentEmail: "yusef.laroussi@studium.com",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
+    taskTitle: "Práctica de Grid y Flexbox",
+    category: "Tareas",
+    score: 100,
+    maxScore: 100,
+    status: "graded",
+    submittedAt: "2024-03-20",
+    feedback: "Maquetación perfecta. Has demostrado un dominio absoluto de Flexbox y CSS Grid.",
+  },
+  {
+    id: "g-fail",
+    studentName: "Yusef Laroussi",
+    studentEmail: "yusef.laroussi@studium.com",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
+    taskTitle: "Cuestionario de Accesibilidad",
+    category: "Exámenes",
+    score: 35,
+    maxScore: 100,
+    status: "graded",
+    submittedAt: "2024-03-18",
+    feedback: "Debes revisar los conceptos de contraste de color y etiquetas ARIA. Te recomiendo volver a leer el tema 2.",
+  },
+  {
+    id: "g-pending",
+    studentName: "Yusef Laroussi",
+    studentEmail: "yusef.laroussi@studium.com",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
+    taskTitle: "Análisis de Interfaz UX",
+    category: "Proyectos",
+    score: 0,
+    maxScore: 100,
+    status: "pending",
+    submittedAt: "2024-03-21",
+  },
+  {
+    id: "g-late",
+    studentName: "Yusef Laroussi",
+    studentEmail: "yusef.laroussi@studium.com",
+    avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
+    taskTitle: "Propuesta de Personas",
+    category: "Tareas",
+    score: 85,
+    maxScore: 100,
+    status: "late",
+    submittedAt: "2024-03-15",
+    feedback: "Buen trabajo, aunque entregado fuera de plazo.",
+  }
+];
+
 // Export mock data for UI
-export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO, PARTICIPANTES, SEED_SUBJECTS, SEED_UNITS, SEED_RESOURCES };
+export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO, PARTICIPANTES, CALIFICACIONES, SEED_SUBJECTS, SEED_UNITS, SEED_RESOURCES };

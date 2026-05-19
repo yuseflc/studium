@@ -8,6 +8,7 @@ export interface ICourse {
   teachers: mongoose.Types.ObjectId[]; // IDs de otros profesores asociados al curso
   status: "draft" | "active" | "archived";
   subjectIds: mongoose.Types.ObjectId[]; // Referencias a las materias del curso
+  subjects?: any[]; // Campo virtual o poblado para la UI
   enrolledStudents: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
