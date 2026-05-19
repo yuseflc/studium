@@ -57,9 +57,7 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
       updatedAt: course.updatedAt,
     };
   } catch (error) {
-    LOGGER.error("Error fetching course full structure", error as Error, {
-      courseId,
-    });
+    LOGGER.error({ courseId, error }, "Error fetching course full structure");
     throw error;
   }
 }
@@ -94,9 +92,7 @@ export async function getSubjectWithUnits(subjectId: string | mongoose.Types.Obj
       unitIds: unitsWithResources,
     };
   } catch (error) {
-    LOGGER.error("Error fetching subject with units", error as Error, {
-      subjectId,
-    });
+    LOGGER.error({ subjectId, error }, "Error fetching subject with units");
     throw error;
   }
 }
@@ -113,9 +109,7 @@ export async function getUnitWithResources(unitId: string | mongoose.Types.Objec
 
     return unit;
   } catch (error) {
-    LOGGER.error("Error fetching unit with resources", error as Error, {
-      unitId,
-    });
+    LOGGER.error({ unitId, error }, "Error fetching unit with resources");
     throw error;
   }
 }
@@ -131,9 +125,7 @@ export async function getCourseSubjects(courseId: string | mongoose.Types.Object
 
     return subjects;
   } catch (error) {
-    LOGGER.error("Error fetching course subjects", error as Error, {
-      courseId,
-    });
+    LOGGER.error({ courseId, error }, "Error fetching course subjects");
     throw error;
   }
 }
@@ -149,9 +141,7 @@ export async function getSubjectUnits(subjectId: string | mongoose.Types.ObjectI
 
     return units;
   } catch (error) {
-    LOGGER.error("Error fetching subject units", error as Error, {
-      subjectId,
-    });
+    LOGGER.error({ subjectId, error }, "Error fetching subject units");
     throw error;
   }
 }
@@ -167,9 +157,7 @@ export async function getUnitResources(unitId: string | mongoose.Types.ObjectId)
 
     return resources;
   } catch (error) {
-    LOGGER.error("Error fetching unit resources", error as Error, {
-      unitId,
-    });
+    LOGGER.error({ unitId, error }, "Error fetching unit resources");
     throw error;
   }
 }
@@ -190,9 +178,7 @@ export async function createSubject(
 
     return subject;
   } catch (error) {
-    LOGGER.error("Error creating subject", error as Error, {
-      courseId,
-    });
+    LOGGER.error({ courseId, error }, "Error creating subject");
     throw error;
   }
 }
@@ -222,10 +208,7 @@ export async function createUnit(
 
     return unit;
   } catch (error) {
-    LOGGER.error("Error creating unit", error as Error, {
-      subjectId,
-      courseId,
-    });
+    LOGGER.error({ subjectId, courseId, error }, "Error creating unit");
     throw error;
   }
 }
@@ -254,10 +237,7 @@ export async function createResource(
 
     return resource;
   } catch (error) {
-    LOGGER.error("Error creating resource", error as Error, {
-      unitId,
-      courseId,
-    });
+    LOGGER.error({ unitId, courseId, error }, "Error creating resource");
     throw error;
   }
 }
@@ -292,9 +272,7 @@ export async function deleteSubject(subjectId: string | mongoose.Types.ObjectId)
 
     return { success: true };
   } catch (error) {
-    LOGGER.error("Error deleting subject", error as Error, {
-      subjectId,
-    });
+    LOGGER.error({ subjectId, error }, "Error deleting subject");
     throw error;
   }
 }
@@ -322,9 +300,7 @@ export async function deleteUnit(unitId: string | mongoose.Types.ObjectId) {
 
     return { success: true };
   } catch (error) {
-    LOGGER.error("Error deleting unit", error as Error, {
-      unitId,
-    });
+    LOGGER.error({ unitId, error }, "Error deleting unit");
     throw error;
   }
 }
@@ -349,9 +325,7 @@ export async function deleteResource(resourceId: string | mongoose.Types.ObjectI
 
     return { success: true };
   } catch (error) {
-    LOGGER.error("Error deleting resource", error as Error, {
-      resourceId,
-    });
+    LOGGER.error({ resourceId, error }, "Error deleting resource");
     throw error;
   }
 }

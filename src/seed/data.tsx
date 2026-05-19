@@ -3,10 +3,176 @@ import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 
-// Mock data for UI (non-MongoDB)
-// Esta constante almacena los datos de prueba de los cursos para la interfaz
-// NOTA: Estructura simplificada para UI mockup (en producción viene del servidor)
-const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
+type SeedUnit = IUnit & { resources?: IResource[] };
+type SeedSubject = ISubject & { units?: SeedUnit[] };
+
+export interface SeedCourseStructure {
+  subjects: SeedSubject[];
+}
+
+const sameId = (left: unknown, right: unknown) => String(left) === String(right);
+
+const SEED_SUBJECTS: ISubject[] = [
+  {
+    _id: "general" as any,
+    courseId: "course-1" as any,
+    title: "General",
+    description: "Información general y avisos del curso.",
+    order: 0,
+    taskIds: [],
+    unitIds: ["unidad-1" as any, "unidad-2" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "tema-1" as any,
+    courseId: "course-1" as any,
+    title: "Tema 1: Fundamentos UX",
+    description: "Introducción a la experiencia de usuario.",
+    order: 1,
+    taskIds: [],
+    unitIds: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "tema-2" as any,
+    courseId: "course-1" as any,
+    title: "Tema 2: Tipografía y Color",
+    description: "Uso del color y tipografía en interfaces.",
+    order: 2,
+    taskIds: [],
+    unitIds: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "info-gen-2" as any,
+    courseId: "course-2" as any,
+    title: "Información General",
+    description: "Recursos básicos para el despliegue.",
+    order: 0,
+    taskIds: [],
+    unitIds: ["unidad-3" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "tema-1-c2" as any,
+    courseId: "course-2" as any,
+    title: "Tema 1: Repositorios y Git",
+    description: "Flujo de trabajo con Git para despliegues.",
+    order: 1,
+    taskIds: [],
+    unitIds: ["unidad-4" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+const SEED_UNITS: IUnit[] = [
+  {
+    _id: "unidad-1" as any,
+    subjectId: "general" as any,
+    courseId: "course-1" as any,
+    title: "Introducción a UX",
+    content: "Conceptos básicos de experiencia de usuario, diseño centrado en el usuario y principios de usabilidad.",
+    order: 1,
+    resourceIds: ["recurso-1" as any, "recurso-2" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "unidad-2" as any,
+    subjectId: "general" as any,
+    courseId: "course-1" as any,
+    title: "Investigación de Usuarios",
+    content: "Técnicas para entender a los usuarios: entrevistas, encuestas, análisis de competencia y creación de personas.",
+    order: 2,
+    resourceIds: ["recurso-3" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "unidad-3" as any,
+    subjectId: "info-gen-2" as any,
+    courseId: "course-2" as any,
+    title: "Checklist de despliegue",
+    content: "Lista base para validar un despliegue antes de publicar una aplicación.",
+    order: 1,
+    resourceIds: ["recurso-4" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "unidad-4" as any,
+    subjectId: "tema-1-c2" as any,
+    courseId: "course-2" as any,
+    title: "Flujo Git para CI/CD",
+    content: "Buenas prácticas para ramas, PRs y automatización de despliegues.",
+    order: 1,
+    resourceIds: ["recurso-5" as any],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+const SEED_RESOURCES: IResource[] = [
+  {
+    _id: "recurso-1" as any,
+    unitId: "unidad-1" as any,
+    courseId: "course-1" as any,
+    title: "Guía UX para principiantes",
+    type: "link",
+    url: "https://www.nngroup.com/articles/definition-user-experience/",
+    description: "Lectura base para introducir el concepto de UX.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "recurso-2" as any,
+    unitId: "unidad-1" as any,
+    courseId: "course-1" as any,
+    title: "Mapa de experiencia",
+    type: "text",
+    description: "Plantilla para analizar el recorrido de usuario en una interfaz.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "recurso-3" as any,
+    unitId: "unidad-2" as any,
+    courseId: "course-1" as any,
+    title: "Entrevistas con usuarios",
+    type: "file",
+    description: "Documento con guion de entrevistas semiestructuradas.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "recurso-4" as any,
+    unitId: "unidad-3" as any,
+    courseId: "course-2" as any,
+    title: "Checklist de despliegue en producción",
+    type: "text",
+    description: "Verificación previa para evitar fallos al publicar.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+  {
+    _id: "recurso-5" as any,
+    unitId: "unidad-4" as any,
+    courseId: "course-2" as any,
+    title: "Pipeline básico de CI/CD",
+    type: "link",
+    url: "https://docs.github.com/actions",
+    description: "Referencia para automatizar integraciones y despliegues.",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  },
+];
+
+const CURSOS: ICourse[] = [
   {
     _id: "course-1" as any,
     title: "Diseño de Interfaces Web",
@@ -14,46 +180,10 @@ const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
     ownerId: "seed" as any,
     teachers: [],
     status: "active",
-    subjectIds: [],
+    subjectIds: ["general" as any, "tema-1" as any, "tema-2" as any],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    // Para UIPreview: estructura mock de materias (sin guarda en BD)
-    subjects: [
-      {
-        _id: "general" as any,
-        courseId: "course-1" as any,
-        title: "General",
-        description: "Información general y avisos del curso.",
-        order: 0,
-        taskIds: [],
-        unitIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        _id: "tema-1" as any,
-        courseId: "course-1" as any,
-        title: "Tema 1: Fundamentos UX",
-        description: "Introducción a la experiencia de usuario.",
-        order: 1,
-        taskIds: [],
-        unitIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        _id: "tema-2" as any,
-        courseId: "course-1" as any,
-        title: "Tema 2: Tipografía y Color",
-        description: "Uso del color y tipografía en interfaces.",
-        order: 2,
-        taskIds: [],
-        unitIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    ]
   },
   {
     _id: "course-2" as any,
@@ -62,34 +192,10 @@ const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
     ownerId: "seed" as any,
     teachers: [],
     status: "active",
-    subjectIds: [],
+    subjectIds: ["info-gen-2" as any, "tema-1-c2" as any],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    subjects: [
-      {
-        _id: "info-gen-2" as any,
-        courseId: "course-2" as any,
-        title: "Información General",
-        description: "Recursos básicos para el despliegue.",
-        order: 0,
-        taskIds: [],
-        unitIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        _id: "tema-1-c2" as any,
-        courseId: "course-2" as any,
-        title: "Tema 1: Repositorios y Git",
-        description: "Flujo de trabajo con Git para despliegues.",
-        order: 1,
-        taskIds: [],
-        unitIds: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      }
-    ]
   },
   {
     _id: "course-3" as any,
@@ -102,7 +208,6 @@ const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    subjects: []
   },
   {
     _id: "course-4" as any,
@@ -115,7 +220,6 @@ const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    subjects: []
   },
   {
     _id: "course-5" as any,
@@ -128,7 +232,6 @@ const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    subjects: []
   },
   {
     _id: "course-6" as any,
@@ -141,9 +244,26 @@ const CURSOS: (ICourse & { subjects?: ISubject[] })[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
-    subjects: []
-  }
+  },
 ];
+
+const buildSeedSubjects = (courseId: string): SeedSubject[] => {
+  return SEED_SUBJECTS.filter((subject) => sameId(subject.courseId, courseId))
+    .sort((left, right) => left.order - right.order)
+    .map((subject) => ({
+      ...subject,
+      units: SEED_UNITS.filter((unit) => sameId(unit.subjectId, subject._id) && sameId(unit.courseId, courseId))
+        .sort((left, right) => left.order - right.order)
+        .map((unit) => ({
+          ...unit,
+          resources: SEED_RESOURCES.filter((resource) => sameId(resource.unitId, unit._id) && sameId(resource.courseId, courseId)),
+        })),
+    }));
+};
+
+export const getSeedCourseStructure = (courseId: string): SeedCourseStructure => ({
+  subjects: buildSeedSubjects(courseId),
+});
 const MENSAJES = [
   {
     id: "mensaje-1",
@@ -240,4 +360,4 @@ const PARTICIPANTES = [
 ];
 
 // Export mock data for UI
-export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO, PARTICIPANTES };
+export { CURSOS, MENSAJES, NOTIFICACIONES, USUARIO, PARTICIPANTES, SEED_SUBJECTS, SEED_UNITS, SEED_RESOURCES };

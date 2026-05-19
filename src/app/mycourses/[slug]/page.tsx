@@ -1,6 +1,6 @@
 // Muestra la pagina de cursos segun el slug (busca en MongoDB y en seed como fallback)
 
-import { CURSOS } from "@/seed/data";
+import { CURSOS, getSeedCourseStructure } from "@/seed/data";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
@@ -32,8 +32,8 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
       const seedCourse = CURSOS.find(c => String(c._id) == slug);
       if (seedCourse) {
         curso = seedCourse;
-        // Para seed data, usar la estructura embebida
-        courseStructure = { subjects: seedCourse.subjects || [] };
+        // Para seed data, usar la estructura normalizada con units y resources hidratados
+        courseStructure = getSeedCourseStructure(slug);
       }
     }
 
@@ -46,7 +46,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     const seedCourse = CURSOS.find(c => String(c._id) == slug);
     if (seedCourse) {
       curso = seedCourse;
-      courseStructure = { subjects: seedCourse.subjects || [] };
+      courseStructure = getSeedCourseStructure(slug);
     }
     //return redirect("/mycourses");
   }

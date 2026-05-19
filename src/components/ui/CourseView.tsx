@@ -23,7 +23,7 @@ interface CourseViewProps {
 
 export default function CourseView({ courseData, courseStructure, isTeacher }: CourseViewProps) {
     const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
-    
+
     const subjects = courseStructure?.subjects || [];
 
     return (
