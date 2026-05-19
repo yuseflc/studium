@@ -27,16 +27,16 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
     });
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+        <div className="space-y-8">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                 {sortedParticipants.map((p) => (
                     <div 
                         key={p.id} 
-                        className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-1 group cursor-pointer aspect-square flex items-center justify-center"
+                        className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-0 group cursor-pointer aspect-square flex items-center justify-center"
                     >
-                        <div className="flex flex-col items-center text-center gap-1 w-full p-1">
+                        <div className="flex flex-col items-center text-center gap-1 w-full p-0">
                             <div className="avatar">
-                                <div className="rounded-full h-20 w-20 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
+                                <div className="rounded-full h-18 w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
                                     {p.avatar ? (
                                         <img src={p.avatar} alt={`${p.nombre} ${p.apellidos}`} className="object-cover" />
                                     ) : (
@@ -46,10 +46,10 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
                             </div>
                             
                             <div className="space-y-0 w-full px-1">
-                                <div className="font-bold text-md text-base-content/90 leading-tight line-clamp-2 active:overflow-visible group-hover:text-primary transition-colors">
+                                <div className="font-bold text-sm text-base-content/90 leading-tight line-clamp-2 active:overflow-visible group-hover:text-primary transition-colors">
                                     {p.nombre} {p.apellidos}
                                 </div>
-                                <div className="text-sm text-base-content/50 lowercase truncate mt-0.5">
+                                <div className="text-xs text-base-content/50 lowercase truncate mt-0.5">
                                     {p.email}
                                 </div>
                                 <div className="pt-1 flex justify-center">
