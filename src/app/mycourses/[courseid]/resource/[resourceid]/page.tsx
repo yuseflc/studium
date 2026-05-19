@@ -33,7 +33,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ resou
   return (
     <div className="min-h-[70vh]">
       <div className="max-w-8xl mx-auto">
-        <CourseView courseData={resource} isTeacher={isTeacher} />
+        <CourseView courseData={resource} isTeacher={isTeacher} courseStructure={null} />
       </div>
     </div>
   );
@@ -41,7 +41,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ resou
   return (
     <><div className="min-h-[70vh]">
           <div className="max-w-8xl mx-auto">
-              <CourseView courseData={resource} isTeacher={isTeacher} />
+              <CourseView courseData={resource} isTeacher={isTeacher} courseStructure={null} />
           </div>
       </div><h1>
               Recurso: {resourceid}
