@@ -1,108 +1,17 @@
 import mongoose from "mongoose";
 
-export interface IResource {
-  _id?: mongoose.Types.ObjectId;
-  title: string;
-  type: "link" | "file" | "text";
-  url?: string;
-  description?: string;
-}
-
-export interface IUnit {
-  _id?: mongoose.Types.ObjectId;
-  title: string;
-  content: string;
-  order: number;
-  resources?: IResource[];
-}
-
-export interface ISubject {
-  _id?: mongoose.Types.ObjectId;
-  title: string;
-  description?: string;
-  order: number;
-  units: IUnit[];
-  taskIds: mongoose.Types.ObjectId[]; // Referencia a las IDs de las tareas asociadas a esta materia
-}
-
 export interface ICourse {
   _id?: mongoose.Types.ObjectId;
   title: string;
   description?: string;
-  ownerId: mongoose.Types.ObjectId; // Profesor / admin que lo haya creado (ID del usuario)
-  teachers: mongoose.Types.ObjectId[]; // IDs de los profesores asociados al curso (además del owner)
+  ownerId: mongoose.Types.ObjectId; // Profesor / admin que lo haya creado
+  teachers: mongoose.Types.ObjectId[]; // IDs de otros profesores asociados al curso
   status: "draft" | "active" | "archived";
-  subjects: ISubject[];
+  subjectIds: mongoose.Types.ObjectId[]; // Referencias a las materias del curso
   enrolledStudents: mongoose.Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
 }
-
-const ResourceSchema = new mongoose.Schema<IResource>(
-  {
-    title: {
-      type: String,
-      required: [true, "El nombre del recurso es requerido"],
-      trim: true,
-    },
-    type: {
-      type: String,
-      enum: ["link", "file", "text"],
-      required: true,
-    },
-    url: String,
-    description: String,
-  },
-  { _id: true }
-);
-
-const UnitSchema = new mongoose.Schema<IUnit>(
-  {
-    title: {
-      type: String,
-      required: [true, "El título de la unidad es requerido"],
-      trim: true,
-    },
-    content: {
-      type: String,
-      required: [true, "El contenido de la unidad es requerido"],
-    },
-    order: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    resources: [ResourceSchema],
-  },
-  { _id: true }
-);
-
-const SubjectSchema = new mongoose.Schema<ISubject>(
-  {
-    title: {
-      type: String,
-      required: [true, "El título de la materia es requerido"],
-      trim: true,
-    },
-    description: String,
-    order: {
-      type: Number,
-      required: true,
-      default: 0,
-    },
-    units: {
-      type: [UnitSchema],
-      default: [],
-    },
-    taskIds: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Task",
-      },
-    ],
-  },
-  { _id: true }
-);
 
 const CourseSchema = new mongoose.Schema<ICourse>(
   {
@@ -132,10 +41,12 @@ const CourseSchema = new mongoose.Schema<ICourse>(
       enum: ["draft", "active", "archived"],
       default: "draft",
     },
-    subjects: {
-      type: [SubjectSchema],
-      default: [],
-    },
+    subjectIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Subject",
+      },
+    ],
     enrolledStudents: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -156,7 +67,7 @@ CourseSchema.virtual('enrollmentCount').get(function () {
 // Habilita la inclusión de campos virtuales al convertir a JSON
 CourseSchema.set('toJSON', { virtuals: true });
 
-// Indices para optimizar consultas comunes
+// Índices para optimizar consultas comunes
 CourseSchema.index({ ownerId: 1 });
 CourseSchema.index({ teachers: 1 });
 CourseSchema.index({ status: 1 });

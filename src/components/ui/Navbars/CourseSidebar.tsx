@@ -1,15 +1,24 @@
 "use client";
 import { CheckSquare, ChevronRight, Circle } from "lucide-react";
 import { motion } from "framer-motion";
-import { ISubject } from "@/models/Course";
+import { ISubject } from "@/models/Subject";
+import { IUnit } from "@/models/Unit";
+import { IResource } from "@/models/Resource";
 
+/**
+ * Tipo para Subject con units pobladas
+ */
+interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
+  units?: (IUnit & { resources?: IResource[] })[];
+  unitIds?: any[];
+}
 
 /**
  * Props del componente Sidebar
  */
 interface CourseSidebarProps {
     isTeacher: boolean; // Indica si el usuario actual es profesor
-    subjects: ISubject[]; // Lista de materias a mostrar
+    subjects: ISubjectWithUnits[]; // Lista de materias a mostrar
 }
 
 export default function CourseSidebar({ isTeacher, subjects }: CourseSidebarProps) {

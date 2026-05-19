@@ -1,0 +1,543 @@
+{
+  "info": {
+    "name": "Studium Backend - API Completa",
+    "description": "Colección completa de API para Studium con todas las rutas organizadas por recurso",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🔐 Autenticación",
+      "item": [
+        {
+          "name": "Registrarse",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/signup",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"nuevoestudiante@ejemplo.com\", \"firstName\": \"Juan\", \"password\": \"SecurePass123\", \"captchaToken\": \"token_opcional\"}"
+            }
+          }
+        },
+        {
+          "name": "Iniciar Sesión",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/callback/credentials",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\": \"usuario@ejemplo.com\", \"password\": \"contraseña123\"}"
+            }
+          }
+        },
+        {
+          "name": "Obtener Sesión",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/auth/session"
+          }
+        },
+        {
+          "name": "Cerrar Sesión",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/signout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Cursos",
+      "item": [
+        {
+          "name": "Listar Cursos",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/courses?page=1&limit=20",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        },
+        {
+          "name": "Crear Curso",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/courses",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\": \"Introducción al Desarrollo Web\", \"description\": \"Aprende HTML, CSS y JavaScript\", \"status\": \"borrador\"}"
+            }
+          }
+        },
+        {
+          "name": "[id] Curso por ID",
+          "item": [
+            {
+              "name": "Obtener Detalles del Curso",
+              "request": {
+                "method": "GET",
+                "url": "{{base_url}}/api/courses/{{course_id}}"
+              }
+            },
+            {
+              "name": "Actualizar Curso",
+              "request": {
+                "method": "PATCH",
+                "url": "{{base_url}}/api/courses/{{course_id}}",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"title\": \"Título del Curso Actualizado\", \"description\": \"Descripción actualizada\", \"status\": \"activo\"}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar Curso",
+              "request": {
+                "method": "DELETE",
+                "url": "{{base_url}}/api/courses/{{course_id}}",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "Inscribir Estudiante",
+              "request": {
+                "method": "POST",
+                "url": "{{base_url}}/api/courses/{{course_id}}/enroll",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"studentId\": \"id_del_estudiante\"}"
+                }
+              }
+            },
+            {
+              "name": "[teachers] Gestión de Profesores",
+              "item": [
+                {
+                  "name": "Agregar Profesor",
+                  "request": {
+                    "method": "POST",
+                    "url": "{{base_url}}/api/courses/{{course_id}}/teachers",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"teacherId\": \"id_del_profesor\"}"
+                    }
+                  }
+                },
+                {
+                  "name": "Eliminar Profesor",
+                  "request": {
+                    "method": "DELETE",
+                    "url": "{{base_url}}/api/courses/{{course_id}}/teachers",
+                    "header": [
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\"teacherId\": \"id_del_profesor\"}"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🎓 Materias",
+      "item": [
+        {
+          "name": "Crear Materia",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/subjects",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"courseId\": \"id_del_curso\", \"title\": \"Introducción\", \"description\": \"Conceptos básicos\", \"order\": 1}"
+            }
+          }
+        },
+        {
+          "name": "[id] Materia por ID",
+          "item": [
+            {
+              "name": "Obtener Materia",
+              "request": {
+                "method": "GET",
+                "url": "{{base_url}}/api/subjects/{{subject_id}}"
+              }
+            },
+            {
+              "name": "Actualizar Materia",
+              "request": {
+                "method": "PATCH",
+                "url": "{{base_url}}/api/subjects/{{subject_id}}",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"title\": \"Título Actualizado\", \"description\": \"Descripción actualizada\", \"order\": 2}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar Materia",
+              "request": {
+                "method": "DELETE",
+                "url": "{{base_url}}/api/subjects/{{subject_id}}",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📖 Unidades",
+      "item": [
+        {
+          "name": "Crear Unidad",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/units",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"subjectId\": \"id_de_la_materia\", \"title\": \"Unidad 1: Fundamentos\", \"content\": \"Contenido detallado aquí\", \"order\": 1}"
+            }
+          }
+        },
+        {
+          "name": "[id] Unidad por ID",
+          "item": [
+            {
+              "name": "Obtener Unidad",
+              "request": {
+                "method": "GET",
+                "url": "{{base_url}}/api/units/{{unit_id}}"
+              }
+            },
+            {
+              "name": "Actualizar Unidad",
+              "request": {
+                "method": "PATCH",
+                "url": "{{base_url}}/api/units/{{unit_id}}",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"title\": \"Título de Unidad Actualizado\", \"content\": \"Contenido actualizado\", \"order\": 2}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar Unidad",
+              "request": {
+                "method": "DELETE",
+                "url": "{{base_url}}/api/units/{{unit_id}}",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📄 Recursos",
+      "item": [
+        {
+          "name": "Crear Recurso",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/resources",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"unitId\": \"id_de_la_unidad\", \"title\": \"Video de Introducción\", \"type\": \"link\", \"url\": \"https://ejemplo.com/video\", \"description\": \"Video introductorio sobre este tema\"}"
+            }
+          }
+        },
+        {
+          "name": "[id] Recurso por ID",
+          "item": [
+            {
+              "name": "Obtener Recurso",
+              "request": {
+                "method": "GET",
+                "url": "{{base_url}}/api/resources/{{resource_id}}"
+              }
+            },
+            {
+              "name": "Actualizar Recurso",
+              "request": {
+                "method": "PATCH",
+                "url": "{{base_url}}/api/resources/{{resource_id}}",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"title\": \"Título Actualizado\", \"url\": \"https://ejemplo.com/actualizado\", \"description\": \"Descripción actualizada\"}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar Recurso",
+              "request": {
+                "method": "DELETE",
+                "url": "{{base_url}}/api/resources/{{resource_id}}",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📋 Tareas y Entregas",
+      "item": [
+        {
+          "name": "Crear Tarea",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/tasks",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"subjectId\": \"id_de_la_materia\", \"title\": \"Ejercicio 1\", \"description\": \"Completa el ejercicio\", \"order\": 1}"
+            }
+          }
+        },
+        {
+          "name": "[id] Tarea por ID",
+          "item": [
+            {
+              "name": "Obtener Tarea",
+              "request": {
+                "method": "GET",
+                "url": "{{base_url}}/api/tasks/{{task_id}}"
+              }
+            },
+            {
+              "name": "Actualizar Tarea",
+              "request": {
+                "method": "PATCH",
+                "url": "{{base_url}}/api/tasks/{{task_id}}",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"title\": \"Tarea Actualizada\", \"description\": \"Descripción actualizada\", \"order\": 2}"
+                }
+              }
+            },
+            {
+              "name": "Eliminar Tarea",
+              "request": {
+                "method": "DELETE",
+                "url": "{{base_url}}/api/tasks/{{task_id}}",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{auth_token}}"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "URL base para las peticiones de la API"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string",
+      "description": "Token de autorización obtenido al iniciar sesión"
+    },
+    {
+      "key": "course_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId de MongoDB de un curso"
+    },
+    {
+      "key": "subject_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId de MongoDB de una materia"
+    },
+    {
+      "key": "unit_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId de MongoDB de una unidad"
+    },
+    {
+      "key": "resource_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId de MongoDB de un recurso"
+    },
+    {
+      "key": "task_id",
+      "value": "",
+      "type": "string",
+      "description": "ObjectId de MongoDB de una tarea"
+    }
+  ]
+}

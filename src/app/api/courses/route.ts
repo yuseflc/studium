@@ -78,7 +78,7 @@ export const GET = withErrorHandling(
     const [total, courses] = await Promise.all([
       Course.countDocuments(filter),
       Course.find(filter)
-        .select('-subjects')
+        .select('-subjectIds')
         .limit(limit)
         .skip(skip)
         .sort({ createdAt: -1 })
@@ -169,10 +169,8 @@ export const POST = withErrorHandling(
       status,
       ownerId: userId,
       teachers: [],
-      subjects: [],
+      subjectIds: [],
       enrolledStudents: [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     await newCourse.save();

@@ -13,18 +13,22 @@ import CourseParticipants from "./CourseParticipants";
 import CreateTaskModal from "./CreateTaskModal";
 import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
+import { ISubject } from "@/models/Subject";
 
 interface CourseViewProps {
     courseData: ICourse | null;
+    courseStructure: { subjects?: ISubject[] } | null;
     isTeacher: boolean;
 }
 
-export default function CourseView({ courseData , isTeacher }: CourseViewProps) {
+export default function CourseView({ courseData, courseStructure, isTeacher }: CourseViewProps) {
     const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
+    
+    const subjects = courseStructure?.subjects || [];
 
     return (
         <div className="flex flex-col lg:flex-row">
-            <CourseSidebar isTeacher={isTeacher} subjects={courseData?.subjects || []} />
+            <CourseSidebar isTeacher={isTeacher} subjects={subjects} />
 
             <main className="flex-1 p-6 lg:p-8">
                 <div className="max-w-8xl mx-auto">
@@ -86,7 +90,7 @@ export default function CourseView({ courseData , isTeacher }: CourseViewProps) 
                     {/* Vistas Renderizadas */}
                     <div className="space-y-6">
                         {activeTab === "content" && (
-                            <CourseContent subjects={courseData?.subjects || []} />
+                            <CourseContent subjects={subjects} />
                         )}
 
                         {activeTab === "participants" && (

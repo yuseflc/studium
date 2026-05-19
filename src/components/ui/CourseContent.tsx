@@ -10,13 +10,23 @@ import {
   GraduationCap,
   ChevronDown
 } from "lucide-react";
-import { IResource, ISubject } from "@/models/Course";
+import { ISubject } from "@/models/Subject";
+import { IUnit } from "@/models/Unit";
+import { IResource } from "@/models/Resource";
+
+/**
+ * Tipo para Subject con units pobladas (estructura retornada por getCourseFullStructure)
+ */
+interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
+  units?: (IUnit & { resources?: IResource[] })[];
+  unitIds?: any[];
+}
 
 /**
  * Propiedades del componente CourseContent
  */
 interface CourseContentProps {
-  subjects: ISubject[];
+  subjects: ISubjectWithUnits[];
 }
 
 export default function CourseContent({ subjects }: CourseContentProps) {

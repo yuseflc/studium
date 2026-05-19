@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
 import { User, Course } from "@/models/index";
+import { getCourseFullStructure } from "@/lib/api/course-helpers";
 import { notFound, redirect } from "next/navigation";
 import CourseView from "@/components/ui/CourseView";
 import { ICourse } from "@/models/Course";
@@ -16,16 +17,23 @@ export const dynamic = "force-dynamic"; // Forzar que esta página sea renderiza
 export default async function MyCoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   var curso: ICourse | null = null;
+  var courseStructure: any = null;
 
   try {
     await connectDB();
     // Busca por _id (si el slug es un ObjectId de MongoDB)
     curso = await Course.findById(slug).lean();
-    // Si no encuentra en DB, intenta buscar en el seed por ID
-    if (!curso) {
+    
+    // Si encontró el curso, obtener su estructura completa
+    if (curso) {
+      courseStructure = await getCourseFullStructure(slug);
+    } else {
+      // Si no encuentra en DB, intenta buscar en el seed por ID
       const seedCourse = CURSOS.find(c => String(c._id) == slug);
       if (seedCourse) {
         curso = seedCourse;
+        // Para seed data, usar la estructura embebida
+        courseStructure = { subjects: seedCourse.subjects || [] };
       }
     }
 
@@ -38,6 +46,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     const seedCourse = CURSOS.find(c => String(c._id) == slug);
     if (seedCourse) {
       curso = seedCourse;
+      courseStructure = { subjects: seedCourse.subjects || [] };
     }
     //return redirect("/mycourses");
   }
@@ -61,7 +70,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
   return (
     <div className="min-h-[70vh]">
       <div className="max-w-8xl mx-auto">
-        <CourseView courseData={curso} isTeacher={isTeacher} />
+        <CourseView courseData={curso} courseStructure={courseStructure} isTeacher={isTeacher} />
       </div>
     </div>
   );

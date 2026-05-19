@@ -15,6 +15,7 @@ import {
 import { updateCourseSchema, type UpdateCourseInput } from '@/lib/validators/validators';
 import { extractUserId } from '@/lib/api/auth-helpers';
 import { withErrorHandlingParams } from '@/lib/api/middleware';
+import { getCourseFullStructure } from '@/lib/api/course-helpers';
 import mongoose from 'mongoose';
 
 /**
@@ -38,6 +39,14 @@ export const GET = withErrorHandlingParams<{ id: string }>(
 
     await connectDB();
 
+    // Obtener curso con estructura completa (materias, unidades, recursos)
+    const courseFullStructure = await getCourseFullStructure(id);
+
+    if (!courseFullStructure) {
+      return notFoundResponse('Curso', requestId);
+    }
+
+    // También obtener datos del propietario y otros detalles
     const course = await Course.findById(id)
       .populate('ownerId', 'email firstName')
       .populate('teachers', 'email firstName')
@@ -58,7 +67,7 @@ export const GET = withErrorHandlingParams<{ id: string }>(
         owner: course.ownerId,
         teachers: course.teachers,
         enrolledStudents: course.enrolledStudents,
-        subjects: course.subjects,
+        structure: courseFullStructure,
         enrollmentCount: course.enrolledStudents?.length || 0,
         createdAt: course.createdAt,
         updatedAt: course.updatedAt,
