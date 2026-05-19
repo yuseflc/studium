@@ -20,10 +20,22 @@ export default async function CourseNavbar() {
     }
 
     const cursosDisponibles = [
-        "Diseño de Interfaces Web", "Despliegue de Aplicaciones web",
-        "Desarrollo Web en Entorno Cliente", "Desarrollo Web en Entorno Servidor",
-        "Shell Script", "Digitalización"
+        "Diseño de Interfaces Web",
+        "Despliegue de Aplicaciones web",
+        "Desarrollo Web en Entorno Cliente",
+        "Desarrollo Web en Entorno Servidor",
+        "Shell Script",
+        "Digitalización"
     ];
+
+    const cursoRoutes: Record<string, string> = {
+        "Diseño de Interfaces Web": "/course/diseno-interfaces-web",
+        "Despliegue de Aplicaciones web": "/course/despliegue-aplicaciones-web",
+        "Desarrollo Web en Entorno Cliente": "/course/dwec",
+        "Desarrollo Web en Entorno Servidor": "/course/dwes",
+        "Shell Script": "/course/shell-script",
+        "Digitalización": "/course/digitalizacion"
+    };
 
     return (
         <header className="sticky top-0 z-[100] w-full">
@@ -33,21 +45,23 @@ export default async function CourseNavbar() {
                         Studium
                     </a>
                 </div>
+
                 <div className="flex flex-row gap-3 items-center">
                     <div className="hidden md:block">
                         <ThemeSwitcher />
                     </div>
 
+                    {/* Notificaciones */}
                     <div className="dropdown dropdown-end">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
                             <div className="indicator">
                                 <IconBell stroke={2} />
-                                <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">{NOTIFICACIONES.length}</span>
+                                <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">
+                                    {NOTIFICACIONES.length}
+                                </span>
                             </div>
                         </div>
-                        <div
-                            tabIndex={0}
-                            className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
+                        <div tabIndex={0} className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
                             <div className="card-body p-4">
                                 <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">Notificaciones</h3>
                                 <div className="flex flex-col max-h-96 overflow-y-auto py-2">
@@ -81,16 +95,17 @@ export default async function CourseNavbar() {
                         </div>
                     </div>
 
+                    {/* Mensajes */}
                     <div className="dropdown dropdown-end">
                         <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
                             <div className="indicator">
                                 <IconMessageCircle stroke={2} />
-                                <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">{MENSAJES.length}</span>
+                                <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">
+                                    {MENSAJES.length}
+                                </span>
                             </div>
                         </div>
-                        <div
-                            tabIndex={0}
-                            className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
+                        <div tabIndex={0} className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
                             <div className="card-body p-4">
                                 <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">Mensajes</h3>
                                 <div className="flex flex-col gap-1 max-h-96 overflow-y-auto py-2">
@@ -131,6 +146,7 @@ export default async function CourseNavbar() {
                         </div>
                     </div>
 
+                    {/* Perfil */}
                     <div className="hidden md:block">
                         <div className="dropdown dropdown-end text-base-content">
                             <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
@@ -142,9 +158,7 @@ export default async function CourseNavbar() {
                                     />
                                 </div>
                             </div>
-                            <ul
-                                tabIndex={-1}
-                                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow border border-base-300">
+                            <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow border border-base-300">
                                 <p className="px-4 py-2 text-sm font-medium text-base-content text-center">
                                     {user?.firstName}
                                 </p>
@@ -165,70 +179,97 @@ export default async function CourseNavbar() {
                 </div>
             </div>
 
-            {/* --- DRAWER SISTEMA (Mobile Menu) --- */}
+            {/* DRAWER SISTEMA */}
             <div className="drawer drawer-end fixed top-16 left-0 w-full h-[calc(100vh-64px)] pointer-events-none">
                 <input id="mobile-menu-drawer" type="checkbox" className="drawer-toggle" />
+
                 <div className="drawer-side h-full overflow-hidden pointer-events-auto">
-                    <label htmlFor="mobile-menu-drawer" aria-label="close sidebar" className="drawer-overlay"></label>
-                    
-                    {/* Contenedor con altura fija y scroll */}
-                    <div className="w-80 h-full bg-base-100 text-base-content shadow-2xl border-l border-base-300 flex flex-col overflow-y-auto overflow-x-hidden">
-                        
-                        {/* Contenido interno con padding y margen inferior para asegurar scroll */}
-                        <div className="flex-1 p-4 pb-20">
-                            {/* 1. Usuario */}
-                            <div className="flex flex-col items-center py-8 border-b border-base-200">
-                                <div className="avatar mb-4">
-                                    <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
-                                        <ProfileImage
-                                            src={user?.profile.profilePicture}
-                                            alt={user?.firstName || "Profile"}
-                                            className="w-full h-full object-cover rounded-full"
-                                        />
-                                    </div>
-                                </div>
-                                <span className="font-bold text-xl mb-6">{user?.firstName || "Usuario"}</span>
-                                <ul className="w-full menu menu-vertical gap-1 p-0 text-base">
-                                    <li><a href="/account/profile" className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">Profile</a></li>
-                                    <li><a className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">Settings</a></li>
-                                    <li>
-                                        <div className="justify-start py-3 px-6 w-full text-error font-bold active:bg-error/10 rounded-xl transition-colors cursor-pointer">
-                                            <LogoutButton />
+                    {/* Overlay con fade suave */}
+                    <label
+                        htmlFor="mobile-menu-drawer"
+                        aria-label="close sidebar"
+                        className="drawer-overlay bg-black/30 backdrop-blur-sm transition-opacity duration-300"
+                    ></label>
+
+                    {/* Panel lateral: DaisyUI ya gestiona translate-x, solo añadimos transición */}
+                    <div className="w-80 h-full bg-base-100 text-base-content shadow-2xl border-l border-base-300 flex flex-col overflow-y-auto overflow-x-hidden transition-transform duration-300 ease-out">
+                        <div className="flex-1 p-4 pb-20 space-y-8">
+                            {/* 1. Usuario (ligero slide/fade al montar) */}
+                            <div className="animate-[fadeInUp_0.35s_ease-out]">
+                                <div className="flex flex-col items-center py-8 border-b border-base-200">
+                                    <div className="avatar mb-4">
+                                        <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
+                                            <ProfileImage
+                                                src={user?.profile.profilePicture}
+                                                alt={user?.firstName || 'Profile'}
+                                                className="w-full h-full object-cover rounded-full"
+                                            />
                                         </div>
-                                    </li>
-                                </ul>
+                                    </div>
+                                    <span className="font-bold text-xl mb-6">{user?.firstName || "Usuario"}</span>
+
+                                    <ul className="w-full menu menu-vertical gap-1 p-0 text-base">
+                                        <li>
+                                            <a
+                                                href="/account/profile"
+                                                className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors"
+                                            >
+                                                Profile
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">
+                                                Settings
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <div className="justify-start py-3 px-6 w-full text-error font-bold active:bg-error/10 rounded-xl transition-colors cursor-pointer">
+                                                <LogoutButton />
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
 
-                            {/* 2. Cursos Acordeón */}
-                            <div className="py-4 border-b border-base-200">
-                                <div className="collapse collapse-arrow">
-                                    <input type="checkbox" />
-                                    <div className="collapse-title font-extrabold text-base text-base-content tracking-tight uppercase">
-                                        CURSOS DISPONIBLES
-                                    </div>
-                                    <div className="collapse-content p-0 text-base">
-                                        <ul className="menu menu-md w-full gap-1">
-                                            {cursosDisponibles.map((curso, idx) => (
-                                                <li key={idx}>
-                                                    <a className="py-2.5 px-4 text-base-content/80 font-medium active:bg-base-300 rounded-lg transition-all">
-                                                        {curso}
-                                                    </a>
-                                                </li>
-                                            ))}
-                                        </ul>
+                            {/* 2. Cursos */}
+                            <div className="animate-[fadeInUp_0.35s_ease-out_0.08s_both]">
+                                <div className="py-4 border-b border-base-200">
+                                    <div className="collapse collapse-arrow">
+                                        <input type="checkbox" />
+                                        <div className="collapse-title font-extrabold text-base text-base-content tracking-tight uppercase">
+                                            CURSOS DISPONIBLES
+                                        </div>
+
+                                        <div className="collapse-content p-0 text-base">
+                                            <ul className="menu menu-md w-full gap-1">
+                                                {cursosDisponibles.map((curso, idx) => (
+                                                    <li key={idx}>
+                                                        <a
+                                                            href={cursoRoutes[curso]}
+                                                            className="py-2.5 px-4 text-base-content/80 font-medium active:bg-base-300 rounded-lg transition-all"
+                                                        >
+                                                            {curso}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* 3. Theme Switcher - Siempre debajo de los cursos */}
-                            <div className="py-6 flex flex-col items-center gap-3 mt-4">
-                                <span className="text-sm opacity-50 uppercase font-bold tracking-widest">Modo de pantalla</span>
-                                <ThemeSwitcher />
+                            {/* 3. Theme Switcher */}
+                            <div className="animate-[fadeInUp_0.35s_ease-out_0.16s_both]">
+                                <div className="py-6 flex flex-col items-center gap-3 mt-4">
+                                    <span className="text-sm opacity-50 uppercase font-bold tracking-widest">Modo de pantalla</span>
+                                    <ThemeSwitcher />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </header>
     );
 }
