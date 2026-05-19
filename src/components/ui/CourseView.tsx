@@ -11,7 +11,7 @@ import {
 import CourseSidebar from "./Navbars/CourseSidebar";
 import CourseContent from "./CourseContent";
 import CourseParticipants from "./CourseParticipants";
-import GradesView from "./GradesView";
+import GradesView from "./grades/GradesView";
 import CreateTaskModal from "./CreateTaskModal";
 import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
@@ -108,7 +108,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         {activeTab === "grades" && (
                             <GradesView 
                                 participants={PARTICIPANTES} 
-                                tasks={allTasks}
+                                subjects={courseData?.subjects || []}
                                 isTeacher={isTeacher}
                                 currentUserEmail={session?.user?.email || ""}
                             />
