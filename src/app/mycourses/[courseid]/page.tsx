@@ -50,7 +50,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ cours
     }
 
     if (!curso) {
-      redirect("/mycourses");
+      // No redirigir, se manejará más abajo
     }
 
   } catch (error) {
@@ -60,7 +60,6 @@ export default async function MyCoursePage({ params }: { params: Promise<{ cours
       curso = seedCourse;
       courseStructure = getSeedCourseStructure(courseid);
     }
-    //return redirect("/mycourses");
   }
 
   let isTeacher: boolean = false;
@@ -77,6 +76,19 @@ export default async function MyCoursePage({ params }: { params: Promise<{ cours
     }
   } catch (error) {
     LOGGER.error(`Error fetching user data: ${error}`);
+  }
+
+  if (!curso) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Curso no encontrado</h1>
+          <p className="text-base-content/70">
+            El curso que buscas no existe o no tienes permiso para verlo.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

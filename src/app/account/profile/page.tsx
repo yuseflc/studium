@@ -1,6 +1,8 @@
 import { USUARIO, CURSOS } from "@/seed/data";
 import { IconUser, IconMail, IconPhone, IconCalendar, IconHome, IconKey} from "@tabler/icons-react";
 
+// Página de perfil de usuario basada en datos de ejemplo del seed.
+// Mantiene la presentación limpia sin editar los datos, solo muestra el usuario y sus cursos.
 export default function ProfilePage() {
     return (
         <div className="flex flex-col items-center m-4 p-4">
@@ -8,7 +10,7 @@ export default function ProfilePage() {
                 <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 p-3 pb-0 w-full max-w-3xl">
                     <div className="avatar flex items-start">
                         <div className="w-24 rounded-full mr-7 mt-4">
-                            <img src="https://i.pravatar.cc/150?u=maria" />
+                            <img src="https://i.pravatar.cc/150?u=maria" alt={`Avatar de ${USUARIO.name}`} />
                         </div>
                         <div>
                             <h1 className="text-2xl font-bold mt-12">{USUARIO.name}</h1>
@@ -20,6 +22,7 @@ export default function ProfilePage() {
                     <div className="card-body">
                         <h2 className="badge badge-soft badge-warning badge-xl m-2 border border-primary font-bold">Detalles del Usuario</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 --font-manrope">
+                            {/* Cada campo se renderiza como entrada de solo lectura para mantener la apariencia del formulario sin editar datos. */}
                             <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
                                 <IconUser size={30} />
                                 <input type="text" placeholder={USUARIO.name} readOnly className="input input-ghost w-full" />

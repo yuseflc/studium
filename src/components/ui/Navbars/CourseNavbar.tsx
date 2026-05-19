@@ -9,10 +9,40 @@ import LogoutButton from "./LogoutButton";
 import ProfileImage from "./ProfileImage";
 import { LOGGER } from "@/config/logger";
 
+/**
+ * server-hoist-static-io: Lista de cursos disponibles hoisted a nivel de módulo.
+ * Evita redefinir el array en cada renderizado del servidor.
+ * Esta es data estática que no cambia entre requests.
+ */
+const CURSOS_DISPONIBLES = [
+    "Diseño de Interfaces Web",
+    "Despliegue de Aplicaciones web",
+    "Desarrollo Web en Entorno Cliente",
+    "Desarrollo Web en Entorno Servidor",
+    "Shell Script",
+    "Digitalización"
+];
+
+/* 
+ * Responsabilidades:
+ * 1. Obtener la sesión del usuario autenticado
+ * 2. Cargar datos del usuario desde la BD
+ * 3. Renderizar navbar con notificaciones, mensajes y perfil
+ * 4. Proporcionar menú responsive (desktop y móvil)
+ * 
+ * Estructura:
+ * - Header sticky con desktop navbar
+ * - Dropdown de notificaciones (campana)
+ * - Dropdown de mensajes (chat)
+ * - Menú de usuario (avatar)
+ * - Drawer lateral para menú móvil
+ */
 export default async function CourseNavbar() {
+    // Obtener sesión del usuario actual usando next-auth
     const session = await getServerSession(authOptions);
     let user = null;
 
+    // Si existe sesión, cargar datos completos del usuario desde MongoDB
     if (session?.user) {
         await connectDB();
         user = await User.findOne({ _id: session.user.id });
@@ -39,7 +69,13 @@ export default async function CourseNavbar() {
 
     return (
         <header className="sticky top-0 z-[100] w-full">
+            {/* 
+              rendering-hoist-jsx: Navbar principal con estructura daisyUI.
+              Sticky positioning mantiene el navbar visible al hacer scroll.
+              Backdrop-blur y bg-base-100/80 crean efecto glass-morphism.
+            */}
             <div className="navbar bg-base-100/80 backdrop-blur-md px-4 h-16 border-b border-base-300 transition-all">
+                {/* Logo/Branding - Lado izquierdo del navbar */}
                 <div className="flex-1">
                     <a className="btn btn-ghost text-xl text-base-content" href="/">
                         Studium
@@ -47,13 +83,19 @@ export default async function CourseNavbar() {
                 </div>
 
                 <div className="flex flex-row gap-3 items-center">
+                    {/* Theme Switcher - Visible solo en desktop (md:) */}
                     <div className="hidden md:block">
                         <ThemeSwitcher />
                     </div>
 
                     {/* Notificaciones */}
                     <div className="dropdown dropdown-end">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
+                        <div 
+                            tabIndex={0} 
+                            role="button" 
+                            aria-label="Abrir notificaciones"
+                            className="btn btn-ghost btn-circle text-base-content"
+                        >
                             <div className="indicator">
                                 <IconBell stroke={2} />
                                 <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">
@@ -63,16 +105,34 @@ export default async function CourseNavbar() {
                         </div>
                         <div tabIndex={0} className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
                             <div className="card-body p-4">
-                                <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">Notificaciones</h3>
+                                <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">
+                                    Notificaciones
+                                </h3>
+                                {/* 
+                                  rendering-conditional-render: Usar ternario en lugar de && para mejor claridad.
+                                  Si no hay notificaciones, mostrar mensaje. Si hay, mapear el array.
+                                */}
                                 <div className="flex flex-col max-h-96 overflow-y-auto py-2">
                                     {NOTIFICACIONES.length === 0 ? (
-                                        <p className="text-sm text-base-content/60 text-center py-4">No tienes nuevas notificaciones.</p>
+                                        <p className="text-sm text-base-content/60 text-center py-4">
+                                            No tienes nuevas notificaciones.
+                                        </p>
                                     ) : (
+                                        /* js-index-maps: Usar key={notification.id} para identificación eficiente en listas */
                                         NOTIFICACIONES.map((notification) => (
-                                            <div key={notification.id} className="group relative flex flex-col gap-1 p-1 rounded-lg transition-colors hover:bg-base-200">
+                                            <div 
+                                                key={notification.id}
+                                                className="group relative flex flex-col gap-1 p-1 rounded-lg transition-colors hover:bg-base-200"
+                                            >
                                                 <div className="flex justify-between items-start">
-                                                    <span className="text-sm font-semibold text-base-content">{notification.title}</span>
-                                                    <button className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity text-base-content">
+                                                    <span className="text-sm font-semibold text-base-content">
+                                                        {notification.title}
+                                                    </span>
+                                                    {/* Botón para cerrar notificación - Aparece al hacer hover */}
+                                                    <button 
+                                                        aria-label="Cerrar notificación"
+                                                        className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity text-base-content"
+                                                    >
                                                         <IconX size={14} />
                                                     </button>
                                                 </div>
@@ -80,14 +140,19 @@ export default async function CourseNavbar() {
                                                     {notification.description}
                                                 </p>
                                                 <div className="flex justify-end mt-2">
-                                                    <span className="text-[10px] text-base-content/50">{notification.time}</span>
+                                                    <span className="text-[10px] text-base-content/50">
+                                                        {notification.time}
+                                                    </span>
                                                 </div>
                                             </div>
                                         ))
                                     )}
                                 </div>
                                 <div className="card-actions pt-2 border-t border-base-300">
-                                    <a className="btn btn-primary btn-sm btn-block" href="/account/notifications">
+                                    <a 
+                                        className="btn btn-primary btn-sm btn-block"
+                                        href="/account/notifications"
+                                    >
                                         Ver todas
                                     </a>
                                 </div>
@@ -97,9 +162,15 @@ export default async function CourseNavbar() {
 
                     {/* Mensajes */}
                     <div className="dropdown dropdown-end">
-                        <div tabIndex={0} role="button" className="btn btn-ghost btn-circle text-base-content">
+                        <div 
+                            tabIndex={0}
+                            role="button"
+                            aria-label="Abrir mensajes"
+                            className="btn btn-ghost btn-circle text-base-content"
+                        >
                             <div className="indicator">
                                 <IconMessageCircle stroke={2} />
+                                {/* Badge rojo con contador de mensajes sin leer */}
                                 <span className="absolute top-0.5 right-0.5 grid min-h-[24px] min-w-[24px] translate-x-2/4 -translate-y-2/4 place-items-center rounded-full bg-red-600 py-1 px-1 text-xs text-white">
                                     {MENSAJES.length}
                                 </span>
@@ -107,30 +178,60 @@ export default async function CourseNavbar() {
                         </div>
                         <div tabIndex={0} className="card card-compact dropdown-content bg-base-100 z-1 mt-3 w-80 shadow-xl border border-base-300">
                             <div className="card-body p-4">
-                                <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">Mensajes</h3>
+                                <h3 className="text-lg font-bold text-base-content border-b border-base-300 pb-2">
+                                    Mensajes
+                                </h3>
+                                {/* 
+                                  rendering-conditional-render: Mostrar estado vacío o lista de mensajes.
+                                  Cada mensaje incluye avatar, nombre, contenido truncado, timestamp.
+                                */}
                                 <div className="flex flex-col gap-1 max-h-96 overflow-y-auto py-2">
                                     {MENSAJES.length === 0 ? (
-                                        <p className="text-sm text-base-content/60 text-center py-4">No tienes nuevos mensajes.</p>
+                                        <p className="text-sm text-base-content/60 text-center py-4">
+                                            No tienes nuevos mensajes.
+                                        </p>
                                     ) : (
                                         MENSAJES.map((message) => (
-                                            <div key={message.id} className="group relative flex gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer">
+                                            <div 
+                                                key={message.id}
+                                                className="group relative flex gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"
+                                            >
+                                                {/* Avatar del remitente */}
                                                 <div className="avatar">
                                                     <div className="w-10 h-10 rounded-full">
-                                                        <img src={message.avatar} alt={message.sender} />
+                                                        <img 
+                                                            src={message.avatar}
+                                                            alt={message.sender}
+                                                        />
                                                     </div>
                                                 </div>
+
+                                                {/* Contenido del mensaje */}
                                                 <div className="flex flex-col flex-1 gap-0.5">
                                                     <div className="flex justify-between items-center">
-                                                        <span className="text-sm font-semibold text-base-content">{message.sender}</span>
+                                                        <span className="text-sm font-semibold text-base-content">
+                                                            {message.sender}
+                                                        </span>
                                                     </div>
+                                                    {/* 
+                                                      line-clamp-2: Limita el contenido a 2 líneas.
+                                                      Evita que mensajes largos desborden el dropdown.
+                                                    */}
                                                     <p className="text-xs text-base-content/70 line-clamp-2 leading-snug">
                                                         {message.content}
                                                     </p>
                                                     <div className="flex justify-end mt-1">
-                                                        <span className="text-[10px] text-base-content/50">{message.time}</span>
+                                                        <span className="text-[10px] text-base-content/50">
+                                                            {message.time}
+                                                        </span>
                                                     </div>
                                                 </div>
-                                                <button className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity absolute right-1 top-1">
+
+                                                {/* Botón para cerrar/descartar mensaje */}
+                                                <button 
+                                                    aria-label="Cerrar mensaje"
+                                                    className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity absolute right-1 top-1"
+                                                >
                                                     <IconX size={12} />
                                                 </button>
                                             </div>
@@ -138,7 +239,10 @@ export default async function CourseNavbar() {
                                     )}
                                 </div>
                                 <div className="card-actions pt-2 border-t border-base-300">
-                                    <a className="btn btn-primary btn-sm btn-block" href="/messages">
+                                    <a 
+                                        className="btn btn-primary btn-sm btn-block"
+                                        href="/messages"
+                                    >
                                         Ir a mensajes
                                     </a>
                                 </div>
@@ -146,14 +250,28 @@ export default async function CourseNavbar() {
                         </div>
                     </div>
 
-                    {/* Perfil */}
+                    {/* 
+                      MENÚ DE USUARIO (Desktop)
+                      - Visible solo en pantallas medianas (md:)
+                      - Avatar clicable que abre dropdown con opciones
+                      - Opciones: Perfil, Configuración, Logout
+                    */}
                     <div className="hidden md:block">
                         <div className="dropdown dropdown-end text-base-content">
-                            <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                            <div 
+                                tabIndex={0}
+                                role="button"
+                                aria-label={`Menú de usuario - ${userFirstName}`}
+                                className="btn btn-ghost btn-circle avatar"
+                            >
                                 <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
+                                    {/* 
+                                      ProfileImage: Componente que maneja carga y errores de imagen.
+                                      userProfilePicture es una propiedad cacheada para evitar acceso repetido.
+                                    */}
                                     <ProfileImage
-                                        src={user?.profile.profilePicture}
-                                        alt={user?.firstName || "Profile"}
+                                        src={userProfilePicture}
+                                        alt={userFirstName}
                                         className="w-full h-full object-cover rounded-full"
                                     />
                                 </div>
@@ -167,13 +285,29 @@ export default async function CourseNavbar() {
                                         Profile
                                     </a>
                                 </li>
-                                <li><a>Settings</a></li>
-                                <li className="hover:bg-error/10 hover:text-error transition-colors"><LogoutButton /></li>
+                                {/* Opción de Configuración */}
+                                <li>
+                                    <a>Settings</a>
+                                </li>
+                                {/* Opción de Logout - Estilizada en rojo */}
+                                <li className="hover:bg-error/10 hover:text-error transition-colors">
+                                    <LogoutButton />
+                                </li>
                             </ul>
                         </div>
                     </div>
 
-                    <label htmlFor="mobile-menu-drawer" className="btn btn-ghost btn-circle md:hidden text-base-content">
+                    {/* 
+                      BOTÓN DE MENÚ MÓVIL
+                      - Solo visible en pantallas pequeñas (hidden md:)
+                      - Abre el drawer sidebar en mobile
+                      - Usa checkbox para toggle sin JavaScript
+                    */}
+                    <label 
+                        htmlFor="mobile-menu-drawer"
+                        className="btn btn-ghost btn-circle md:hidden text-base-content"
+                        aria-label="Abrir menú móvil"
+                    >
                         <IconMenu2 />
                     </label>
                 </div>

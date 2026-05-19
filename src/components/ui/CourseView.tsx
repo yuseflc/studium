@@ -43,7 +43,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                 <div className="max-w-8xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold mb-2">{courseData?.title || "Cargando curso..."}  {courseData?.status == "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
+                        <h1 className="text-3xl font-bold mb-2">{courseData?.title || "Cargando curso..."}  {courseData?.status === "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
                         {(courseData?.description ? <p className="text-base-content/70">{courseData.description}</p> : <p className="text-base-content/60 italic">Sin descripción disponible.</p>)}
                     </div>
 

@@ -32,8 +32,13 @@ interface CourseContentProps {
 }
 
 export default function CourseContent({ subjects }: CourseContentProps) {
+  // Controla qué materias están expandidas en la UI.
   const [openSubjects, setOpenSubjects] = useState<Record<string, boolean>>({});
 
+  /**
+   * Toggle de expansión de una materia.
+   * No muta el estado anterior, solo invierte el valor actual.
+   */
   const toggleSubject = (subjectId: string) => {
     setOpenSubjects((prev) => ({
       ...prev,
@@ -41,7 +46,12 @@ export default function CourseContent({ subjects }: CourseContentProps) {
     }));
   };
 
-  // Renderizado defensivo si no hay materias
+  // Ordenar las materias fuera del render principal para no mutar el arreglo de props.
+  const sortedSubjects = [...subjects].sort((a, b) => a.order - b.order);
+
+
+  // rendering-conditional-render: Validación defensiva al inicio (fail-fast pattern)
+  // Previene rendering de estructura vacía si no hay materias
   if (!subjects || subjects.length === 0) {
     return (
       <div className="card bg-base-100 border border-base-300 p-12 text-center">
@@ -56,12 +66,11 @@ export default function CourseContent({ subjects }: CourseContentProps) {
 
   return (
     <div className="space-y-12 py-4">
-      {/* Ordenar y mapear materias */}
-      {subjects
-        .sort((a, b) => a.order - b.order)
-        .map((subject) => {
+      {/* Ordenar por propiedad order y mapear cada materia */}
+      {sortedSubjects.map((subject) => {
           const subjectId = subject._id || subject.title;
           const isOpen = openSubjects[subjectId.toString()] !== false; // Abierto por defecto
+          const sortedUnits = subject.units ? [...subject.units].sort((a, b) => a.order - b.order) : [];
 
           return (
             <div
@@ -69,26 +78,28 @@ export default function CourseContent({ subjects }: CourseContentProps) {
               id={subjectId.toString()}
               className="scroll-mt-24"
             >
-              {/* Cabecera del Tema (Título y Línea Larga) */}
-              <div
-                className="mb-6 flex flex-col gap-2 group"
-              >
+              {/* Cabecera: Título, botón de toggle y línea decorativa */}
+              <div className="mb-6 flex flex-col gap-2 group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <h3 className="font-bold text-2xl text-base-content/90 tracking-tight">
                       {subject.title}
                     </h3>
+                    {/* Botón de toggle con animación de rotación */}
                     <motion.button
                       type="button"
                       onClick={() => toggleSubject(subjectId.toString())}
                       animate={{ rotate: isOpen ? 0 : -90 }}
                       transition={{ duration: 0.2 }}
                       className="text-base-content/30 hover:text-primary hover:bg-base-200 p-1 rounded-full transition-colors cursor-pointer flex items-center justify-center"
+                      aria-label={isOpen ? 'Contraer materia' : 'Expandir materia'}
+                      aria-expanded={isOpen}
                     >
                       <ChevronDown size={20} />
                     </motion.button>
                   </div>
                 </div>
+                {/* Línea decorativa separadora */}
                 <div className="h-0.5 w-full bg-base-200 rounded-full" />
 
                 {subject.description && (
@@ -98,7 +109,7 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                 )}
               </div>
 
-              {/* Lista vertical de tareas directamente debajo */}
+              {/* AnimatePresence + Motion: Animación suave de expansión/contracción */}
               <AnimatePresence>
                 {isOpen && (
                   <motion.div
@@ -117,13 +128,16 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                           <div
                             key={task._id.toString()}
                             className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
+                            role="button"
+                            tabIndex={0}
+                            aria-label={`Tarea: ${task.title}`}
                           >
-                            {/* Icono de Tarea - Estilo igual a otros recursos */}
+                            {/* Icono circular de tarea con color amarillo (tema del proyecto) */}
                             <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
                               <ClipboardList size={18} className="fill-yellow-600/10" />
                             </div>
 
-                            {/* Detalle de la tarea */}
+                            {/* Contenido principal: título y detalles de la tarea */}
                             <div className="flex flex-col min-w-0 flex-1">
                               <div className="flex items-center gap-2">
                                 <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
@@ -139,61 +153,67 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                               </div>
                             </div>
 
-                            {/* Botón de opciones a la derecha */}
-                            <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                            {/* Menú de opciones (visible en hover) */}
+                            <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                             </div>
                           </div>
                           );
                         })}
 
-                        {/* Renderizar Recursos de Unidades */}
-                        {subject.units
-                          .sort((a, b) => a.order - b.order)
-                          .flatMap((unit) => unit.resources || [])
-                          .map((resource : IResource) => (
-                            <div
-                              key={resource._id?.toString()}
-                              className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
-                            >
-                              {/* Icono circular a la izquierda - Color Amarillo del proyecto */}
-                              <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
-                                {resource.type === "link" && (
-                                  <StickyNote size={18} className="fill-yellow-600/10" />
-                                )}
-                                {resource.type === "file" && (
-                                  <Bookmark size={18} className="fill-yellow-600/10" />
-                                )}
-                                {resource.type === "text" && (
-                                  <GraduationCap size={18} />
-                                )}
-                                {resource.type !== "link" && resource.type !== "file" && resource.type !== "text" && (
-                                  <FileText size={18} />
-                                )}
-                              </div>
+                        {/* Sección 2: Renderizar recursos de unidades ordenados por order */}
+                        {(sortedUnits.length > 0)
+                          ? sortedUnits
+                              .flatMap((unit) => unit.resources || [])
+                              .map((resource : IResource) => (
+                                <div
+                                  key={resource._id?.toString()}
+                                  className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
+                                  role="button"
+                                  tabIndex={0}
+                                  aria-label={`Recurso: ${resource.title}`}
+                                >
+                                  {/* Icono circular según tipo de recurso (link/file/text) */}
+                                  <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
+                                    {resource.type === "link" && (
+                                      <StickyNote size={18} className="fill-yellow-600/10" />
+                                    )}
+                                    {resource.type === "file" && (
+                                      <Bookmark size={18} className="fill-yellow-600/10" />
+                                    )}
+                                    {resource.type === "text" && (
+                                      <GraduationCap size={18} />
+                                    )}
+                                    {resource.type !== "link" && resource.type !== "file" && resource.type !== "text" && (
+                                      <FileText size={18} />
+                                    )}
+                                  </div>
 
-                              {/* Detalle del recurso */}
-                              <div className="flex flex-col min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
-                                    {resource.title}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-xs text-base-content/50 truncate">
-                                    {resource.description || "Nueva tarea publicada"}
-                                  </span>
-                                </div>
-                              </div>
+                                  {/* Contenido principal: título y descripción del recurso */}
+                                  <div className="flex flex-col min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
+                                        {resource.title}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-0.5">
+                                      <span className="text-xs text-base-content/50 truncate">
+                                        {resource.description || "Nueva tarea publicada"}
+                                      </span>
+                                    </div>
+                                  </div>
 
-                              {/* Botón de opciones a la derecha */}
-                              <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                              </div>
-                            </div>
-                          ))}
+                                  {/* Menú de opciones (visible en hover) */}
+                                  <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                  </div>
+                                </div>
+                              ))
+                          : null
+                        }
                       </div>
                     ) : (
+                      // Mensaje cuando no hay contenido en la materia
                       <div className="ml-4 py-4 text-sm text-base-content/40 italic pb-4">
                         Sin recursos en este tema
                       </div>
@@ -204,6 +224,11 @@ export default function CourseContent({ subjects }: CourseContentProps) {
             </div>
           );
         })}
+
+      {/* Sección separada: Listado completo de todas las tareas del curso */}
+      <div className="pt-8 border-t border-base-300 mt-12">
+        <TasksView />
+      </div>
     </div>
   );
 }
