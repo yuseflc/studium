@@ -77,24 +77,27 @@ export default function Sidebar() {
         <div className="flex-1 overflow-y-auto p-4">
 
           <nav className="flex flex-col gap-1">
-            {CURSOS.map((curso) => (
+            {CURSOS.map((curso, index) => {
+              const courseId = curso._id?.toString() || `seed-${index}`;
+              return (
               <motion.div
-                key={curso.id}
+                key={courseId}
                 variants={itemVariants}
               >
                 <Link
-                  href={`/mycourses/${curso.id}`}
+                  href={`/mycourses/${courseId}`}
                   className="group flex items-center justify-between p-2 rounded-s hover:bg-base-300 transition-colors text-sm rounded-xl"
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-semibold max-w-[180px]">
-                      {curso.nombre}
+                      {curso.title}
                     </span>
                   </div>
                   <ChevronRight size={14} className="text-base-content/30 group-hover:text-base-content transition-colors" />
                 </Link>
               </motion.div>
-            ))}
+              );
+            })}
           </nav>
         </div>
 

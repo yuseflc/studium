@@ -15,16 +15,15 @@ export const dynamic = "force-dynamic"; // Forzar que esta página sea renderiza
 
 export default async function MyCoursePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-
+  var curso: ICourse | null = null;
 
   try {
     await connectDB();
     // Busca por _id (si el slug es un ObjectId de MongoDB)
-    var curso : ICourse | null = await Course.findById(slug).lean();
-    
+    curso = await Course.findById(slug).lean();
     // Si no encuentra en DB, intenta buscar en el seed por ID
     if (!curso) {
-      const seedCourse = CURSOS.find(c => String(c._id) === slug);
+      const seedCourse = CURSOS.find(c => String(c._id) == slug);
       if (seedCourse) {
         curso = seedCourse;
       }
@@ -35,11 +34,15 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     }
 
   } catch (error) {
-    console.error("Error fetching course from MongoDB:", error);
-    redirect("/mycourses");
+    console.error(`Curso ${slug} no encontrado en MongoDB ${error}`);
+    const seedCourse = CURSOS.find(c => String(c._id) == slug);
+    if (seedCourse) {
+      curso = seedCourse;
+    }
+    //return redirect("/mycourses");
   }
 
-  let isTeacher : boolean = false;
+  let isTeacher: boolean = false;
 
   try {
     const session = await getServerSession(authOptions);

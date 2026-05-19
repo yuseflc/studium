@@ -15,7 +15,7 @@ import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
 
 interface CourseViewProps {
-    courseData: ICourse;
+    courseData: ICourse | null;
     isTeacher: boolean;
 }
 
@@ -24,14 +24,14 @@ export default function CourseView({ courseData , isTeacher }: CourseViewProps) 
 
     return (
         <div className="flex flex-col lg:flex-row">
-            <CourseSidebar isTeacher={isTeacher} subjects={courseData.subjects || []} />
+            <CourseSidebar isTeacher={isTeacher} subjects={courseData?.subjects || []} />
 
             <main className="flex-1 p-6 lg:p-8">
                 <div className="max-w-8xl mx-auto">
                     {/* Header */}
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold mb-2">{courseData.title || "Cargando curso..."}  {courseData.status == "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
-                        {(courseData.description ? <p className="text-base-content/70">{courseData.description}</p> : <p className="text-base-content/60 italic">Sin descripción disponible.</p>)}
+                        <h1 className="text-3xl font-bold mb-2">{courseData?.title || "Cargando curso..."}  {courseData?.status == "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
+                        {(courseData?.description ? <p className="text-base-content/70">{courseData.description}</p> : <p className="text-base-content/60 italic">Sin descripción disponible.</p>)}
                     </div>
 
                     <div className="flex border-b border-base-300 mb-6 overflow-x-auto relative z-10">
