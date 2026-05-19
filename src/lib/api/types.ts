@@ -2,6 +2,43 @@
  * Tipos estandarizados para respuestas de API
  */
 
+import mongoose from "mongoose";
+import { ISubject } from "@/models/Subject";
+import { IUnit } from "@/models/Unit";
+import { IResource } from "@/models/Resource";
+import { ITask } from "@/models/Task";
+
+/**
+ * Estructura de una unidad poblada con recursos
+ */
+export interface IUnitWithResources extends Omit<IUnit, 'resourceIds'> {
+  resources?: IResource[];
+}
+
+/**
+ * Estructura de una materia poblada con unidades y tareas
+ */
+export interface ISubjectWithContent extends Omit<ISubject, 'unitIds' | 'taskIds'> {
+  units: IUnitWithResources[];
+  tasks?: ITask[];
+}
+
+/**
+ * Estructura genérica de curso que puede venir de DB o Seed
+ * Flexible para soportar ambas fuentes de datos
+ */
+export interface CourseStructureGeneric {
+  subjects?: any[];
+  _id?: string | mongoose.Types.ObjectId;
+  title?: string;
+  description?: string;
+  ownerId?: string | mongoose.Types.ObjectId;
+  status?: string;
+  enrollmentCount?: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
 /**
  * Estructura base de respuesta exitosa
  */

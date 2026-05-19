@@ -16,32 +16,78 @@ import { LOGGER } from "@/config/logger";
  */
 export async function getCourseFullStructure(courseId: string | mongoose.Types.ObjectId) {
   try {
-    // Obtener curso con materias pobladas
-    const course = await Course.findById(courseId)
-      .populate({
-        path: "subjectIds",
-        select: "_id courseId title description order unitIds taskIds",
-      })
-      .lean();
+    // Validar que courseId es válido
+    if (!courseId || !mongoose.Types.ObjectId.isValid(String(courseId))) {
+      throw new Error(`Invalid courseId: ${courseId}`);
+    }
 
-    if (!course) return null;
+    // Obtener curso básico sin populate (más confiable)
+    const course = await Course.findById(courseId).lean();
+
+    if (!course) {
+      LOGGER.warn({ courseId }, "Course not found");
+      return null;
+    }
+
+    // Obtener subjectIds de forma segura
+    const subjectIds = Array.isArray(course.subjectIds) ? course.subjectIds : [];
+
+    if (subjectIds.length === 0) {
+      LOGGER.info({ courseId }, "Course has no subjects");
+      return {
+        _id: course._id,
+        title: course.title,
+        description: course.description,
+        ownerId: course.ownerId,
+        status: course.status,
+        subjects: [],
+        enrollmentCount: (course.enrolledStudents as any[])?.length || 0,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      };
+    }
+
+    // Obtener todas las materias directamente
+    const allSubjects = await Subject.find({ _id: { $in: subjectIds } })
+      .select("_id courseId title description order unitIds taskIds")
+      .lean();
 
     // Para cada materia, obtener sus unidades pobladas con recursos
     const subjects = await Promise.all(
-      (course.subjectIds as any[]).map(async (subject: any) => {
-        const units = await Unit.find({ _id: { $in: subject.unitIds } })
-          .populate({
-            path: "resourceIds",
-            select: "_id unitId title type url description createdAt updatedAt",
-          })
-          .sort({ order: 1 })
-          .lean();
+      allSubjects.map(async (subject: any) => {
+        try {
+          // Validar que subject.unitIds existe y es un array
+          const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds : [];
 
-        return {
-          ...subject,
-          units: units, // Retornar units pobladas en lugar de unitIds
-          unitIds: subject.unitIds, // Mantener también los IDs
-        };
+          if (unitIds.length === 0) {
+            return {
+              ...subject,
+              units: [],
+              unitIds: [],
+            };
+          }
+
+          const units = await Unit.find({ _id: { $in: unitIds } })
+            .populate({
+              path: "resourceIds",
+              select: "_id unitId title type url description createdAt updatedAt",
+            })
+            .sort({ order: 1 })
+            .lean();
+
+          return {
+            ...subject,
+            units: units || [], // Retornar units pobladas en lugar de unitIds
+            unitIds: unitIds, // Mantener también los IDs
+          };
+        } catch (subjectError) {
+          LOGGER.error({ courseId, subjectId: subject._id, error: subjectError }, "Error processing subject");
+          return {
+            ...subject,
+            units: [],
+            unitIds: subject.unitIds || [],
+          };
+        }
       })
     );
 
@@ -57,8 +103,13 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
       updatedAt: course.updatedAt,
     };
   } catch (error) {
-    LOGGER.error({ courseId, error }, "Error fetching course full structure");
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    LOGGER.error(
+      { courseId, errorMessage, errorStack: error instanceof Error ? error.stack : undefined },
+      "Error fetching course full structure"
+    );
+    // Retornar null en lugar de lanzar error para que el frontend pueda manejar gracefully
+    return null;
   }
 }
 

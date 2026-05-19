@@ -9,31 +9,43 @@ import { getCourseFullStructure } from "@/lib/api/course-helpers";
 import { notFound, redirect } from "next/navigation";
 import CourseView from "@/components/ui/CourseView";
 import { ICourse } from "@/models/Course";
+import { CourseStructureGeneric } from "@/lib/api/types";
+import { LOGGER } from "@/config/logger";
 
+/**
+ * Serializa datos de MongoDB para que sean compatibles con Client Components
+ * Convierte ObjectId y otros tipos especiales a valores planos
+ */
+function serializeForClient<T>(data: T): T {
+  return JSON.parse(JSON.stringify(data));
+}
 
 export const dynamic = "force-dynamic"; // Forzar que esta página sea renderizada en cada solicitud
 
 
-export default async function MyCoursePage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  var curso: ICourse | null = null;
-  var courseStructure: any = null;
+export default async function MyCoursePage({ params }: { params: Promise<{ courseid: string }> }) {
+  const { courseid } = await params;
+  let curso: ICourse | null = null;
+  let courseStructure: CourseStructureGeneric | null = null;
 
   try {
     await connectDB();
     // Busca por _id (si el slug es un ObjectId de MongoDB)
-    curso = await Course.findById(slug).lean();
+    const rawCurso = await Course.findById(courseid).lean();
     
     // Si encontró el curso, obtener su estructura completa
-    if (curso) {
-      courseStructure = await getCourseFullStructure(slug);
+    if (rawCurso) {
+      // Serializar el curso para hacerlo compatible con Client Components
+      curso = serializeForClient(rawCurso);
+      const rawStructure = await getCourseFullStructure(courseid);
+      courseStructure = serializeForClient(rawStructure);
     } else {
       // Si no encuentra en DB, intenta buscar en el seed por ID
-      const seedCourse = CURSOS.find(c => String(c._id) == slug);
+      const seedCourse = CURSOS.find(c => String(c._id) == courseid);
       if (seedCourse) {
         curso = seedCourse;
         // Para seed data, usar la estructura normalizada con units y resources hidratados
-        courseStructure = getSeedCourseStructure(slug);
+        courseStructure = getSeedCourseStructure(courseid);
       }
     }
 
@@ -42,11 +54,11 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     }
 
   } catch (error) {
-    console.error(`Curso ${slug} no encontrado en MongoDB ${error}`);
-    const seedCourse = CURSOS.find(c => String(c._id) == slug);
+    LOGGER.error(`Curso ${courseid} no encontrado en MongoDB ${error}`);
+    const seedCourse = CURSOS.find(c => String(c._id) == courseid);
     if (seedCourse) {
       curso = seedCourse;
-      courseStructure = getSeedCourseStructure(slug);
+      courseStructure = getSeedCourseStructure(courseid);
     }
     //return redirect("/mycourses");
   }
@@ -64,7 +76,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
       }
     }
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    LOGGER.error(`Error fetching user data: ${error}`);
   }
 
   return (

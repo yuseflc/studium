@@ -14,13 +14,14 @@ import {
 import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
+import { ITask } from "@/models/Task";
 
 /**
  * Tipo para Subject con units pobladas (estructura retornada por getCourseFullStructure)
  */
 interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
-  units?: (IUnit & { resources?: IResource[] })[];
-  unitIds?: any[];
+  units: (IUnit & { resources?: IResource[] })[];
+  tasks?: ITask[];
 }
 
 /**
@@ -107,12 +108,14 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    {((subject.units && subject.units.length > 0) || ((subject as any).tasks && (subject as any).tasks.length > 0)) ? (
+                    {(subject.units.length > 0 || (subject.tasks && subject.tasks.length > 0)) ? (
                       <div className="flex flex-col gap-3 ml-2 lg:ml-4 pb-4">
                         {/* Renderizar Tareas del Subject si existen */}
-                        {(subject as any).tasks && (subject as any).tasks.map((task: any) => (
+                        {subject.tasks?.map((task: ITask) => {
+                          if (!task._id) return null;
+                          return (
                           <div
-                            key={task.id}
+                            key={task._id.toString()}
                             className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
                           >
                             {/* Icono de Tarea - Estilo igual a otros recursos */}
@@ -141,7 +144,8 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
 
                         {/* Renderizar Recursos de Unidades */}
                         {subject.units

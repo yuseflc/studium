@@ -430,7 +430,7 @@ const PARTICIPANTES = [
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
   },
   {
-    id: "p6",
+    id: "p7",
     nombre: "Pepe",
     apellidos: "Muñoz Rodríguez",
     email: "pepe.munoz@studium.com",
@@ -438,7 +438,7 @@ const PARTICIPANTES = [
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
   },
   {
-    id: "p6",
+    id: "p8",
     nombre: "Pepe",
     apellidos: "Muñoz Rodríguez",
     email: "pepe.munoz@studium.com",
@@ -446,7 +446,7 @@ const PARTICIPANTES = [
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
   },
   {
-    id: "p6",
+    id: "p9",
     nombre: "Pepe",
     apellidos: "Muñoz Rodríguez",
     email: "pepe.munoz@studium.com",
@@ -454,7 +454,7 @@ const PARTICIPANTES = [
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=original"
   },
   {
-    id: "p6",
+    id: "p10",
     nombre: "Pepe",
     apellidos: "Muñoz Rodríguez",
     email: "pepe.munoz@studium.com",

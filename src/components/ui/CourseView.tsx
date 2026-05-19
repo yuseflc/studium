@@ -16,10 +16,11 @@ import CreateTaskModal from "./CreateTaskModal";
 import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
 import { ISubject } from "@/models/Subject";
+import { CourseStructureGeneric } from "@/lib/api/types";
 
 interface CourseViewProps {
     courseData: ICourse | null;
-    courseStructure: { subjects?: ISubject[] } | null;
+    courseStructure: CourseStructureGeneric | null;
     isTeacher: boolean;
 }
 
