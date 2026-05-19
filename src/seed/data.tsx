@@ -1,68 +1,76 @@
+import { ICourse, ISubject, IUnit, IResource } from "@/models/Course";
+
 // Mock data for UI (non-MongoDB)
 // Esta constante almacena los datos de prueba de los cursos para la interfaz
-const CURSOS = [
+const CURSOS: ICourse[] = [
   {
-    id: "course-1",
-    nombre: "Diseño de Interfaces Web",
-    descripcion: "Diseña interfaces modernas y accesibles con principios de UX/UI, prototipado en Figma y CSS avanzado.",
-    imagen: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=60",
+    _id: "course-1" as any,
+    title: "Diseño de Interfaces Web",
+    description: "Diseña interfaces modernas y accesibles con principios de UX/UI, prototipado en Figma y CSS avanzado.",
+    // imagen: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=60",
+    ownerId: "seed" as any,
+    teachers: [],
+    status: "active",
+    enrolledStudents: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     // Materias/Temas que componen el curso
     subjects: [
       {
-        _id: "general",
+        _id: "general" as any,
         title: "General",
         description: "Información general y avisos del curso.",
         order: 0,
+        taskIds: [],
         // Unidades de contenido dentro de la materia
         units: [
           {
-            _id: "info-1",
+            _id: "info-1" as any,
             title: "Guía Docente",
             content: "Descarga aquí la guía docente del curso 2023/24.",
             order: 1,
             resources: [
-              { _id: "task-guia", title: "Consultar Guía Docente", type: "doc", description: "Documentación obligatoria" }
+              { _id: "task-guia" as any, title: "Consultar Guía Docente", type: "text", description: "Documentación obligatoria" }
             ]
           },
           {
-            _id: "info-2",
+            _id: "info-2" as any,
             title: "Foro de Avisos",
             content: "Consulta los últimos avisos del profesor.",
             order: 2,
             resources: [
-              { _id: "task-foro", title: "Revisar Foro de Avisos", type: "task", status: "pending", description: "Nuevas notificaciones" }
+              { _id: "task-foro" as any, title: "Revisar Foro de Avisos", type: "text", description: "Nuevas notificaciones" }
             ]
           }
         ]
       },
       {
-        _id: "tema-1",
+        _id: "tema-1" as any,
         title: "Tema 1: Fundamentos UX",
         description: "Introducción a la experiencia de usuario.",
         order: 1,
+        taskIds: [],
         units: [
           {
-            _id: "u1t1",
+            _id: "u1t1" as any,
             title: "Principios de Diseño",
             content: "Exploración de los 10 principios de Nielsen.",
             order: 1,
             resources: [
-              { _id: "res-1", title: "Guía de Principios UX", type: "link", url: "#", description: "Documentación oficial" },
-              { _id: "task-1", title: "Análisis de Interfaz", type: "task", status: "completed" },
-              { _id: "task-2", title: "Propuesta de UX", type: "task", status: "pending" },
-              { _id: "task-3", title: "Cuestionario Inicial", type: "task", status: "late" }
+              { _id: "res-1" as any, title: "Guía de Principios UX", type: "link", url: "#", description: "Documentación oficial" },
             ]
           }
         ]
       },
       {
-        _id: "tema-2",
+        _id: "tema-2" as any,
         title: "Tema 2: Tipografía y Color",
         description: "Uso del color y tipografía en interfaces.",
         order: 2,
+        taskIds: [],
         units: [
           {
-            _id: "u1t2",
+            _id: "u1t2" as any,
             title: "Psicología del Color",
             content: "Cómo afectan los colores a la percepción del usuario.",
             order: 1,
@@ -73,43 +81,47 @@ const CURSOS = [
     ]
   },
   {
-    id: "course-2",
-    nombre: "Despliegue de Aplicaciones Web",
-    descripcion: "Despliega aplicaciones con Vercel/Netlify, configura CI/CD, dominios y certificados SSL.",
-    imagen: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=60",
+    _id: "course-2" as any,
+    title: "Despliegue de Aplicaciones Web",
+    description: "Despliega aplicaciones con Vercel/Netlify, configura CI/CD, dominios y certificados SSL.",
+    // imagen: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=60",
+    ownerId: "seed" as any,
+    teachers: [],
+    status: "active",
+    enrolledStudents: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     subjects: [
       {
-        _id: "info-gen-2",
+        _id: "info-gen-2" as any,
         title: "Información General",
         description: "Recursos básicos para el despliegue.",
         order: 0,
+        taskIds: [],
         units: [
           {
-            _id: "u1g2",
+            _id: "u1g2" as any,
             title: "Planificación del despliegue",
             content: "Checklist antes de subir a producción.",
             order: 1,
-            resources: [
-              { _id: "task-plan", title: "Completar Plan de Despliegue", type: "task", status: "pending" }
-            ]
+            resources: []
           }
         ]
       },
       {
-        _id: "tema-1-c2",
+        _id: "tema-1-c2" as any,
         title: "Tema 1: Repositorios y Git",
         description: "Flujo de trabajo con Git para despliegues.",
         order: 1,
+        taskIds: [],
         units: [
           {
-            _id: "u1t1c2",
+            _id: "u1t1c2" as any,
             title: "Git Flow",
             content: "Estrategias de ramificación.",
             order: 1,
             resources: [
-              { _id: "res-u1t1c2-1", title: "Git Flow Diagram", type: "doc" },
-              { _id: "task-u1t1c2-1", title: "Configurar repositorio", type: "task", status: "completed" },
-              { _id: "exam-u1t1c2-1", title: "Examen de Git", type: "exam", description: "Evaluación tema 1" }
+              { _id: "res-u1t1c2-1" as any, title: "Git Flow Diagram", type: "text" },
             ]
           }
         ]
@@ -117,31 +129,55 @@ const CURSOS = [
     ]
   },
   {
-    id: "course-3",
-    nombre: "Desarrollo Web en Entorno Cliente",
-    descripcion: "Domina HTML, CSS, JavaScript y frameworks (React) para construir experiencias web interactivas.",
-    imagen: "https://images.unsplash.com/photo-1505685296765-3a2736de412f?auto=format&fit=crop&w=800&q=60",
+    _id: "course-3" as any,
+    title: "Desarrollo Web en Entorno Cliente",
+    description: "Domina HTML, CSS, JavaScript y frameworks (React) para construir experiencias web interactivas.",
+    // imagen: "https://images.unsplash.com/photo-1505685296765-3a2736de412f?auto=format&fit=crop&w=800&q=60",
+    ownerId: "seed" as any,
+    teachers: [],
+    status: "active",
+    enrolledStudents: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     subjects: []
   },
   {
-    id: "course-4",
-    nombre: "Desarrollo Web en Entorno Servidor",
-    descripcion: "Crea APIs y servicios con Node.js/Express, maneja bases de datos y buenas prácticas de backend.",
-    imagen: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=60",
+    _id: "course-4" as any,
+    title: "Desarrollo Web en Entorno Servidor",
+    description: "Crea APIs y servicios con Node.js/Express, maneja bases de datos y buenas prácticas de backend.",
+    // imagen: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=60",
+    ownerId: "seed" as any,
+    teachers: [],
+    status: "active",
+    enrolledStudents: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     subjects: []
   },
   {
-    id: "course-5",
-    nombre: "Shell Scripting",
-    descripcion: "Automatiza tareas en Unix/Linux usando Bash: scripting, cron, pipes y gestión de procesos.",
-    imagen: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=800&q=60",
+    _id: "course-5" as any,
+    title: "Shell Scripting",
+    description: "Automatiza tareas en Unix/Linux usando Bash: scripting, cron, pipes y gestión de procesos.",
+    // imagen: "https://images.unsplash.com/photo-1517433456452-f9633a875f6f?auto=format&fit=crop&w=800&q=60",
+    ownerId: "seed" as any,
+    teachers: [],
+    status: "active",
+    enrolledStudents: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     subjects: []
   },
   {
-    id: "course-6",
-    nombre: "Digitalización",
-    descripcion: "Aprende procesos de transformación digital, herramientas SaaS y técnicas para optimizar workflows.",
-    imagen: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=60",
+    _id: "course-6" as any,
+    title: "Digitalización",
+    description: "Aprende procesos de transformación digital, herramientas SaaS y técnicas para optimizar workflows.",
+    // imagen: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=60",
+    ownerId: "seed" as any,
+    teachers: [],
+    status: "active",
+    enrolledStudents: [],
+    createdAt: new Date(),
+    updatedAt: new Date(),
     subjects: []
   }
 ];

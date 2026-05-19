@@ -12,10 +12,15 @@ export async function seedDatabase() {
     try {
         await connectDB();
 
+        // Limpiar datos existentes (opcional, pero ayuda si quieres que use los del seed)
+        // await User.deleteMany({});
+        // await Course.deleteMany({});
+        // await Task.deleteMany({});
+
         // Check if data already exists
-        const existingUsers = await User.countDocuments();
-        if (existingUsers > 0) {
-            console.log('Database already seeded, skipping...');
+        const existingCourses = await Course.countDocuments();
+        if (existingCourses > 0) {
+            console.log('Database already has courses, skipping seed...');
             return;
         }
 

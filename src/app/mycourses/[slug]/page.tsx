@@ -22,7 +22,14 @@ export default async function MyCoursePage({ params }: { params: Promise<{ slug:
     // Busca por _id (si el slug es un ObjectId de MongoDB)
     var curso : ICourse | null = await Course.findById(slug).lean();
     
-    // Si no encuentra, intenta buscar en el seed
+    // Si no encuentra en DB, intenta buscar en el seed por ID
+    if (!curso) {
+      const seedCourse = CURSOS.find(c => String(c._id) === slug);
+      if (seedCourse) {
+        curso = seedCourse;
+      }
+    }
+
     if (!curso) {
       redirect("/mycourses");
     }
