@@ -113,4 +113,3 @@ export default function TeacherGradesView({ participants, subjects }: TeacherGra
         </div>
     );
 }
-

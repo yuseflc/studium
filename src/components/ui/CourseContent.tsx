@@ -15,6 +15,7 @@ import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
+import TasksView from "./tasks/TasksView";
 
 /**
  * Tipo para Subject con units pobladas (estructura retornada por getCourseFullStructure)
@@ -174,8 +175,7 @@ export default function CourseContent({
                               </div>
                             )}
                           </div>
-                          );
-                        })}
+                        ))}
 
                         {/* Sección 2: Renderizar recursos de unidades ordenados por order */}
                         {(sortedUnits.length > 0)
