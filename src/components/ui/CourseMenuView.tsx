@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { IconDotsVertical, IconArrowUpRight, IconTrash } from "@tabler/icons-react";
+import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";
 import { useEffect, useState } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
@@ -123,84 +123,85 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
           courses.map((c: SerializedCourse) => {
             const courseId = c._id;
             return (
-            <Link key={courseId} href={`/mycourses/${courseId}`} className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all group relative flex flex-col z-20 hover:z-30 focus-within:z-30">
-              <div className="relative">
-                <figure className="aspect-video relative overflow-hidden rounded-t-xl">
-                  <img
-                    src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=60"
-                    alt={c.title}
-                    className="w-full h-full object-cover transition-transform"
-                  />
-                  {/* Overlay para facilitar lectura del nombre */}
-                  <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+              <Link key={courseId} href={`/mycourses/${courseId}`} className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all group relative flex flex-col z-20 hover:z-30 focus-within:z-30">
+                <div className="relative">
+                  <figure className="aspect-video relative overflow-hidden rounded-t-xl">
+                    <img
+                      src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=60"
+                      alt={c.title}
+                      className="w-full h-full object-cover transition-transform"
+                    />
+                    {/* Overlay para facilitar lectura del nombre */}
+                    <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
 
-                  <div className="absolute top-2 right-2 opacity-0 border border-white group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-2 group-hover:translate-y-0 translate-y-2 bg-black/50 p-1.5 rounded-full">
-                    <IconArrowUpRight size={20} className="text-white" />
-                  </div>
-                </figure>
-
-                <span className="badge absolute -bottom-3 left-20 text-xs min-[1280px]:max-[1300px]:text-[5px] min-[1300px]:max-[1550px]:text-[7px] font-bold uppercase tracking-widest drop-shadow-md z-40">
-                  Ignacio Miguel Mateos
-                </span>
-
-                {/* Avatar movido fuera del figure para evitar recortes y problemas de z-index */}
-                <div className="absolute -bottom-8 left-2 w-16 h-16 rounded-full border-4 border-base-100 overflow-hidden z-30 bg-base-300 shadow-lg">
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-                    alt="Ignacio Miguel Mateos"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              </div>
-
-              <div className="card-body p-4 pt-10 flex flex-col relative">
-                <h2 className="card-title text-lg leading-tight flex-grow">{c.title}</h2>
-                <p className="text-sm text-base-content/70">{c.description}</p>
-                <div className="card-actions justify-end mt-auto" onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}>
-                  <div className="dropdown dropdown-end">
-                    <div
-                      tabIndex={0}
-                      role="button"
-                      aria-label="Opciones del curso"
-                      className="hover:bg-base-200 rounded-full transition-colors p-2 translate-x-2"
-                    >
-                      <IconDotsVertical size={20} className="text-base-content/50" />
+                    <div className="absolute top-2 right-2 opacity-0 border border-white group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-0 -translate-x-2 group-hover:translate-y-0 translate-y-2 bg-black/50 p-1.5 rounded-full">
+                      <IconArrowUpRight size={20} className="text-white" />
                     </div>
-                    <ul tabIndex={0} className="dropdown-content z-[1000] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
-                      <li>
-                        <button onClick={() => location.href = `/mycourses/${courseId}`} className="flex justify-between">
-                          Acceder al curso
-                          <IconArrowUpRight size={16} />
-                        </button>
-                      </li>
-                      <li>
-                        <button 
-                          className="text-warning hover:bg-warning/10"
-                          onClick={() => (document.getElementById(`confirm_unenroll_${courseId}`) as HTMLDialogElement)?.showModal()}
-                        >
-                          Cancelar registro
-                        </button>
-                      </li>
-                      {/* Opción de eliminar solo visible para el propietario */}
-                      {c.ownerId && c.ownerId === currentUserId && (
+                  </figure>
+
+                  <span className="badge absolute -bottom-3 left-20 text-xs min-[1280px]:max-[1300px]:text-[5px] min-[1300px]:max-[1550px]:text-[7px] font-bold uppercase tracking-widest drop-shadow-md z-40">
+                    Ignacio Miguel Mateos
+                  </span>
+
+                  {/* Avatar movido fuera del figure para evitar recortes y problemas de z-index */}
+                  <div className="absolute -bottom-8 left-2 w-16 h-16 rounded-full border-4 border-base-100 overflow-hidden z-30 bg-base-300 shadow-lg">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
+                      alt="Ignacio Miguel Mateos"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+
+                <div className="card-body p-4 pt-10 flex flex-col relative">
+                  <h2 className="card-title text-lg leading-tight flex-grow">{c.title}</h2>
+                  <p className="text-sm text-base-content/70">{c.description}</p>
+                  <div className="card-actions justify-end mt-auto" onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}>
+                    <div className="dropdown dropdown-end">
+                      <div
+                        tabIndex={0}
+                        role="button"
+                        aria-label="Opciones del curso"
+                        className="hover:bg-base-200 rounded-full transition-colors p-2 translate-x-2"
+                      >
+                        <IconDotsVertical size={20} className="text-base-content/50" />
+                      </div>
+                      <ul tabIndex={0} className="dropdown-content z-[1000] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
                         <li>
-                          <button 
-                            className="text-error hover:bg-error/10"
-                            onClick={() => (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.showModal()}
-                          >
-                            <IconTrash size={16} />
-                            Eliminar curso
+                          <button onClick={() => location.href = `/mycourses/${courseId}`}>
+                            <IconArrowUpRight size={16} />
+                            Acceder al curso
+
                           </button>
                         </li>
-                      )}
-                    </ul>
+                        <li>
+                          <button
+                            className="text-warning hover:bg-warning/10"
+                            onClick={() => (document.getElementById(`confirm_unenroll_${courseId}`) as HTMLDialogElement)?.showModal()}
+                          >
+                            <IconCancel size={16} /> Cancelar registro
+                          </button>
+                        </li>
+                        {/* Opción de eliminar solo visible para el propietario */}
+                        {c.ownerId && c.ownerId === currentUserId && (
+                          <li>
+                            <button
+                              className="text-error hover:bg-error/10"
+                              onClick={() => (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.showModal()}
+                            >
+                              <IconTrash size={16} />
+                              Eliminar curso
+                            </button>
+                          </li>
+                        )}
+                      </ul>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
             );
           })
         )}
@@ -210,47 +211,47 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
       {courses.map((course) => {
         const courseId = course._id;
         return (
-        <dialog key={`dialog_${courseId}`} id={`confirm_delete_${courseId}`} className="modal">
-          <div className="modal-box border border-error/30 bg-error/5 backdrop-blur">
-            <h3 className="font-bold text-lg text-error">Eliminar curso</h3>
-            <p className="py-4">
-              ¿Estás seguro de que deseas eliminar el curso <strong>"{course.title}"</strong>? Esta acción no se puede deshacer.
-            </p>
-            {deleteError && (
-              <div className="alert alert-error mb-4">
-                <span>{deleteError}</span>
+          <dialog key={`dialog_${courseId}`} id={`confirm_delete_${courseId}`} className="modal">
+            <div className="modal-box border border-error/30 bg-error/5 backdrop-blur">
+              <h3 className="font-bold text-lg text-error">Eliminar curso</h3>
+              <p className="py-4">
+                ¿Estás seguro de que deseas eliminar el curso <strong>"{course.title}"</strong>? Esta acción no se puede deshacer.
+              </p>
+              {deleteError && (
+                <div className="alert alert-error mb-4">
+                  <span>{deleteError}</span>
+                </div>
+              )}
+              <div className="modal-action gap-2">
+                <button
+                  type="button"
+                  onClick={() => (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.close()}
+                  className="btn btn-ghost"
+                  disabled={deletingId === courseId}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCourse(courseId)}
+                  className="btn btn-error"
+                  disabled={deletingId === courseId}
+                >
+                  {deletingId === courseId ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      Eliminando...
+                    </>
+                  ) : (
+                    "Eliminar"
+                  )}
+                </button>
               </div>
-            )}
-            <div className="modal-action gap-2">
-              <button
-                type="button"
-                onClick={() => (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.close()}
-                className="btn btn-ghost"
-                disabled={deletingId === courseId}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDeleteCourse(courseId)}
-                className="btn btn-error"
-                disabled={deletingId === courseId}
-              >
-                {deletingId === courseId ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Eliminando...
-                  </>
-                ) : (
-                  "Eliminar"
-                )}
-              </button>
             </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button>cerrar</button>
-          </form>
-        </dialog>
+            <form method="dialog" className="modal-backdrop">
+              <button>cerrar</button>
+            </form>
+          </dialog>
         );
       })}
 
@@ -258,47 +259,47 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
       {courses.map((course) => {
         const courseId = course._id;
         return (
-        <dialog key={`unenroll_dialog_${courseId}`} id={`confirm_unenroll_${courseId}`} className="modal">
-          <div className="modal-box border border-warning/30 bg-warning/5 backdrop-blur">
-            <h3 className="font-bold text-lg text-warning">Cancelar registro</h3>
-            <p className="py-4">
-              ¿Estás seguro de que deseas cancelar tu registro en el curso <strong>"{course.title}"</strong>? No podrás acceder al contenido hasta que te vuelvas a inscribir.
-            </p>
-            {unenrollError && (
-              <div className="alert alert-error mb-4">
-                <span>{unenrollError}</span>
+          <dialog key={`unenroll_dialog_${courseId}`} id={`confirm_unenroll_${courseId}`} className="modal">
+            <div className="modal-box border border-warning/30 bg-warning/5 backdrop-blur">
+              <h3 className="font-bold text-lg text-warning">Cancelar registro</h3>
+              <p className="py-4">
+                ¿Estás seguro de que deseas cancelar tu registro en el curso <strong>"{course.title}"</strong>? No podrás acceder al contenido hasta que te vuelvas a inscribir.
+              </p>
+              {unenrollError && (
+                <div className="alert alert-error mb-4">
+                  <span>{unenrollError}</span>
+                </div>
+              )}
+              <div className="modal-action gap-2">
+                <button
+                  type="button"
+                  onClick={() => (document.getElementById(`confirm_unenroll_${courseId}`) as HTMLDialogElement)?.close()}
+                  className="btn btn-ghost"
+                  disabled={unenrollingId === courseId}
+                >
+                  Volver
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleUnenrollCourse(courseId)}
+                  className="btn btn-warning"
+                  disabled={unenrollingId === courseId}
+                >
+                  {unenrollingId === courseId ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm"></span>
+                      Cancelando...
+                    </>
+                  ) : (
+                    "Sí, cancelar registro"
+                  )}
+                </button>
               </div>
-            )}
-            <div className="modal-action gap-2">
-              <button
-                type="button"
-                onClick={() => (document.getElementById(`confirm_unenroll_${courseId}`) as HTMLDialogElement)?.close()}
-                className="btn btn-ghost"
-                disabled={unenrollingId === courseId}
-              >
-                Volver
-              </button>
-              <button
-                type="button"
-                onClick={() => handleUnenrollCourse(courseId)}
-                className="btn btn-warning"
-                disabled={unenrollingId === courseId}
-              >
-                {unenrollingId === courseId ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Cancelando...
-                  </>
-                ) : (
-                  "Sí, cancelar registro"
-                )}
-              </button>
             </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button>cerrar</button>
-          </form>
-        </dialog>
+            <form method="dialog" className="modal-backdrop">
+              <button>cerrar</button>
+            </form>
+          </dialog>
         );
       })}
     </main>
