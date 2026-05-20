@@ -13,7 +13,7 @@ type CreationType = 'task' | 'exam' | 'resource' | null;
 export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
-  const slug = params?.slug || 'course-1';
+  const courseid = params?.courseid || 'course-1';
 
   const modalRef = useRef<HTMLDialogElement>(null);
   
@@ -121,11 +121,11 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
     if (createdItemId) {
       if (modalRef.current) modalRef.current.close();
       if (creationType === 'task') {
-        router.push(`/mycourses/${slug}/tasks/${createdItemId}`);
+        router.push(`/mycourses/${courseid}/tasks/${createdItemId}`);
       } else if (creationType === 'exam') {
-        router.push(`/mycourses/${slug}/exams/${createdItemId}`);
+        router.push(`/mycourses/${courseid}/exams/${createdItemId}`);
       } else if (creationType === 'resource') {
-        router.push(`/mycourses/${slug}/resources/${createdItemId}`);
+        router.push(`/mycourses/${courseid}/resources/${createdItemId}`);
       }
     }
   };

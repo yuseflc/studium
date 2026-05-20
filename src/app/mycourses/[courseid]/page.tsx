@@ -1,4 +1,4 @@
-// Muestra la pagina de cursos segun el slug (busca en MongoDB y en seed como fallback)
+// Muestra la pagina de cursos segun el courseid (busca en MongoDB y en seed como fallback)
 
 import { CURSOS, getSeedCourseStructure } from "@/seed/data";
 import { getServerSession } from "next-auth/next";
@@ -30,7 +30,7 @@ export default async function MyCoursePage({ params }: { params: Promise<{ cours
 
   try {
     await connectDB();
-    // Busca por _id (si el slug es un ObjectId de MongoDB)
+    // Busca por _id (si el courseid es un ObjectId de MongoDB)
     const rawCurso = await Course.findById(courseid).lean();
     
     // Si encontró el curso, obtener su estructura completa

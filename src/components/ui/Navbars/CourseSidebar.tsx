@@ -23,7 +23,7 @@ interface CourseSidebarProps {
 export default function CourseSidebar({ isTeacher, subjects, courseData, newTasks = [] }: CourseSidebarProps) {
     const router = useRouter();
     const params = useParams();
-    const slug = (params?.slug as string) || "course-1";
+    const courseid = (params?.courseid as string) || "course-1";
 
     const searchModalRef = useRef<HTMLDialogElement>(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -78,7 +78,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData, newTask
 
     const handleGoToTask = (taskId: string) => {
         searchModalRef.current?.close();
-        router.push(`/mycourses/${slug}/tasks/${taskId}`);
+        router.push(`/mycourses/${courseid}/tasks/${taskId}`);
     };
 
     const sortedSubjects = [...subjects].sort((a, b) => a.order - b.order);

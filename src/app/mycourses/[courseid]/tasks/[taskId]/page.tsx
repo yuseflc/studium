@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function TaskDetailPage({ 
   params 
 }: { 
-  params: Promise<{ slug: string; taskId: string }> 
+  params: Promise<{ courseid: string; taskId: string }> 
 }) {
-  const { slug, taskId } = await params;
+  const { courseid, taskId } = await params;
   
   let taskInfo: any = null;
 
@@ -46,5 +46,5 @@ export default async function TaskDetailPage({
     maxPoints: taskInfo.maxPoints
   };
 
-  return <TaskDetailClient taskInfo={serializedTask} slug={slug} />;
+  return <TaskDetailClient taskInfo={serializedTask} courseid={courseid} />;
 }

@@ -21,7 +21,7 @@ const TasksView = ({
   isTeacher = false 
 }: TasksViewProps) => {
   const params = useParams();
-  const slug = (params?.slug as string) || 'course-1';
+  const courseid = (params?.courseid as string) || 'course-1';
 
   // Datos estáticos importados del seed, combinados con las nuevas tareas y filtrados
   const tasks = [...CALIFICACIONES, ...newTasks].filter(
@@ -39,7 +39,7 @@ const TasksView = ({
         
         return (
           <Link 
-            href={`/mycourses/${slug}/tasks/${task.id}`} 
+            href={`/mycourses/${courseid}/tasks/${task.id}`} 
             key={task.id}
             className="block"
             aria-label={`Ver tarea: ${task.taskTitle}`}

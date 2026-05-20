@@ -10,9 +10,9 @@ export const dynamic = "force-dynamic";
 export default async function ResourceDetailPage({ 
   params 
 }: { 
-  params: Promise<{ slug: string; resourceId: string }> 
+  params: Promise<{ courseid: string; resourceId: string }> 
 }) {
-  const { slug, resourceId } = await params;
+  const { courseid, resourceId } = await params;
   
   let resourceInfo: any = null;
 
@@ -38,7 +38,7 @@ export default async function ResourceDetailPage({
     <div className="min-h-screen bg-base-200/50 p-6 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <Link 
-          href={`/mycourses/${slug}`} 
+          href={`/mycourses/${courseid}`} 
           className="btn btn-ghost btn-sm mb-6 flex items-center gap-2 w-fit text-base-content/70 hover:text-base-content"
         >
           <ArrowLeft size={16} />

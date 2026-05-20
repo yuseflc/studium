@@ -12,10 +12,10 @@ interface TaskDetailClientProps {
     dueDate: Date;
     maxPoints?: number;
   };
-  slug: string;
+  courseid: string;
 }
 
-export default function TaskDetailClient({ taskInfo, slug }: TaskDetailClientProps) {
+export default function TaskDetailClient({ taskInfo, courseid }: TaskDetailClientProps) {
   const [status, setStatus] = useState<'pending' | 'submitted'>('pending');
   const [submissionText, setSubmissionText] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -52,7 +52,7 @@ export default function TaskDetailClient({ taskInfo, slug }: TaskDetailClientPro
     <div className="min-h-screen bg-base-200/50 p-6 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <Link 
-          href={`/mycourses/${slug}`} 
+          href={`/mycourses/${courseid}`} 
           className="btn btn-ghost btn-sm mb-6 flex items-center gap-2 w-fit text-base-content/70 hover:text-base-content"
         >
           <ArrowLeft size={16} />
