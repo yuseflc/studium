@@ -13,7 +13,7 @@ import {
   unauthorizedResponse,
 } from '@/lib/api/response-handler';
 import { updateCourseSchema, type UpdateCourseInput } from '@/lib/validators/validators';
-import { extractUserId } from '@/lib/api/auth-helpers';
+import { extractUserId, requireAuthMiddleware } from '@/lib/api/auth-helpers';
 import { withErrorHandlingParams } from '@/lib/api/middleware';
 import { getCourseFullStructure } from '@/lib/api/course-helpers';
 import mongoose from 'mongoose';
@@ -30,6 +30,7 @@ import mongoose from 'mongoose';
  */
 export const GET = withErrorHandlingParams<{ id: string }>(
   async (request: NextRequest, context, requestId) => {
+    await requireAuthMiddleware(request);
     const { id } = await context.params;
 
     // Validar ObjectId (sync check antes de cualquier await)

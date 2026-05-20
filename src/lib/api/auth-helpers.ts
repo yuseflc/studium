@@ -2,6 +2,18 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/config/auth.config';
 import { NextRequest } from 'next/server';
 import { unauthorizedResponse, internalErrorResponse } from './response-handler';
+import { connectDB } from '@/lib/database/database';
+import Session from '@/models/Session';
+
+/**
+ * Error personalizado para fallos de autenticación
+ */
+export class AuthenticationError extends Error {
+    constructor(message: string = 'No autenticado') {
+        super(message);
+        this.name = 'AuthenticationError';
+    }
+}
 
 /**
  * Obtiene la sesión autenticada del request actual
@@ -28,6 +40,46 @@ export async function getAuthSession() {
 export async function getAuthUserId(): Promise<string | null> {
     const session = await getAuthSession();
     return session?.user?.id || null;
+}
+
+/**
+ * Valida que la sesión actual del usuario no haya sido revocada
+ * Chequea contra la BD usando el userId de la sesión autenticada
+ * 
+ * @param request - NextRequest
+ * @returns true si la sesión es válida y no revocada, false si está revocada
+ */
+export async function isSessionActive(request: NextRequest): Promise<boolean> {
+    try {
+        // Primero obtener el userId del JWT/sesión autenticada de NextAuth
+        const userId = await getAuthUserId();
+        
+        if (!userId) {
+            return false;
+        }
+
+        await connectDB();
+        
+        // Buscar sesión activa (no revocada) para este usuario
+        const session = await Session.findOne({ 
+            userId,
+            revokedAt: null // Solo aceptar sesiones no revocadas
+        });
+
+        if (!session) {
+            return false;
+        }
+
+        // Chequear si la sesión ha expirado
+        if (session.expires < new Date()) {
+            return false;
+        }
+
+        return true;
+    } catch (error) {
+        console.error('Error validando sesión:', error);
+        return false;
+    }
 }
 
 /**
@@ -62,10 +114,11 @@ export async function extractUserId(request: NextRequest): Promise<string | null
 
 /**
  * Middleware que requiere autenticación en rutas API
- * Retorna el userId o una respuesta 401
+ * Valida que la sesión sea activa (no revocada)
+ * Retorna el userId o lanza AuthenticationError
  * 
  * @param request - NextRequest
- * @returns userId si autenticado, sino lanza error
+ * @returns userId si autenticado, sino lanza AuthenticationError
  */
 export async function requireAuthMiddleware(
     request: NextRequest
@@ -73,7 +126,13 @@ export async function requireAuthMiddleware(
     const userId = await extractUserId(request);
 
     if (!userId) {
-        throw unauthorizedResponse();
+        throw new AuthenticationError('No autenticado');
+    }
+
+    // Validar que la sesión no está revocada
+    const sessionActive = await isSessionActive(request);
+    if (!sessionActive) {
+        throw new AuthenticationError('Sesión revocada o inválida');
     }
 
     return userId;

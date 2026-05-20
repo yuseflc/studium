@@ -147,22 +147,32 @@ export const authOptions: NextAuthOptions = {
     events: {
         async signIn({ user, account }) {
 
-            // Crear registro de sesión en BD cuando inician sesión
-            if (user?.email) {
+            // Crear/actualizar registro de sesión en BD cuando inician sesión
+            if (user?.id) {
                 try {
                     await connectDB();
-                    const sessionToken = crypto.randomBytes(32).toString('hex');
                     const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
 
-                    await Session.create({
-                        sessionToken,
-                        userId: user.id,
-                        expires,
-                    });
-
-                    LOGGER.info(`Sesión creada para el usuario: ${user.email}`);
+                    // Buscar sesión existente por userId, si no existe crear nueva
+                    const existingSession = await Session.findOne({ userId: user.id, revokedAt: null });
+                    
+                    if (existingSession) {
+                        // Actualizar sesión existente: resetear expiration
+                        existingSession.expires = expires;
+                        await existingSession.save();
+                        LOGGER.info(`Sesión actualizada para el usuario: ${user.id}`);
+                    } else {
+                        // Crear nueva sesión (generar token para referencia)
+                        const sessionToken = crypto.randomBytes(32).toString('hex');
+                        await Session.create({
+                            sessionToken,
+                            userId: user.id,
+                            expires,
+                        });
+                        LOGGER.info(`Sesión creada para el usuario: ${user.id}`);
+                    }
                 } catch (error: Error | any) {
-                    LOGGER.error('Error creando registro de sesión:', error);
+                    LOGGER.error('Error manejando sesión:', error);
                 }
             }
         },

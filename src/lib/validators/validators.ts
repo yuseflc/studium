@@ -178,3 +178,257 @@ export const enrollStudentSchema = z.object({
 });
 
 export type EnrollStudentInput = z.infer<typeof enrollStudentSchema>;
+
+// ============ ESQUEMAS DE MATERIAS ============
+
+/**
+ * Validación para crear una materia
+ */
+export const createSubjectSchema = z.object({
+  courseId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  title: z
+    .string()
+    .min(3, "El título de la materia debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim()),
+  description: z
+    .string()
+    .max(1000, "La descripción no puede exceder 1000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+  order: z
+    .number()
+    .int("El orden debe ser un número entero")
+    .min(0, "El orden no puede ser negativo")
+    .default(0),
+});
+
+export type CreateSubjectInput = z.infer<typeof createSubjectSchema>;
+
+/**
+ * Validación para actualizar una materia
+ */
+export const updateSubjectSchema = z.object({
+  title: z
+    .string()
+    .min(3, "El título de la materia debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim())
+    .optional(),
+  description: z
+    .string()
+    .max(1000, "La descripción no puede exceder 1000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+  order: z
+    .number()
+    .int("El orden debe ser un número entero")
+    .min(0, "El orden no puede ser negativo")
+    .optional(),
+});
+
+export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
+
+// ============ ESQUEMAS DE UNIDADES ============
+
+/**
+ * Validación para crear una unidad
+ */
+export const createUnitSchema = z.object({
+  subjectId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+  courseId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  title: z
+    .string()
+    .min(3, "El título de la unidad debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim()),
+  content: z
+    .string()
+    .min(1, "El contenido es requerido")
+    .transform((val) => val.trim()),
+  order: z
+    .number()
+    .int("El orden debe ser un número entero")
+    .min(0, "El orden no puede ser negativo")
+    .default(0),
+});
+
+export type CreateUnitInput = z.infer<typeof createUnitSchema>;
+
+/**
+ * Validación para actualizar una unidad
+ */
+export const updateUnitSchema = z.object({
+  title: z
+    .string()
+    .min(3, "El título de la unidad debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim())
+    .optional(),
+  content: z
+    .string()
+    .min(1, "El contenido es requerido")
+    .transform((val) => val.trim())
+    .optional(),
+  order: z
+    .number()
+    .int("El orden debe ser un número entero")
+    .min(0, "El orden no puede ser negativo")
+    .optional(),
+});
+
+export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
+
+// ============ ESQUEMAS DE RECURSOS ============
+
+/**
+ * Validación para crear un recurso
+ */
+export const createResourceSchema = z.object({
+  unitId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido"),
+  courseId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  title: z
+    .string()
+    .min(3, "El título del recurso debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim()),
+  type: z
+    .enum(["link", "file", "text"], { message: "El tipo debe ser link, file o text" }),
+  url: z
+    .string()
+    .url("URL debe ser válida")
+    .optional(),
+  description: z
+    .string()
+    .max(500, "La descripción no puede exceder 500 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+});
+
+export type CreateResourceInput = z.infer<typeof createResourceSchema>;
+
+/**
+ * Validación para actualizar un recurso
+ */
+export const updateResourceSchema = z.object({
+  title: z
+    .string()
+    .min(3, "El título del recurso debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim())
+    .optional(),
+  type: z
+    .enum(["link", "file", "text"], { message: "El tipo debe ser link, file o text" })
+    .optional(),
+  url: z
+    .string()
+    .url("URL debe ser válida")
+    .optional(),
+  description: z
+    .string()
+    .max(500, "La descripción no puede exceder 500 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+});
+
+export type UpdateResourceInput = z.infer<typeof updateResourceSchema>;
+
+// ============ ESQUEMAS DE TAREAS ============
+
+/**
+ * Validación para crear una tarea
+ */
+export const createTaskSchema = z.object({
+  courseId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  subjectId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+  title: z
+    .string()
+    .min(3, "El título de la tarea debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim()),
+  description: z
+    .string()
+    .min(1, "La descripción es requerida")
+    .transform((val) => val.trim()),
+  type: z
+    .enum(["assignment", "quiz", "forum", "project"])
+    .default("assignment"),
+  maxPoints: z
+    .number()
+    .int("Los puntos deben ser un número entero")
+    .min(0, "Los puntos no pueden ser negativos")
+    .default(100),
+  startDate: z
+    .string()
+    .datetime({ message: "Fecha de inicio inválida" })
+    .transform((val) => new Date(val)),
+  dueDate: z
+    .string()
+    .datetime({ message: "Fecha de entrega inválida" })
+    .transform((val) => new Date(val)),
+  allowLateSubmission: z
+    .boolean()
+    .default(false),
+  active: z
+    .boolean()
+    .default(true),
+});
+
+export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+
+/**
+ * Validación para actualizar una tarea
+ */
+export const updateTaskSchema = z.object({
+  title: z
+    .string()
+    .min(3, "El título de la tarea debe tener al menos 3 caracteres")
+    .max(200, "El título no puede exceder 200 caracteres")
+    .transform((val) => val.trim())
+    .optional(),
+  description: z
+    .string()
+    .min(1, "La descripción es requerida")
+    .transform((val) => val.trim())
+    .optional(),
+  type: z
+    .enum(["assignment", "quiz", "forum", "project"])
+    .optional(),
+  maxPoints: z
+    .number()
+    .int("Los puntos deben ser un número entero")
+    .min(0, "Los puntos no pueden ser negativos")
+    .optional(),
+  startDate: z
+    .string()
+    .datetime({ message: "Fecha de inicio inválida" })
+    .transform((val) => new Date(val))
+    .optional(),
+  dueDate: z
+    .string()
+    .datetime({ message: "Fecha de entrega inválida" })
+    .transform((val) => new Date(val))
+    .optional(),
+  allowLateSubmission: z
+    .boolean()
+    .optional(),
+  active: z
+    .boolean()
+    .optional(),
+});
+
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;

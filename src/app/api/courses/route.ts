@@ -12,7 +12,7 @@ import {
   internalErrorResponse,
   unauthorizedResponse,
 } from '@/lib/api/response-handler';
-import { extractUserId } from '@/lib/api/auth-helpers';
+import { extractUserId, requireAuthMiddleware } from '@/lib/api/auth-helpers';
 import {
   createCourseSchema,
   type CreateCourseInput,
@@ -49,7 +49,10 @@ interface CourseFilter {
  */
 export const GET = withErrorHandling(
   async (request: NextRequest, requestId) => {
-    await connectDB();
+    const dbPromise = connectDB();
+    await requireAuthMiddleware(request);
+
+    await dbPromise;
 
     const { searchParams } = new URL(request.url);
     const ownerId = searchParams.get('ownerId');

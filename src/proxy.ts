@@ -29,6 +29,10 @@ export const config = {
         "/account/:path*",
         "/mycourses/:path*",
         "/course/:path*",
-        "/api/courses/:path*"
+        "/api/courses/:path*",
+        "/api/subjects/:path*",
+        "/api/units/:path*",
+        "/api/resources/:path*",
+        "/api/tasks/:path*",
     ],
 };

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { internalErrorResponse } from './response-handler';
+import { internalErrorResponse, unauthorizedResponse } from './response-handler';
 import { logError } from '@/config/logger';
+import { AuthenticationError } from './auth-helpers';
 
 /**
  * Tipo para funciones manejadoras de rutas sin params dinámicos
@@ -34,6 +35,11 @@ export function withErrorHandling(
         try {
             return await handler(request, requestId);
         } catch (error) {
+            // Manejar errores de autenticación específicamente
+            if (error instanceof AuthenticationError) {
+                return unauthorizedResponse(requestId);
+            }
+
             const err = error instanceof Error ? error : new Error(String(error));
             logError(`Error en ${method}`, err, { requestId });
             return internalErrorResponse(`Error en la operación: ${err.message}`, err, requestId);
@@ -57,6 +63,11 @@ export function withErrorHandlingParams<P extends Record<string, string> = Recor
         try {
             return await handler(request, context, requestId);
         } catch (error) {
+            // Manejar errores de autenticación específicamente
+            if (error instanceof AuthenticationError) {
+                return unauthorizedResponse(requestId);
+            }
+
             const err = error instanceof Error ? error : new Error(String(error));
             logError(`Error en ${method}`, err, { requestId });
             return internalErrorResponse(`Error en la operación: ${err.message}`, err, requestId);

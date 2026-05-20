@@ -15,8 +15,61 @@ import {
 } from '@/lib/api/response-handler';
 import { addTeacherSchema, type AddTeacherInput } from '@/lib/validators/validators';
 import mongoose from 'mongoose';
-import { extractUserId } from '@/lib/api/auth-helpers';
+import { extractUserId, requireAuthMiddleware } from '@/lib/api/auth-helpers';
 import { withErrorHandlingParams } from '@/lib/api/middleware';
+
+/**
+ * GET /api/courses/[id]/teachers
+ * Obtiene la lista de profesores del curso
+ *
+ * Respuestas:
+ * - 200: Lista de profesores obtenida exitosamente
+ * - 400: ID de curso inválido
+ * - 404: Curso no encontrado
+ * - 500: Error del servidor
+ */
+export const GET = withErrorHandlingParams<{ id: string }>(
+  async (request: NextRequest, context, requestId) => {
+    await requireAuthMiddleware(request);
+    const { id } = await context.params;
+
+    // Validar ObjectId del curso (sync check antes de cualquier await)
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return validationErrorResponse({ id: ['ID de curso inválido'] }, requestId);
+    }
+
+    await connectDB();
+
+    // Obtener curso con profesores poblados
+    const course = await Course.findById(id)
+      .populate('teachers', 'email firstName profile.lastName role active')
+      .select('_id title teachers ownerId')
+      .lean();
+
+    if (!course) {
+      return notFoundResponse('Curso', requestId);
+    }
+
+    logInfo('Profesores del curso obtenidos', {
+      courseId: id,
+      teachersCount: course.teachers?.length || 0,
+      requestId,
+    });
+
+    return successResponse(
+      {
+        courseId: course._id.toString(),
+        title: course.title,
+        teachers: course.teachers || [],
+        teachersCount: (course.teachers as any[])?.length || 0,
+      },
+      'Profesores obtenidos exitosamente',
+      200,
+      requestId
+    );
+  },
+  'GET /courses/[id]/teachers'
+);
 
 /**
  * POST /api/courses/[id]/teachers

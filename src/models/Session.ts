@@ -4,6 +4,7 @@ interface ISession {
     sessionToken: string;
     userId: mongoose.Types.ObjectId;
     expires: Date;
+    revokedAt?: Date;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -25,6 +26,11 @@ const SessionSchema = new mongoose.Schema<ISession>(
         expires: {
             type: Date,
             required: true,
+            index: true,
+        },
+        revokedAt: {
+            type: Date,
+            default: null,
             index: true,
         },
     },

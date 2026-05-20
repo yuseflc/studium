@@ -50,10 +50,29 @@
           }
         },
         {
+          "name": "Revocar Sesión Actual",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/auth/session/revoke",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
+              }
+            ]
+          }
+        },
+        {
           "name": "Cerrar Sesión",
           "request": {
             "method": "POST",
-            "url": "{{base_url}}/api/auth/signout"
+            "url": "{{base_url}}/api/signout",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
+              }
+            ]
           }
         }
       ]
@@ -87,6 +106,10 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
               }
             ],
             "body": {
@@ -102,7 +125,13 @@
               "name": "Obtener Detalles del Curso",
               "request": {
                 "method": "GET",
-                "url": "{{base_url}}/api/courses/{{course_id}}"
+                "url": "{{base_url}}/api/courses/{{course_id}}",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
+                  }
+                ]
               }
             },
             {
@@ -118,6 +147,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ],
                 "body": {
@@ -135,6 +168,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ]
               }
@@ -152,6 +189,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ],
                 "body": {
@@ -176,6 +217,10 @@
                       {
                         "key": "Authorization",
                         "value": "Bearer {{auth_token}}"
+                      },
+                      {
+                        "key": "Cookie",
+                        "value": "next-auth.session-token={{session_cookie}}"
                       }
                     ],
                     "body": {
@@ -193,6 +238,10 @@
                       {
                         "key": "Authorization",
                         "value": "Bearer {{auth_token}}"
+                      },
+                      {
+                        "key": "Cookie",
+                        "value": "next-auth.session-token={{session_cookie}}"
                       }
                     ],
                     "body": {
@@ -223,6 +272,10 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
               }
             ],
             "body": {
@@ -238,7 +291,13 @@
               "name": "Obtener Materia",
               "request": {
                 "method": "GET",
-                "url": "{{base_url}}/api/subjects/{{subject_id}}"
+                "url": "{{base_url}}/api/subjects/{{subject_id}}",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
+                  }
+                ]
               }
             },
             {
@@ -254,6 +313,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ],
                 "body": {
@@ -271,6 +334,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ]
               }
@@ -295,6 +362,10 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
               }
             ],
             "body": {
@@ -310,7 +381,13 @@
               "name": "Obtener Unidad",
               "request": {
                 "method": "GET",
-                "url": "{{base_url}}/api/units/{{unit_id}}"
+                "url": "{{base_url}}/api/units/{{unit_id}}",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
+                  }
+                ]
               }
             },
             {
@@ -326,6 +403,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ],
                 "body": {
@@ -343,6 +424,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ]
               }
@@ -367,6 +452,10 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
               }
             ],
             "body": {
@@ -382,7 +471,13 @@
               "name": "Obtener Recurso",
               "request": {
                 "method": "GET",
-                "url": "{{base_url}}/api/resources/{{resource_id}}"
+                "url": "{{base_url}}/api/resources/{{resource_id}}",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
+                  }
+                ]
               }
             },
             {
@@ -398,6 +493,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ],
                 "body": {
@@ -415,6 +514,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ]
               }
@@ -439,6 +542,10 @@
               {
                 "key": "Authorization",
                 "value": "Bearer {{auth_token}}"
+              },
+              {
+                "key": "Cookie",
+                "value": "next-auth.session-token={{session_cookie}}"
               }
             ],
             "body": {
@@ -454,7 +561,13 @@
               "name": "Obtener Tarea",
               "request": {
                 "method": "GET",
-                "url": "{{base_url}}/api/tasks/{{task_id}}"
+                "url": "{{base_url}}/api/tasks/{{task_id}}",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
+                  }
+                ]
               }
             },
             {
@@ -470,6 +583,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ],
                 "body": {
@@ -487,6 +604,10 @@
                   {
                     "key": "Authorization",
                     "value": "Bearer {{auth_token}}"
+                  },
+                  {
+                    "key": "Cookie",
+                    "value": "next-auth.session-token={{session_cookie}}"
                   }
                 ]
               }
@@ -538,6 +659,12 @@
       "value": "",
       "type": "string",
       "description": "ObjectId de MongoDB de una tarea"
+    },
+    {
+      "key": "session_cookie",
+      "value": "",
+      "type": "string",
+      "description": "Cookie de sesión next-auth.session-token obtenida después de iniciar sesión"
     }
   ]
 }

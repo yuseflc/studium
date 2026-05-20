@@ -42,8 +42,7 @@ export default async function CourseNavbar() {
     const session = await getServerSession(authOptions);
     let user = null;
 
-    // Si existe sesión, cargar datos completos del usuario desde MongoDB
-    if (session?.user) {
+    if (session?.user?.id) {
         await connectDB();
         user = await User.findOne({ _id: session.user.id });
         LOGGER.info(`Usuario de sesión: ${session.user.id} - ${session.user.email} - ${session.user.name}`);
