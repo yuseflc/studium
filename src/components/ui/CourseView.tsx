@@ -133,42 +133,42 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         )}
 
                         {activeTab === "settings" && isTeacher && (
-                            <div className="space-y-6">
+                            <div className="space-y-6 max-w-3xl mx-auto w-full">
                                 {/* Información General */}
                                 <div className="card bg-base-100 border border-base-300">
                                     <div className="card-body">
                                         <h2 className="card-title text-xl mb-6">Información General</h2>
                                         <form className="space-y-6">
-                                            <div className="form-control">
-                                                <label htmlFor="course-title" className="label">
+                                            <div className="form-control flex flex-col items-start">
+                                                <label htmlFor="course-title" className="label p-0">
                                                     <span className="label-text font-medium mb-2">Título del Curso</span>
                                                 </label>
                                                 <input
                                                     id="course-title"
                                                     type="text"
                                                     defaultValue={courseData?.title || ""}
-                                                    className="input input-bordered mt-1 ml-3"
+                                                    className="input input-bordered mt-2 w-full mb-5"
                                                     placeholder="Ej: Desarrollo Web Avanzado"
                                                 />
                                             </div>
 
-                                            <div className="form-control">
-                                                <label htmlFor="course-description" className="label">
+                                            <div className="form-control flex flex-col items-start">
+                                                <label htmlFor="course-description" className="label p-0">
                                                     <span className="label-text font-medium mb-2">Descripción</span>
                                                 </label>
                                                 <textarea
                                                     id="course-description"
-                                                    className="textarea textarea-bordered h-24 mt-2 ml-3"
+                                                    className="textarea textarea-bordered h-24 mt-2 w-full mb-5"
                                                     defaultValue={courseData?.description || ""}
                                                     placeholder="Describe el contenido y objetivos del curso..."
                                                 ></textarea>
                                             </div>
 
-                                            <div className="form-control">
-                                                <label htmlFor="course-status" className="label">
+                                            <div className="form-control flex flex-col items-start">
+                                                <label htmlFor="course-status" className="label p-0">
                                                     <span className="label-text font-medium mb-2">Estado del Curso</span>
                                                 </label>
-                                                <select id="course-status" className="select select-bordered mt-2 ml-3" defaultValue={courseData?.status || "draft"}>
+                                                <select id="course-status" className="select select-bordered mt-2 w-full mb-5" defaultValue={courseData?.status || "draft"}>
                                                     <option value="draft">Borrador</option>
                                                     <option value="published">Publicado</option>
                                                     <option value="archived">Archivado</option>
@@ -191,27 +191,27 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                                 <label className="cursor-pointer label">
                                                     <div>
                                                         <span className="label-text font-medium">Mostrar participantes en la barra horizontal</span>
-                                                        <p className="text-sm text-base-content/60 mt-1">Muestra la lista de participantes en la barra de navegación superior</p>
+                                                        <p className="text-sm text-base-content/60 mt-1 mb-4">Muestra la lista de participantes en la barra de navegación superior</p>
                                                     </div>
-                                                    <input type="checkbox" className="toggle toggle-primary ml-5" defaultChecked />
+                                                    <input type="checkbox" className="toggle toggle-primary ml-55" defaultChecked />
                                                 </label>
                                             </div>
                                             <div className="form-control">
                                                 <label className="cursor-pointer label">
                                                     <div>
                                                         <span className="label-text font-medium">Permitir comentarios en el contenido</span>
-                                                        <p className="text-sm text-base-content/60 mt-1">Los estudiantes pueden comentar en las lecciones y tareas</p>
+                                                        <p className="text-sm text-base-content/60 mt-1 mb-4">Los estudiantes pueden comentar en las lecciones y tareas</p>
                                                     </div>
-                                                    <input type="checkbox" className="toggle toggle-primary ml-17" defaultChecked />
+                                                    <input type="checkbox" className="toggle toggle-primary ml-67" defaultChecked />
                                                 </label>
                                             </div>
                                             <div className="form-control">
                                                 <label className="cursor-pointer label">
                                                     <div>
                                                         <span className="label-text font-medium">Notificar nuevas tareas por email</span>
-                                                        <p className="text-sm text-base-content/60 mt-1">Envía notificaciones por correo cuando se crean nuevas tareas</p>
+                                                        <p className="text-sm text-base-content/60 mt-1 mb-4">Envía notificaciones por correo cuando se crean nuevas tareas</p>
                                                     </div>
-                                                    <input type="checkbox" className="toggle toggle-primary ml-12" />
+                                                    <input type="checkbox" className="toggle toggle-primary ml-62" />
                                                 </label>
                                             </div>
                                         </div>
@@ -270,18 +270,18 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                     <div className="card-body">
                                         <h2 className="card-title text-error text-xl mb-6">Zona de Peligro</h2>
                                         <div className="space-y-4">
-                                            <div className="alert alert-warning">
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                            <div className="alert alert-warning py-2 px-3 items-center gap-3 w-full max-w-xl mx-auto mb-8">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-5 w-5" fill="none" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                                                 </svg>
-                                                <span>Estas acciones no se pueden deshacer.</span>
+                                                
                                             </div>
 
                                             <div className="flex gap-3 flex-wrap">
-                                                <button className="btn btn-outline btn-warning">
+                                                <button className="btn btn-outline btn-warning ml-50">
                                                     Archivar Curso
                                                 </button>
-                                                <button className="btn btn-outline btn-error">
+                                                <button className="btn btn-outline btn-error ml-4">
                                                     Eliminar Curso
                                                 </button>
                                             </div>
