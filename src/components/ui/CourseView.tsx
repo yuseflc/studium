@@ -11,8 +11,8 @@ import {
 import CourseSidebar from "./Navbars/CourseSidebar";
 import CourseContent from "./CourseContent";
 import CourseParticipants from "./CourseParticipants";
-import GradesView from "./grades/GradesView";
-import CreateTaskModal from "./CreateTaskModal";
+import GradesView from "./GradesView";
+import CourseFAB from "./CourseFAB";
 import { PARTICIPANTES } from "@/seed/data";
 import { ICourse } from "@/models/Course";
 import { ISubject } from "@/models/Subject";
@@ -27,13 +27,24 @@ interface CourseViewProps {
 export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
     const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
+    const [newTasks, setNewTasks] = useState<any[]>([]);
+    const [deletedItems, setDeletedItems] = useState<string[]>([]);
 
     const subjects = courseData?.subjects || [];
 
-    // Extraer todas las tareas del curso de forma plana
-    const allTasks = courseData?.subjects?.flatMap(subject =>
-        (subject as any).tasks || []
-    ) || [];
+    const handleAddTask = (task: any) => {
+        setNewTasks((prev) => [...prev, task]);
+    };
+
+    const handleDeleteItem = async (id: string) => {
+        setDeletedItems((prev) => [...prev, id]);
+        
+        try {
+            await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
+        } catch (error) {
+            console.error("Error deleting task:", error);
+        }
+    };
 
     return (
         <div className="flex flex-col lg:flex-row">
@@ -99,7 +110,13 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                     {/* Vistas Renderizadas */}
                     <div className="space-y-6">
                         {activeTab === "content" && (
-                            <CourseContent subjects={subjects} />
+                            <CourseContent 
+                                subjects={subjects} 
+                                newTasks={newTasks} 
+                                deletedItems={deletedItems}
+                                onDeleteItem={handleDeleteItem}
+                                isTeacher={isTeacher}
+                            />
                         )}
 
                         {activeTab === "participants" && (
@@ -109,7 +126,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         {activeTab === "grades" && (
                             <GradesView
                                 participants={PARTICIPANTES}
-                                subjects={courseData?.subjects || []}
+                                tasks={[]}
                                 isTeacher={isTeacher}
                                 currentUserEmail={session?.user?.email || ""}
                             />
@@ -123,10 +140,11 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                         <h2 className="card-title text-xl mb-6">Información General</h2>
                                         <form className="space-y-6">
                                             <div className="form-control">
-                                                <label className="label">
+                                                <label htmlFor="course-title" className="label">
                                                     <span className="label-text font-medium mb-2">Título del Curso</span>
                                                 </label>
                                                 <input
+                                                    id="course-title"
                                                     type="text"
                                                     defaultValue={courseData?.title || ""}
                                                     className="input input-bordered mt-1 ml-3"
@@ -135,21 +153,22 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                             </div>
 
                                             <div className="form-control">
-                                                <label className="label">
+                                                <label htmlFor="course-description" className="label">
                                                     <span className="label-text font-medium mb-2">Descripción</span>
                                                 </label>
                                                 <textarea
-                                                    className="textarea textarea-bordered h-24 mt-2  ml-3"
+                                                    id="course-description"
+                                                    className="textarea textarea-bordered h-24 mt-2 ml-3"
                                                     defaultValue={courseData?.description || ""}
                                                     placeholder="Describe el contenido y objetivos del curso..."
                                                 ></textarea>
                                             </div>
 
                                             <div className="form-control">
-                                                <label className="label">
+                                                <label htmlFor="course-status" className="label">
                                                     <span className="label-text font-medium mb-2">Estado del Curso</span>
                                                 </label>
-                                                <select className="select select-bordered mt-2  ml-3" defaultValue={courseData?.status || "draft"}>
+                                                <select id="course-status" className="select select-bordered mt-2 ml-3" defaultValue={courseData?.status || "draft"}>
                                                     <option value="draft">Borrador</option>
                                                     <option value="published">Publicado</option>
                                                     <option value="archived">Archivado</option>
@@ -205,11 +224,12 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                         <h2 className="card-title text-xl mb-6">Gestión de Participantes</h2>
                                         <div className="space-y-6">
                                             <div className="form-control">
-                                                <label className="label">
+                                                <label htmlFor="invite-email" className="label">
                                                     <span className="label-text font-medium mb-2">Invitar por email</span>
                                                 </label>
                                                 <div className="flex gap-2 mt-2">
                                                     <input
+                                                        id="invite-email"
                                                         type="email"
                                                         placeholder="email@ejemplo.com"
                                                         className="input input-bordered flex-1"
@@ -221,11 +241,12 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                                             <div className="divider">O</div>
 
                                             <div className="form-control">
-                                                <label className="label">
+                                                <label htmlFor="invite-code" className="label">
                                                     <span className="label-text font-medium mb-2">Código de invitación</span>
                                                 </label>
                                                 <div className="flex gap-2 mt-2">
                                                     <input
+                                                        id="invite-code"
                                                         type="text"
                                                         value="COURSE-2024-ABC123"
                                                         readOnly
@@ -272,6 +293,15 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                     </div>
                 </div>
             </main>
+            
+            {/* FAB Button - Solo visible para profesores */}
+            {isTeacher && (
+                <CourseFAB 
+                    onAddTask={handleAddTask} 
+                    courseId={String(courseData?._id)} 
+                    defaultSubjectId={subjects[0] ? String(subjects[0]._id) : undefined}
+                />
+            )}
         </div>
     );
 }

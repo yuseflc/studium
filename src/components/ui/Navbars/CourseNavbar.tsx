@@ -58,6 +58,9 @@ export default async function CourseNavbar() {
         "Digitalización"
     ];
 
+    const userFirstName = user?.firstName || user?.name || "Usuario";
+    const userProfilePicture = user?.profile?.profilePicture || user?.profilePicture || "";
+
     const cursoRoutes: Record<string, string> = {
         "Diseño de Interfaces Web": "/course/diseno-interfaces-web",
         "Despliegue de Aplicaciones web": "/course/despliegue-aplicaciones-web",
@@ -277,9 +280,9 @@ export default async function CourseNavbar() {
                                 </div>
                             </div>
                             <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow border border-base-300">
-                                <p className="px-4 py-2 text-sm font-medium text-base-content text-center">
+                                <li className="px-4 py-2 text-sm font-medium text-base-content text-center">
                                     {user?.firstName}
-                                </p>
+                                </li>
                                 <li>
                                     <a href="/account/profile" className="justify-between">
                                         Profile
@@ -369,7 +372,7 @@ export default async function CourseNavbar() {
                             <div className="animate-[fadeInUp_0.35s_ease-out_0.08s_both]">
                                 <div className="py-4 border-b border-base-200">
                                     <div className="collapse collapse-arrow">
-                                        <input type="checkbox" />
+                                        <input type="checkbox" aria-label="Expandir cursos disponibles" />
                                         <div className="collapse-title font-extrabold text-base text-base-content tracking-tight uppercase">
                                             CURSOS DISPONIBLES
                                         </div>

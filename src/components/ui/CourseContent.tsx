@@ -29,9 +29,19 @@ interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
  */
 interface CourseContentProps {
   subjects: ISubjectWithUnits[];
+  newTasks?: any[];
+  deletedItems?: string[];
+  onDeleteItem?: (id: string) => void;
+  isTeacher?: boolean;
 }
 
-export default function CourseContent({ subjects }: CourseContentProps) {
+export default function CourseContent({ 
+  subjects, 
+  newTasks = [],
+  deletedItems = [],
+  onDeleteItem,
+  isTeacher = false
+}: CourseContentProps) {
   // Controla qué materias están expandidas en la UI.
   const [openSubjects, setOpenSubjects] = useState<Record<string, boolean>>({});
 
@@ -121,15 +131,14 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                   >
                     {(subject.units.length > 0 || (subject.tasks && subject.tasks.length > 0)) ? (
                       <div className="flex flex-col gap-3 ml-2 lg:ml-4 pb-4">
-                        {/* Renderizar Tareas del Subject si existen */}
-                        {subject.tasks?.map((task: ITask) => {
-                          if (!task._id) return null;
-                          return (
+                        {/* Sección 1: Renderizar tareas del subject si existen */}
+                        {(subject as any).tasks && (subject as any).tasks
+                          .filter((task: any) => !deletedItems.includes(String(task.id)))
+                          .map((task: any) => (
                           <div
-                            key={task._id.toString()}
-                            className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
-                            role="button"
-                            tabIndex={0}
+                            key={task.id}
+                            className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md group relative"
+                            role="region"
                             aria-label={`Tarea: ${task.title}`}
                           >
                             {/* Icono circular de tarea con color amarillo (tema del proyecto) */}
@@ -154,9 +163,16 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                             </div>
 
                             {/* Menú de opciones (visible en hover) */}
-                            <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical" aria-hidden="true"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                            </div>
+                            {isTeacher && (
+                              <div className="dropdown dropdown-end opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+                                <div tabIndex={0} role="button" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                </div>
+                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
+                                  <li><button onClick={() => onDeleteItem?.(String(task.id))} className="text-error hover:bg-error/10 hover:text-error">Eliminar</button></li>
+                                </ul>
+                              </div>
+                            )}
                           </div>
                           );
                         })}
@@ -165,12 +181,12 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                         {(sortedUnits.length > 0)
                           ? sortedUnits
                               .flatMap((unit) => unit.resources || [])
+                              .filter((resource: IResource) => !deletedItems.includes(String(resource._id)))
                               .map((resource : IResource) => (
                                 <div
                                   key={resource._id?.toString()}
-                                  className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group"
-                                  role="button"
-                                  tabIndex={0}
+                                  className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md group relative"
+                                  role="region"
                                   aria-label={`Recurso: ${resource.title}`}
                                 >
                                   {/* Icono circular según tipo de recurso (link/file/text) */}
@@ -204,9 +220,16 @@ export default function CourseContent({ subjects }: CourseContentProps) {
                                   </div>
 
                                   {/* Menú de opciones (visible en hover) */}
-                                  <div className="text-base-content/30 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" aria-hidden="true">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-more-vertical"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                                  </div>
+                                  {isTeacher && (
+                                    <div className="dropdown dropdown-end opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+                                      <div tabIndex={0} role="button" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                                      </div>
+                                      <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
+                                        <li><button onClick={() => onDeleteItem?.(String(resource._id))} className="text-error hover:bg-error/10 hover:text-error">Eliminar</button></li>
+                                      </ul>
+                                    </div>
+                                  )}
                                 </div>
                               ))
                           : null
@@ -225,9 +248,53 @@ export default function CourseContent({ subjects }: CourseContentProps) {
           );
         })}
 
-      {/* Sección separada: Listado completo de todas las tareas del curso */}
-      <div className="pt-8 border-t border-base-300 mt-12">
-        <TasksView />
+      {/* Sección separada: Listado completo de todas las tareas del curso renderizado como un Subject (Tema) */}
+      <div
+        id="tasks-global-section"
+        className="scroll-mt-24"
+      >
+        <div className="mb-6 flex flex-col gap-2 group">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h3 className="font-bold text-2xl text-base-content/90 tracking-tight">
+                Tareas
+              </h3>
+              <motion.button
+                type="button"
+                onClick={() => toggleSubject('tasks-global-section')}
+                animate={{ rotate: openSubjects['tasks-global-section'] !== false ? 0 : -90 }}
+                transition={{ duration: 0.2 }}
+                className="text-base-content/30 hover:text-primary hover:bg-base-200 p-1 rounded-full transition-colors cursor-pointer flex items-center justify-center"
+                aria-label={openSubjects['tasks-global-section'] !== false ? 'Contraer tareas' : 'Expandir tareas'}
+                aria-expanded={openSubjects['tasks-global-section'] !== false}
+              >
+                <ChevronDown size={20} />
+              </motion.button>
+            </div>
+          </div>
+          <div className="h-0.5 w-full bg-base-200 rounded-full" />
+        </div>
+
+        <AnimatePresence>
+          {openSubjects['tasks-global-section'] !== false && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="overflow-hidden"
+            >
+              <div className="flex flex-col gap-3 ml-2 lg:ml-4 pb-4">
+                <TasksView 
+                  newTasks={newTasks} 
+                  deletedItems={deletedItems} 
+                  onDeleteItem={onDeleteItem} 
+                  isTeacher={isTeacher} 
+                />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
