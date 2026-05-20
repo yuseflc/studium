@@ -1,4 +1,4 @@
-import { ClipboardList, GraduationCap, FileText, Plus, X, CheckCircle } from 'lucide-react';
+import { ClipboardList, GraduationCap, FileText, Plus, X, CheckCircle, Upload } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 
@@ -8,6 +8,8 @@ interface CourseFABProps {
   defaultSubjectId?: string;
 }
 
+type CreationType = 'task' | 'exam' | 'resource' | null;
+
 export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
@@ -15,60 +17,99 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
 
   const modalRef = useRef<HTMLDialogElement>(null);
   
-  // Form states
-  const [taskTitle, setTaskTitle] = useState('');
-  const [taskDescription, setTaskDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  
   // Flow states
+  const [creationType, setCreationType] = useState<CreationType>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
+  const [createdItemId, setCreatedItemId] = useState<string | null>(null);
 
-  const handleOpenModal = () => {
+  // Form states
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  
+  const handleOpenModal = (type: CreationType) => {
     // Resetear estados al abrir
-    setTaskTitle('');
-    setTaskDescription('');
+    setCreationType(type);
+    setTitle('');
+    setDescription('');
     setDueDate('');
+    setSelectedFile(null);
     setIsSubmitting(false);
     setIsSuccess(false);
-    setCreatedTaskId(null);
+    setCreatedItemId(null);
 
     if (modalRef.current) {
       modalRef.current.showModal();
     }
   };
 
-  const handleSaveTask = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!taskTitle.trim()) return;
+    if (!title.trim()) return;
 
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: taskTitle,
-          description: taskDescription,
-          dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
-          courseId: courseId,
-          subjectId: defaultSubjectId
-        })
-      });
+      let response;
+      if (creationType === 'resource' && selectedFile) {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('courseId', courseId || '');
+        if (defaultSubjectId) {
+          formData.append('subjectId', defaultSubjectId);
+        }
+        formData.append('file', selectedFile);
 
-      if (!response.ok) {
-        throw new Error('Error al guardar la tarea');
+        response = await fetch('/api/resources', {
+          method: 'POST',
+          body: formData,
+        });
+      } else {
+        let endpoint = '';
+        let bodyData: any = {
+          title,
+          description,
+          courseId,
+          subjectId: defaultSubjectId
+        };
+
+        if (creationType === 'task') {
+          endpoint = '/api/tasks';
+          bodyData.dueDate = dueDate ? new Date(dueDate).toISOString() : new Date().toISOString();
+        } else if (creationType === 'exam') {
+          endpoint = '/api/exams';
+          bodyData.dueDate = dueDate ? new Date(dueDate).toISOString() : new Date().toISOString();
+        } else if (creationType === 'resource') {
+          endpoint = '/api/resources';
+        }
+
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
       }
 
-      const createdTask = await response.json();
+      if (!response.ok) {
+        throw new Error('Error al guardar');
+      }
+
+      const createdItem = await response.json();
       
-      onAddTask(createdTask.task || createdTask);
+      // Si es tarea, se llama a onAddTask
+      if (creationType === 'task' && onAddTask) {
+        onAddTask(createdItem.task || createdItem);
+      }
       
       setIsSubmitting(false);
       setIsSuccess(true);
-      setCreatedTaskId(createdTask.task?._id || createdTask._id);
+      
+      // Intentar obtener el ID independientemente de la estructura
+      const itemId = createdItem.task?._id || createdItem.exam?._id || createdItem.resource?._id || createdItem._id;
+      setCreatedItemId(itemId || null);
     } catch (error) {
       console.error(error);
       setIsSubmitting(false);
@@ -77,11 +118,58 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
   };
 
   const handleRedirect = () => {
-    if (createdTaskId) {
+    if (createdItemId) {
       if (modalRef.current) modalRef.current.close();
-      router.push(`/mycourses/${slug}/tasks/${createdTaskId}`);
+      if (creationType === 'task') {
+        router.push(`/mycourses/${slug}/tasks/${createdItemId}`);
+      } else if (creationType === 'exam') {
+        router.push(`/mycourses/${slug}/exams/${createdItemId}`);
+      } else if (creationType === 'resource') {
+        router.push(`/mycourses/${slug}/resources/${createdItemId}`);
+      }
     }
   };
+
+  const getModalConfig = () => {
+    switch (creationType) {
+      case 'exam':
+        return {
+          icon: <GraduationCap size={20} />,
+          title: 'Crear Nuevo Examen',
+          successText: '¡Examen creado con éxito!',
+          successDesc: 'El examen se ha añadido al curso correctamente.',
+          btnText: 'Crear Examen',
+          redirectText: 'Ir al Examen',
+          nameLabel: 'Nombre del examen',
+          namePlaceholder: 'Ej: Examen parcial de matemáticas'
+        };
+      case 'resource':
+        return {
+          icon: <FileText size={20} />,
+          title: 'Añadir Nuevo Recurso',
+          successText: '¡Recurso añadido con éxito!',
+          successDesc: 'El recurso se ha subido al curso correctamente.',
+          btnText: 'Añadir Recurso',
+          redirectText: 'Ir al Recurso',
+          nameLabel: 'Nombre del recurso',
+          namePlaceholder: 'Ej: Presentación tema 1'
+        };
+      case 'task':
+      default:
+        return {
+          icon: <ClipboardList size={20} />,
+          title: 'Crear Nueva Tarea',
+          successText: '¡Tarea creada con éxito!',
+          successDesc: 'La tarea se ha añadido al curso correctamente.',
+          btnText: 'Crear Tarea',
+          redirectText: 'Ir a la Tarea',
+          nameLabel: 'Nombre de la tarea',
+          namePlaceholder: 'Ej: Ensayo sobre el tema 1'
+        };
+    }
+  };
+
+  const config = getModalConfig();
 
   return (
     <>
@@ -95,7 +183,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
         </button>
 
         <button 
-          onClick={handleOpenModal}
+          onClick={() => handleOpenModal('task')}
           className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
           title="Crear Tarea"
           aria-label="Crear Tarea"
@@ -104,6 +192,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
         </button>
 
         <button 
+          onClick={() => handleOpenModal('exam')}
           className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
           title="Crear Examen"
           aria-label="Crear Examen"
@@ -112,6 +201,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
         </button>
 
         <button 
+          onClick={() => handleOpenModal('resource')}
           className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
           title="Añadir Recurso (PDF, Info...)"
           aria-label="Añadir Recurso"
@@ -129,21 +219,21 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
           {!isSuccess ? (
             <>
               <h3 className="font-bold text-lg text-primary mb-6 flex items-center gap-2">
-                <ClipboardList size={20} />
-                Crear Nueva Tarea
+                {config.icon}
+                {config.title}
               </h3>
               
-              <form onSubmit={handleSaveTask} className="flex flex-col gap-4">
+              <form onSubmit={handleSave} className="flex flex-col gap-4">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text font-semibold">Nombre de la tarea</span>
+                    <span className="label-text font-semibold">{config.nameLabel}</span>
                   </label>
                   <input 
                     type="text" 
-                    placeholder="Ej: Ensayo sobre el tema 1" 
-                    className="input input-bordered w-full focus:input-primary" 
-                    value={taskTitle}
-                    onChange={(e) => setTaskTitle(e.target.value)}
+                    placeholder={config.namePlaceholder} 
+                    className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
                     required
                     disabled={isSubmitting}
                   />
@@ -155,27 +245,53 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
                   </label>
                   <input 
                     type="text"
-                    className="input input-bordered w-full focus:input-primary" 
-                    placeholder="Escribe las instrucciones de la tarea..."
-                    value={taskDescription}
-                    onChange={(e) => setTaskDescription(e.target.value)}
+                    className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
+                    placeholder="Escribe una breve descripción..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                     disabled={isSubmitting}
                   />
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">Fecha de entrega</span>
-                  </label>
-                  <input 
-                    type="date" 
-                    className="input input-bordered w-full focus:input-primary" 
-                    value={dueDate}
-                    onChange={(e) => setDueDate(e.target.value)}
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
+                {(creationType === 'task' || creationType === 'exam') && (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold">
+                        {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
+                      </span>
+                    </label>
+                    <input 
+                      type="date" 
+                      className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      required
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                )}
+
+                {creationType === 'resource' && (
+                  <div className="form-control">
+                    <label className="label">
+                      <span className="label-text font-semibold flex items-center gap-2">
+                        <Upload size={16} /> Subir archivo (Requerido)
+                      </span>
+                    </label>
+                    <input 
+                      type="file" 
+                      className="file-input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                      disabled={isSubmitting}
+                      required
+                    />
+                    {selectedFile && (
+                      <span className="text-xs text-base-content/60 mt-1 block truncate">
+                        Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <div className="modal-action mt-6">
                   <button 
@@ -186,8 +302,12 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
                   >
                     Cancelar
                   </button>
-                  <button type="submit" className="btn btn-primary min-w-[120px]" disabled={isSubmitting}>
-                    {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : "Crear Tarea"}
+                  <button 
+                    type="submit" 
+                    className="btn btn-primary min-w-[120px] hover:bg-primary/90 focus:bg-primary focus:border-primary active:bg-primary active:border-primary focus:outline-none" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : config.btnText}
                   </button>
                 </div>
               </form>
@@ -197,14 +317,14 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
               <div className="w-16 h-16 bg-success/20 text-success rounded-full flex items-center justify-center mb-4">
                 <CheckCircle size={32} />
               </div>
-              <h3 className="font-bold text-2xl text-base-content">¡Tarea creada con éxito!</h3>
-              <p className="text-base-content/70">La tarea se ha añadido al curso correctamente.</p>
+              <h3 className="font-bold text-2xl text-base-content">{config.successText}</h3>
+              <p className="text-base-content/70">{config.successDesc}</p>
               <div className="modal-action justify-center mt-8 gap-4 w-full">
                 <button type="button" className="btn btn-ghost" onClick={() => modalRef.current?.close()}>
                   Cerrar
                 </button>
                 <button type="button" className="btn btn-primary" onClick={handleRedirect}>
-                  Ir a la Tarea
+                  {config.redirectText}
                 </button>
               </div>
             </div>

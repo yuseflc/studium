@@ -1,23 +1,10 @@
-import { FileText, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { ClipboardList } from 'lucide-react';
 import Link from 'next/link';
 import { CALIFICACIONES } from '@/seed/data';
+import { useParams } from 'next/navigation';
 
-/**
- * Componente de icono extraído fuera del render principal
- * Evita recrear JSX en cada render y mantiene la lógica limpia y reutilizable
- */
-const TaskStatusIcon = ({ status }: { status: string }) => {
-  // js-index-maps: Map para lookups O(1) en lugar de switch/case repetido
-  const iconConfig = new Map([
-    ['graded', { icon: CheckCircle, className: 'text-success' }],
-    ['pending', { icon: Clock, className: 'text-warning' }],
-    ['late', { icon: AlertCircle, className: 'text-error' }],
-  ]);
-  
-  const config = iconConfig.get(status) || { icon: FileText, className: 'text-base-content/60' };
-  const IconComponent = config.icon;
-  
-  return <IconComponent className={config.className} size={18} aria-hidden="true" />;
+const TaskStatusIcon = () => {
+  return <ClipboardList size={18} className="text-yellow-600" aria-hidden="true" />;
 };
 
 interface TasksViewProps {
@@ -33,6 +20,9 @@ const TasksView = ({
   onDeleteItem, 
   isTeacher = false 
 }: TasksViewProps) => {
+  const params = useParams();
+  const slug = (params?.slug as string) || 'course-1';
+
   // Datos estáticos importados del seed, combinados con las nuevas tareas y filtrados
   const tasks = [...CALIFICACIONES, ...newTasks].filter(
     (task) => !deletedItems.includes(String(task.id))
@@ -49,16 +39,15 @@ const TasksView = ({
         
         return (
           <Link 
-            href={`/mycourses/course-1/tasks/${task.id}`} 
+            href={`/mycourses/${slug}/tasks/${task.id}`} 
             key={task.id}
             className="block"
             aria-label={`Ver tarea: ${task.taskTitle}`}
           >
             <div className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group">
               <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
-                <TaskStatusIcon status={task.status} />
-              </div>
-              
+                  <TaskStatusIcon />
+                </div>
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
@@ -84,7 +73,7 @@ const TasksView = ({
               {/* Menú de opciones opcional */}
               {isTeacher && (
                 <div className="dropdown dropdown-end opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" onClick={(e) => e.preventDefault()}>
-                  <div tabIndex={0} role="button" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
+                  <div tabIndex={0} role="button" aria-label="Abrir opciones de tarea" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
                   </div>
                   <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
