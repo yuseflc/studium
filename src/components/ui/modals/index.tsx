@@ -10,7 +10,7 @@ import { IconX, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 export const Modal = ({ id, dialogRef, onClose, children, className = "max-w-2xl", showClose = false }: ModalProps) => {
     return (
         <dialog id={id} ref={dialogRef} className="modal">
-            <div className={`modal-box border shadow-xl ${className}`}>
+            <div className={`modal-box border shadow-xl backdrop-blur-md ${className}`}>
                 {showClose && (
                     <button
                         onClick={onClose}
@@ -59,7 +59,7 @@ export const ModalDanger = ({
     };
 
     return (
-        <Modal id={id} onClose={closeDialog} className="border-error/30 bg-error/5 backdrop-blur">
+        <Modal id={id} onClose={closeDialog} className="border-error/30 bg-error/5 backdrop-blur-md">
             <h3 className="font-bold text-lg text-error">{title}</h3>
             
             <div className="py-4">
@@ -120,7 +120,7 @@ export const ModalAdvise = ({
     };
 
     return (
-        <Modal id={id} onClose={closeDialog} className="border-warning/30 bg-warning/5 backdrop-blur">
+        <Modal id={id} onClose={closeDialog} className="border-warning/30 bg-warning/5 backdrop-blur-md">
             <h3 className="font-bold text-lg text-warning">{title}</h3>
             
             <div className="py-4">
@@ -192,9 +192,9 @@ export const ModalForm = ({
     className = "max-w-2xl"
 }: ModalFormProps) => {
     return (
-        <Modal id={id} dialogRef={dialogRef} onClose={onClose} showClose={true} className={`bg-base-100 border-base-300 p-6 ${className}`}>
+        <Modal id={id} dialogRef={dialogRef} onClose={onClose} showClose={true} className={`bg-warning/5 border-warning/30 p-6 backdrop-blur-md ${className}`}>
             <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-2xl">
+                <h3 className="font-bold text-2xl text-warning">
                     {success ? "¡Completado!" : title}
                 </h3>
             </div>

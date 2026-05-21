@@ -234,19 +234,19 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
       >
         {!isSuccess ? (
           <>
-            <div className="flex items-center gap-2 mb-2 text-primary">
+            <div className="flex items-center gap-2 mb-2 text-warning">
               {config.icon}
               <span className="font-semibold">Nuevo Registro</span>
             </div>
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-semibold">{config.nameLabel}</span>
+                <span className="label-text font-bold text-warning/80">{config.nameLabel}</span>
               </label>
               <input
                 type="text"
                 placeholder={config.namePlaceholder}
-                className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -256,10 +256,10 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-semibold">Tema / Materia<span className="text-error"> *</span></span>
+                <span className="label-text font-bold text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
               </label>
               <select
-                className="select w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                className="select w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
                 value={selectedSubjectId}
                 onChange={(e) => setSelectedSubjectId(e.target.value)}
                 required
@@ -276,11 +276,11 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-semibold">Descripción</span>
+                <span className="label-text font-bold text-warning/80">Descripción</span>
               </label>
               <input
                 type="text"
-                className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
                 placeholder="Escribe una breve descripción..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -291,13 +291,13 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
             {(creationType === 'task' || creationType === 'exam') && (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-semibold">
+                  <span className="label-text font-bold text-warning/80">
                     {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
                   </span>
                 </label>
                 <input
                   type="date"
-                  className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                  className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                   required
@@ -309,19 +309,19 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
             {creationType === 'resource' && (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-semibold flex items-center gap-2">
+                  <span className="label-text font-bold text-warning/80 flex items-center gap-2">
                     <Upload size={16} /> Subir archivo (Requerido)
                   </span>
                 </label>
                 <input
                   type="file"
-                  className="file-input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                  className="file-input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   disabled={isSubmitting}
                   required
                 />
                 {selectedFile && (
-                  <span className="text-xs text-base-content/60 mt-1 block truncate">
+                  <span className="text-xs text-warning/70 mt-1 block truncate">
                     Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
                   </span>
                 )}

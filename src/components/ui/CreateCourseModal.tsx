@@ -130,7 +130,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
       >
         <div className="form-control">
           <label className="label">
-            <span className="label-text font-bold">Nombre de la clase<span className="text-error"> *</span></span>
+            <span className="label-text font-bold text-warning/80">Nombre de la clase<span className="text-error"> *</span></span>
           </label>
           <input
             name="title"
@@ -138,7 +138,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
             value={formData.title}
             onChange={handleChange}
             placeholder="Nombre de la clase"
-            className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+            className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all"
             required
             disabled={loading}
           />
@@ -146,14 +146,14 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
 
         <div className="form-control">
           <label className="label">
-            <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
+            <span className="label-text font-bold text-warning/80">Descripción<span className="text-error"> *</span></span>
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             placeholder="Descripción del curso"
-            className="textarea w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+            className="textarea w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all"
             rows={3}
             required
             disabled={loading}

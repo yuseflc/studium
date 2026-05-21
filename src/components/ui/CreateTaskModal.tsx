@@ -91,7 +91,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
       >
         <div className="form-control">
           <label className="label">
-            <span className="label-text font-bold">Título de la tarea<span className="text-error"> *</span></span>
+            <span className="label-text font-bold text-warning/80">Título de la tarea<span className="text-error"> *</span></span>
           </label>
           <input
             name="title"
@@ -99,7 +99,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             value={formData.title}
             onChange={handleChange}
             placeholder="Nombre de la tarea"
-            className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+            className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all"
             required
             disabled={loading}
           />
@@ -107,14 +107,14 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
 
         <div className="form-control">
           <label className="label">
-            <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
+            <span className="label-text font-bold text-warning/80">Descripción<span className="text-error"> *</span></span>
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             placeholder="Descripción de la tarea"
-            className="textarea w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+            className="textarea w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all"
             rows={4}
             required
             disabled={loading}
