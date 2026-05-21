@@ -195,9 +195,9 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
                             </p>
                         ) : (
                             filteredTasks.map((task) => {
-                                const taskId = String(task._id || task.id);
-                                const title = task.title || task.taskTitle;
-                                const description = task.description || task.category || "Tarea";
+                                const taskId = String(task._id);
+                                const title = task.title;
+                                const description = task.description || "Tarea";
                                 
                                 return (
                                     <div 

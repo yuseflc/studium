@@ -27,16 +27,16 @@ const TasksView = ({
 
   // Filtrar tareas eliminadas
   const filteredTasks = tasks.filter(
-    (task) => !deletedItems.includes(String(task._id || task.id))
+    (task) => !deletedItems.includes(String(task._id))
   );
 
   return (
     <div className="space-y-3">
       {filteredTasks.map((task) => {
-        const taskId = task._id?.toString() || task.id;
-        const taskTitle = task.title || task.taskTitle;
-        const taskDescription = task.description || task.category || "Nueva tarea publicada";
-        const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : (task.submittedAt ? new Date(task.submittedAt).toLocaleDateString() : "");
+        const taskId = task._id?.toString();
+        const taskTitle = task.title;
+        const taskDescription = task.description || "Nueva tarea publicada";
+        const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "";
         
         return (
           <Link 

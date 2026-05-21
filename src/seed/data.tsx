@@ -232,8 +232,8 @@ const CURSOS: ICourse[] = [
           }
         ],
         tasks: [
-          { _id: "g-pass" as any, title: "Práctica de Grid y Flexbox", description: "Tareas", dueDate: new Date("2024-03-20") },
-          { _id: "g-pending" as any, title: "Análisis de Interfaz UX", description: "Proyectos", dueDate: new Date("2024-03-21") }
+          { _id: "g-pass" as any, title: "Práctica de Grid y Flexbox", description: "Dominio de Flexbox y CSS Grid para layouts complejos.", dueDate: new Date("2024-03-20") },
+          { _id: "g-pending" as any, title: "Análisis de Interfaz UX", description: "Auditoría de usabilidad de un sitio web existente.", dueDate: new Date("2024-03-21") }
         ] as any
       },
       {
@@ -252,8 +252,8 @@ const CURSOS: ICourse[] = [
           }
         ],
         tasks: [
-          { _id: "g-fail" as any, title: "Cuestionario de Accesibilidad", description: "Exámenes", dueDate: new Date("2024-03-18") },
-          { _id: "g-late" as any, title: "Propuesta de Personas", description: "Tareas", dueDate: new Date("2024-03-15") }
+          { _id: "g-fail" as any, title: "Cuestionario de Accesibilidad", description: "Evaluación de cumplimiento de pautas WCAG 2.1.", dueDate: new Date("2024-03-18") },
+          { _id: "g-late" as any, title: "Propuesta de Personas", description: "Creación de perfiles de usuario basados en investigación.", dueDate: new Date("2024-03-15") }
         ] as any
       }
     ]
