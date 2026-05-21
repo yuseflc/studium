@@ -30,7 +30,6 @@ interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
  */
 interface CourseContentProps {
   subjects: ISubjectWithUnits[];
-  newTasks?: any[];
   deletedItems?: string[];
   onDeleteItem?: (id: string) => void;
   isTeacher?: boolean;
@@ -38,13 +37,15 @@ interface CourseContentProps {
 
 export default function CourseContent({ 
   subjects, 
-  newTasks = [],
   deletedItems = [],
   onDeleteItem,
   isTeacher = false
 }: CourseContentProps) {
   // Controla qué materias están expandidas en la UI.
   const [openSubjects, setOpenSubjects] = useState<Record<string, boolean>>({});
+
+  // Recopilar todas las tareas de todos los subjects
+  const allTasks = subjects.flatMap(s => (s as any).tasks || []);
 
   /**
    * Toggle de expansión de una materia.
@@ -68,8 +69,8 @@ export default function CourseContent({
       <div className="card bg-base-100 border border-base-300 p-12 text-center">
         <div className="flex flex-col items-center gap-4">
           <BookOpen size={48} className="text-base-content/20" />
-          <p className="text-xl font-semibold">Aún no hay contenido disponible</p>
-          <p className="text-base-content/60">El profesor aún no ha añadido materias o unidades a este curso.</p>
+          <p className="text-xl font-semibold">Aún no hay tareas disponibles</p>
+          <p className="text-base-content/60">El profesor aún no ha añadido temas o tareas a este curso.</p>
         </div>
       </div>
     );
@@ -130,115 +131,19 @@ export default function CourseContent({
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="overflow-hidden"
                   >
-                    {(subject.units.length > 0 || (subject.tasks && subject.tasks.length > 0)) ? (
+                    {((subject as any).tasks && (subject as any).tasks.length > 0) ? (
                       <div className="flex flex-col gap-3 ml-2 lg:ml-4 pb-4">
-                        {/* Sección 1: Renderizar tareas del subject si existen */}
-                        {(subject as any).tasks && (subject as any).tasks
-                          .filter((task: any) => !deletedItems.includes(String(task.id)))
-                          .map((task: any) => (
-                          <div
-                            key={task.id}
-                            className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md group relative"
-                            role="region"
-                            aria-label={`Tarea: ${task.title}`}
-                          >
-                            {/* Icono circular de tarea con color amarillo (tema del proyecto) */}
-                            <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
-                              <ClipboardList size={18} className="fill-yellow-600/10" />
-                            </div>
-
-                            {/* Contenido principal: título y detalles de la tarea */}
-                            <div className="flex flex-col min-w-0 flex-1">
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
-                                  {task.title}
-                                </span>
-                              </div>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <span className="text-xs text-base-content/50 truncate">
-                                  {task.dueDate instanceof Date 
-                                    ? `Fecha de entrega: ${task.dueDate.toLocaleDateString()}` 
-                                    : (task.description || "Nueva tarea publicada")}
-                                </span>
-                              </div>
-                            </div>
-
-                            {/* Menú de opciones (visible en hover) */}
-                            {isTeacher && (
-                              <div className="dropdown dropdown-end opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
-                                <div tabIndex={0} role="button" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                                </div>
-                                <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
-                                  <li><button onClick={() => onDeleteItem?.(String(task.id))} className="text-error hover:bg-error/10 hover:text-error">Eliminar</button></li>
-                                </ul>
-                              </div>
-                            )}
-                          </div>
-                        ))}
-
-                        {/* Sección 2: Renderizar recursos de unidades ordenados por order */}
-                        {(sortedUnits.length > 0)
-                          ? sortedUnits
-                              .flatMap((unit) => unit.resources || [])
-                              .filter((resource: IResource) => !deletedItems.includes(String(resource._id)))
-                              .map((resource : IResource) => (
-                                <div
-                                  key={resource._id?.toString()}
-                                  className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md group relative"
-                                  role="region"
-                                  aria-label={`Recurso: ${resource.title}`}
-                                >
-                                  {/* Icono circular según tipo de recurso (link/file/text) */}
-                                  <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
-                                    {resource.type === "link" && (
-                                      <StickyNote size={18} className="fill-yellow-600/10" />
-                                    )}
-                                    {resource.type === "file" && (
-                                      <Bookmark size={18} className="fill-yellow-600/10" />
-                                    )}
-                                    {resource.type === "text" && (
-                                      <GraduationCap size={18} />
-                                    )}
-                                    {resource.type !== "link" && resource.type !== "file" && resource.type !== "text" && (
-                                      <FileText size={18} />
-                                    )}
-                                  </div>
-
-                                  {/* Contenido principal: título y descripción del recurso */}
-                                  <div className="flex flex-col min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
-                                        {resource.title}
-                                      </span>
-                                    </div>
-                                    <div className="flex items-center gap-2 mt-0.5">
-                                      <span className="text-xs text-base-content/50 truncate">
-                                        {resource.description || "Nueva tarea publicada"}
-                                      </span>
-                                    </div>
-                                  </div>
-
-                                  {/* Menú de opciones (visible en hover) */}
-                                  {isTeacher && (
-                                    <div className="dropdown dropdown-end opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
-                                      <div tabIndex={0} role="button" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
-                                      </div>
-                                      <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
-                                        <li><button onClick={() => onDeleteItem?.(String(resource._id))} className="text-error hover:bg-error/10 hover:text-error">Eliminar</button></li>
-                                      </ul>
-                                    </div>
-                                  )}
-                                </div>
-                              ))
-                          : null
-                        }
+                        <TasksView 
+                          tasks={(subject as any).tasks} 
+                          deletedItems={deletedItems} 
+                          onDeleteItem={onDeleteItem} 
+                          isTeacher={isTeacher} 
+                        />
                       </div>
                     ) : (
                       // Mensaje cuando no hay contenido en la materia
                       <div className="ml-4 py-4 text-sm text-base-content/40 italic pb-4">
-                        Sin recursos en este tema
+                        Sin tareas en este tema
                       </div>
                     )}
                   </motion.div>
@@ -286,7 +191,7 @@ export default function CourseContent({
             >
               <div className="flex flex-col gap-3 ml-2 lg:ml-4 pb-4">
                 <TasksView 
-                  newTasks={newTasks} 
+                  tasks={allTasks} 
                   deletedItems={deletedItems} 
                   onDeleteItem={onDeleteItem} 
                   isTeacher={isTeacher} 

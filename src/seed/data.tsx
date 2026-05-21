@@ -232,8 +232,8 @@ const CURSOS: ICourse[] = [
           }
         ],
         tasks: [
-          { id: "t1", title: "Análisis de Heurísticas de Nielsen", dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
-          { id: "t2", title: "Prototipo de Baja Fidelidad", dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) }
+          { _id: "g-pass" as any, title: "Práctica de Grid y Flexbox", description: "Tareas", dueDate: new Date("2024-03-20") },
+          { _id: "g-pending" as any, title: "Análisis de Interfaz UX", description: "Proyectos", dueDate: new Date("2024-03-21") }
         ] as any
       },
       {
@@ -252,7 +252,8 @@ const CURSOS: ICourse[] = [
           }
         ],
         tasks: [
-          { id: "t3", title: "Paleta de Colores Accesible", dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000) }
+          { _id: "g-fail" as any, title: "Cuestionario de Accesibilidad", description: "Exámenes", dueDate: new Date("2024-03-18") },
+          { _id: "g-late" as any, title: "Propuesta de Personas", description: "Tareas", dueDate: new Date("2024-03-15") }
         ] as any
       }
     ]

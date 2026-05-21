@@ -27,13 +27,16 @@ interface CourseViewProps {
 export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
     const { data: session } = useSession();
     const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
-    const [newTasks, setNewTasks] = useState<any[]>([]);
     const [deletedItems, setDeletedItems] = useState<string[]>([]);
 
     const subjects = courseData?.subjects || [];
 
     const handleAddTask = (task: any) => {
-        setNewTasks((prev) => [...prev, task]);
+        // En lugar de manejar una lista separada, confiamos en que el backend
+        // refrescará los datos o que el componente padre los gestione.
+        // Por ahora, recargamos para ver los cambios si es necesario
+        // o simplemente dejamos que el sistema de estado lo maneje si se integra con TanStack Query
+        window.location.reload();
     };
 
     const handleDeleteItem = async (id: string) => {
@@ -55,7 +58,6 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                     {/* Header */}
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold mb-2">{courseData?.title || "Cargando curso..."}  {courseData?.status === "draft" && <span className="badge bg-secondary text-base-content">BORRADOR</span>}</h1>
-                        {(courseData?.description ? <p className="text-base-content/70">{courseData.description}</p> : <p className="text-base-content/60 italic">Sin descripción disponible.</p>)}
                     </div>
 
                     <div className="flex border-b border-base-300 mb-6 overflow-x-auto relative z-10">
@@ -112,7 +114,6 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                         {activeTab === "content" && (
                             <CourseContent 
                                 subjects={subjects} 
-                                newTasks={newTasks} 
                                 deletedItems={deletedItems}
                                 onDeleteItem={handleDeleteItem}
                                 isTeacher={isTeacher}
@@ -300,6 +301,7 @@ export default function CourseView({ courseData, isTeacher }: CourseViewProps) {
                     onAddTask={handleAddTask} 
                     courseId={String(courseData?._id)} 
                     defaultSubjectId={subjects[0] ? String(subjects[0]._id) : undefined}
+                    subjects={subjects}
                 />
             )}
         </div>

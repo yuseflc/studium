@@ -3,19 +3,21 @@ import Link from 'next/link';
 import { CALIFICACIONES } from '@/seed/data';
 import { useParams } from 'next/navigation';
 
+/* Vista de la tarea en el curso */
+
 const TaskStatusIcon = () => {
   return <ClipboardList size={18} className="text-yellow-600" aria-hidden="true" />;
 };
 
 interface TasksViewProps {
-  newTasks?: any[];
+  tasks: any[];
   deletedItems?: string[];
   onDeleteItem?: (id: string) => void;
   isTeacher?: boolean;
 }
 
 const TasksView = ({ 
-  newTasks = [], 
+  tasks = [], 
   deletedItems = [], 
   onDeleteItem, 
   isTeacher = false 
@@ -23,26 +25,25 @@ const TasksView = ({
   const params = useParams();
   const courseid = (params?.courseid as string) || 'course-1';
 
-  // Datos estáticos importados del seed, combinados con las nuevas tareas y filtrados
-  const tasks = [...CALIFICACIONES, ...newTasks].filter(
-    (task) => !deletedItems.includes(String(task.id))
+  // Filtrar tareas eliminadas
+  const filteredTasks = tasks.filter(
+    (task) => !deletedItems.includes(String(task._id || task.id))
   );
 
   return (
     <div className="space-y-3">
-      {tasks.map((task) => {
-        // js-cache-property-access: Cachear propiedades computadas en la iteración
-        // Evita recalcular en cada render si el componente padre re-renderiza
-        const submittedDate = new Date(task.submittedAt).toLocaleDateString();
-        const isGraded = task.status === 'graded';
-        const scoreColorClass = task.score < 50 ? 'text-error' : 'text-success';
+      {filteredTasks.map((task) => {
+        const taskId = task._id?.toString() || task.id;
+        const taskTitle = task.title || task.taskTitle;
+        const taskDescription = task.description || task.category || "Nueva tarea publicada";
+        const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : (task.submittedAt ? new Date(task.submittedAt).toLocaleDateString() : "");
         
         return (
           <Link 
-            href={`/mycourses/${courseid}/tasks/${task.id}`} 
-            key={task.id}
+            href={`/mycourses/${courseid}/tasks/${taskId}`} 
+            key={taskId}
             className="block"
-            aria-label={`Ver tarea: ${task.taskTitle}`}
+            aria-label={`Ver tarea: ${taskTitle}`}
           >
             <div className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group">
               <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
@@ -51,22 +52,19 @@ const TasksView = ({
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
-                    {task.taskTitle}
+                    {taskTitle}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
                   <span className="text-xs text-base-content/50 truncate">
-                    {task.category}
+                    {taskDescription}
                   </span>
                 </div>
               </div>
 
               <div className="text-right flex-shrink-0 ml-2">
-                <p className={`text-sm font-semibold ${scoreColorClass}`}>
-                  {isGraded ? `${task.score}/${task.maxScore}` : 'Pendiente'}
-                </p>
                 <p className="text-xs text-base-content/60">
-                  {submittedDate}
+                  {dueDate}
                 </p>
               </div>
               
@@ -81,7 +79,7 @@ const TasksView = ({
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
-                          onDeleteItem?.(String(task.id));
+                          onDeleteItem?.(String(taskId));
                         }} 
                         className="text-error hover:bg-error/10 hover:text-error"
                       >

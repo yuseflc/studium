@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import Subject from "@/models/Subject";
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
+import Task from "@/models/Task";
 import Course from "@/models/Course";
 import { LOGGER } from "@/config/logger";
 
@@ -75,10 +76,16 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
             .sort({ order: 1 })
             .lean();
 
+          // Fetch tasks associated with this subject
+          const tasks = await Task.find({ subjectId: subject._id })
+            .sort({ createdAt: -1 })
+            .lean();
+
           return {
             ...subject,
             units: units || [], // Retornar units pobladas en lugar de unitIds
             unitIds: unitIds, // Mantener también los IDs
+            tasks: tasks || [], // Incluir tareas
           };
         } catch (subjectError) {
           LOGGER.error({ courseId, subjectId: subject._id, error: subjectError }, "Error processing subject");

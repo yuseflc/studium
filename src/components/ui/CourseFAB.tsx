@@ -6,11 +6,12 @@ interface CourseFABProps {
   onAddTask: (task: any) => void;
   courseId?: string;
   defaultSubjectId?: string;
+  subjects?: any[];
 }
 
 type CreationType = 'task' | 'exam' | 'resource' | null;
 
-export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: CourseFABProps) {
+export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subjects = [] }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
   const courseid = params?.courseid || 'course-1';
@@ -27,6 +28,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [selectedSubjectId, setSelectedSubjectId] = useState(defaultSubjectId || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const handleOpenModal = (type: CreationType) => {
@@ -35,6 +37,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
     setTitle('');
     setDescription('');
     setDueDate('');
+    setSelectedSubjectId(defaultSubjectId || '');
     setSelectedFile(null);
     setIsSubmitting(false);
     setIsSuccess(false);
@@ -47,7 +50,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !selectedSubjectId) return;
 
     setIsSubmitting(true);
 
@@ -58,9 +61,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
         formData.append('title', title);
         formData.append('description', description);
         formData.append('courseId', courseId || '');
-        if (defaultSubjectId) {
-          formData.append('subjectId', defaultSubjectId);
-        }
+        formData.append('subjectId', selectedSubjectId);
         formData.append('file', selectedFile);
 
         response = await fetch('/api/resources', {
@@ -73,7 +74,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
           title,
           description,
           courseId,
-          subjectId: defaultSubjectId
+          subjectId: selectedSubjectId
         };
 
         if (creationType === 'task') {
@@ -237,6 +238,26 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId }: Cou
                     required
                     disabled={isSubmitting}
                   />
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-semibold">Tema / Materia<span className="text-error"> *</span></span>
+                  </label>
+                  <select 
+                    className="select w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                    value={selectedSubjectId}
+                    onChange={(e) => setSelectedSubjectId(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                  >
+                    <option value="" disabled>Selecciona un tema...</option>
+                    {subjects.map((subject: any) => (
+                      <option key={subject._id?.toString() || subject.id} value={subject._id?.toString() || subject.id}>
+                        {subject.title}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="form-control">

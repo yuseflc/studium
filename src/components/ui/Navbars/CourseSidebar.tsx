@@ -4,23 +4,23 @@ import { motion } from "framer-motion";
 import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
+import { ITask } from "@/models/Task";
 import { useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { CALIFICACIONES } from "@/seed/data";
 
 interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
   units?: (IUnit & { resources?: IResource[] })[];
   unitIds?: any[];
+  tasks?: ITask[];
 }
 
 interface CourseSidebarProps {
     isTeacher: boolean;
     subjects: ISubjectWithUnits[];
     courseData?: any;
-    newTasks?: any[];
 }
 
-export default function CourseSidebar({ isTeacher, subjects, courseData, newTasks = [] }: CourseSidebarProps) {
+export default function CourseSidebar({ isTeacher, subjects, courseData }: CourseSidebarProps) {
     const router = useRouter();
     const params = useParams();
     const courseid = (params?.courseid as string) || "course-1";
@@ -62,18 +62,15 @@ export default function CourseSidebar({ isTeacher, subjects, courseData, newTask
         },
     };
 
-    // Combinar tareas estáticas del seed con las creadas dinámicamente
-    const allTasks = [
-        ...CALIFICACIONES,
-        ...newTasks
-    ];
+    // Recopilar todas las tareas de los subjects
+    const allTasks = subjects.flatMap(s => s.tasks || []);
 
-    // Filtrar tareas por término de búsqueda (título o categoría)
+    // Filtrar tareas por término de búsqueda (título o descripción)
     const filteredTasks = allTasks.filter(task => {
-        const title = task.taskTitle || task.title || "";
-        const category = task.category || "Tarea";
+        const title = task.title || "";
+        const description = task.description || "";
         return title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-               category.toLowerCase().includes(searchTerm.toLowerCase());
+               description.toLowerCase().includes(searchTerm.toLowerCase());
     });
 
     const handleGoToTask = (taskId: string) => {
@@ -115,13 +112,10 @@ export default function CourseSidebar({ isTeacher, subjects, courseData, newTask
                                         </summary>
                                         <div className="pb-2">
                                             <ul className="space-y-1 mt-1">
-                                                {subject.units && subject.units.length > 0 ? (
-                                                    subject.units
-                                                        .sort((a, b) => a.order - b.order)
-                                                        .flatMap(u => u.resources || [])
-                                                        .map((resource) => (
+                                                {subject.tasks && subject.tasks.length > 0 ? (
+                                                    subject.tasks.map((task: any) => (
                                                             <li
-                                                                key={resource._id?.toString()}
+                                                                key={task._id?.toString() || task.id}
                                                                 onClick={() => {
                                                                     const element = document.getElementById(subject._id?.toString() || "");
                                                                     if (element) {
@@ -130,12 +124,12 @@ export default function CourseSidebar({ isTeacher, subjects, courseData, newTask
                                                                 }}
                                                                 className="flex items-center gap-3 px-8 py-2 hover:bg-base-200 cursor-pointer text-sm text-base-content/70 rounded-lg transition-colors mx-2"
                                                             >
-                                                                <Circle size={8} className="text-base-content/30" />
-                                                                <span className="truncate">{resource.title}</span>
+                                                                <ClipboardList size={14} className="text-base-content/30" />
+                                                                <span className="truncate">{task.title}</span>
                                                             </li>
                                                         ))
                                                 ) : (
-                                                    <li className="px-8 py-2 text-xs italic text-base-content/40">Sin unidades</li>
+                                                    <li className="px-8 py-2 text-xs italic text-base-content/40">Sin tareas</li>
                                                 )}
                                             </ul>
                                         </div>
@@ -201,9 +195,9 @@ export default function CourseSidebar({ isTeacher, subjects, courseData, newTask
                             </p>
                         ) : (
                             filteredTasks.map((task) => {
-                                const taskId = String(task.id || task._id);
-                                const title = task.taskTitle || task.title;
-                                const category = task.category || "Tarea";
+                                const taskId = String(task._id || task.id);
+                                const title = task.title || task.taskTitle;
+                                const description = task.description || task.category || "Tarea";
                                 
                                 return (
                                     <div 
@@ -219,8 +213,8 @@ export default function CourseSidebar({ isTeacher, subjects, courseData, newTask
                                                 <p className="font-bold text-sm text-base-content group-hover:text-primary transition-colors truncate max-w-[280px]">
                                                     {title}
                                                 </p>
-                                                <span className="badge badge-sm badge-ghost text-xs text-base-content/60 font-semibold mt-0.5">
-                                                    {category}
+                                                <span className="badge badge-sm badge-ghost text-xs text-base-content/60 font-semibold mt-0.5 text-nowrap">
+                                                    {description}
                                                 </span>
                                             </div>
                                         </div>
