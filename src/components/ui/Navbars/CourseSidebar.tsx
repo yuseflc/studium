@@ -7,6 +7,7 @@ import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
 import { useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { ModalSearch } from "../modals";
 
 interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
   units?: (IUnit & { resources?: IResource[] })[];
@@ -159,89 +160,15 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
             </motion.aside>
 
             {/* Modal para Buscar y Navegar a Tareas */}
-            <dialog ref={searchModalRef} className="modal modal-bottom sm:modal-middle focus:outline-none">
-                <div className="modal-box bg-base-100 border border-base-300 max-w-xl">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="font-bold text-xl text-primary flex items-center gap-2">
-                            <Search size={22} />
-                            Buscador de Tareas
-                        </h3>
-                        <button 
-                            onClick={() => searchModalRef.current?.close()} 
-                            className="btn btn-sm btn-circle btn-ghost focus:outline-none"
-                        >
-                            <X size={20} />
-                        </button>
-                    </div>
-
-                    <div className="form-control mb-6">
-                        <input 
-                            type="text"
-                            placeholder="Buscar tarea o examen por título..."
-                            className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-
-                    <div className="space-y-3 max-h-[350px] overflow-y-auto pr-1">
-                        <h4 className="font-bold text-xs uppercase tracking-wider text-base-content/50 mb-2">
-                            Resultados ({filteredTasks.length})
-                        </h4>
-                        
-                        {filteredTasks.length === 0 ? (
-                            <p className="text-sm italic text-base-content/50 text-center py-6">
-                                No se encontraron tareas que coincidan con la búsqueda.
-                            </p>
-                        ) : (
-                            filteredTasks.map((task) => {
-                                const taskId = String(task._id);
-                                const title = task.title;
-                                const description = task.description || "Tarea";
-                                
-                                return (
-                                    <div 
-                                        key={taskId}
-                                        onClick={() => handleGoToTask(taskId)}
-                                        className="flex items-center justify-between p-4 rounded-xl border border-base-200 bg-base-200/20 hover:bg-primary/10 hover:border-primary/30 transition-all cursor-pointer group"
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className="p-2 bg-primary/10 text-primary rounded-lg group-hover:bg-primary group-hover:text-white transition-colors">
-                                                <ClipboardList size={18} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-sm text-base-content group-hover:text-primary transition-colors truncate max-w-[280px]">
-                                                    {title}
-                                                </p>
-                                                <span className="badge badge-sm badge-ghost text-xs text-base-content/60 font-semibold mt-0.5 text-nowrap">
-                                                    {description}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-xs text-base-content/50">
-                                            <ClipboardList size={12} />
-                                            <span>Ir</span>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-
-                    <div className="modal-action border-t border-base-200 pt-4 mt-6">
-                        <button 
-                            type="button" 
-                            className="btn btn-ghost" 
-                            onClick={() => searchModalRef.current?.close()}
-                        >
-                            Cerrar
-                        </button>
-                    </div>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                    <button onClick={() => searchModalRef.current?.close()}>Cerrar</button>
-                </form>
-            </dialog>
+            <ModalSearch
+                id="search-tasks-dialog"
+                dialogRef={searchModalRef}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                filteredTasks={filteredTasks}
+                onGoToTask={handleGoToTask}
+                onClose={() => searchModalRef.current?.close()}
+            />
         </>
     );
 }

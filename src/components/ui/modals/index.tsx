@@ -1,7 +1,16 @@
 'use client';
 
 import React from 'react';
-import { IconX, IconCheck, IconAlertCircle } from '@tabler/icons-react';
+import { IconX, IconCheck, IconAlertCircle, IconSearch, IconClipboardText } from '@tabler/icons-react';
+
+export interface ModalProps {
+    id?: string;
+    dialogRef?: React.RefObject<HTMLDialogElement | null>;
+    onClose: () => void;
+    children: React.ReactNode;
+    className?: string;
+    showClose?: boolean;
+}
 
 /**
  * Modal base: Proporciona la estructura común, el fondo desenfocado y el cierre automático.
@@ -55,6 +64,7 @@ export const ModalDanger = ({
     error = null,
 }: ModalConfirmProps) => {
     const closeDialog = () => {
+        if (!id) return;
         (document.getElementById(id) as HTMLDialogElement)?.close();
     };
 
@@ -116,6 +126,7 @@ export const ModalAdvise = ({
     error = null,
 }: ModalConfirmProps) => {
     const closeDialog = () => {
+        if (!id) return;
         (document.getElementById(id) as HTMLDialogElement)?.close();
     };
 
@@ -236,6 +247,112 @@ export const ModalForm = ({
                     </form>
                 </>
             )}
+        </Modal>
+    );
+};
+
+export interface ModalSearchProps {
+    id: string;
+    dialogRef: React.RefObject<HTMLDialogElement | null>;
+    searchTerm: string;
+    onSearchChange: (value: string) => void;
+    filteredTasks: any[];
+    onGoToTask: (id: string) => void;
+    onClose: () => void;
+}
+
+/**
+ * Modal de Búsqueda: Especializado para filtrar y navegar rápidamente a tareas o exámenes.
+ * Usado en: src/components/ui/Navbars/CourseSidebar.tsx
+ */
+export const ModalSearch = ({
+    id,
+    dialogRef,
+    searchTerm,
+    onSearchChange,
+    filteredTasks,
+    onGoToTask,
+    onClose,
+}: ModalSearchProps) => {
+    return (
+        <Modal 
+            id={id} 
+            dialogRef={dialogRef} 
+            onClose={onClose} 
+            showClose={true} 
+            className="max-w-xl bg-warning/5 border-warning/30 p-6 backdrop-blur-md"
+        >
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-2xl text-warning flex items-center gap-2">
+                    <IconSearch size={28} />
+                    Buscador de Tareas
+                </h3>
+            </div>
+
+            <div className="form-control mb-6">
+                <div className="relative">
+                    <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-warning/50" size={20} />
+                    <input 
+                        type="text"
+                        placeholder="Buscar tarea o examen por título..."
+                        className="input w-full pl-10 border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                        value={searchTerm}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        autoFocus
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-warning/40 mb-2 flex items-center justify-between">
+                    <span>Resultados</span>
+                    <span className="badge badge-sm badge-warning badge-outline opacity-70">{filteredTasks.length}</span>
+                </h4>
+                
+                {filteredTasks.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-10 text-warning/30">
+                        <IconSearch size={48} className="opacity-10 mb-2" />
+                        <p className="text-sm italic">
+                            No se encontraron tareas que coincidan con la búsqueda.
+                        </p>
+                    </div>
+                ) : (
+                    filteredTasks.map((task) => {
+                        const taskId = String(task._id || task.id);
+                        const title = task.title;
+                        const description = task.description || "Tarea del curso";
+                        
+                        return (
+                            <div
+                                key={taskId}
+                                onClick={() => onGoToTask(taskId)}
+                                className="flex items-center gap-4 p-4 rounded-2xl border border-warning/30 bg-warning/5 backdrop-blur-md cursor-pointer"
+                            >
+                                <div className="p-2.5 rounded-full bg-yellow-100 text-yellow-600 shadow-sm flex-shrink-0">
+                                    <IconClipboardText size={18} />
+                                </div>
+
+                                <div className="flex flex-col min-w-0">
+                                    <p className="font-bold text-base text-base-content truncate max-w-[320px]">{title}</p>
+                                    <span className="text-xs text-base-content/50 truncate">{description}</span>
+                                </div>
+
+                                <div className="ml-auto text-sm font-bold text-base-content/40">Ver</div>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+
+            <div className="modal-action border-t border-warning/10 pt-4 mt-6">
+                <button 
+                    type="button" 
+                    className="btn btn-ghost btn-sm text-warning/60 hover:text-warning" 
+                    onClick={onClose}
+                >
+                    Cerrar buscador
+                </button>
+            </div>
         </Modal>
     );
 };
