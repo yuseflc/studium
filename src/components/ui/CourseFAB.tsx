@@ -184,41 +184,59 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
           <X size={24} aria-hidden="true" />
         </button>
 
-        <button 
-          onClick={() => {
-            handleOpenModal('task');
-            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-          }}
-          className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
-          title="Crear Tarea"
-          aria-label="Crear Tarea"
+        {/* Crear Tarea: Tooltip en desktop, Icono+Texto en mobile */}
+        <div 
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-primary relative" 
+          data-tip="Tarea"
         >
-          <ClipboardList size={20} className="text-primary" aria-hidden="true" />
-        </button>
+          <button 
+            onClick={() => {
+              handleOpenModal('task');
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+            }}
+            className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
+            aria-label="Crear Tarea"
+          >
+            <ClipboardList size={20} className="text-primary" aria-hidden="true" />
+          </button>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Tarea</span>
+        </div>
 
-        <button 
-          onClick={() => {
-            handleOpenModal('exam');
-            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-          }}
-          className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
-          title="Crear Examen"
-          aria-label="Crear Examen"
+        {/* Crear Examen: Tooltip en desktop, Icono+Texto en mobile */}
+        <div 
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-secondary relative" 
+          data-tip="Examen"
         >
-          <GraduationCap size={20} className="text-primary" aria-hidden="true" />
-        </button>
+          <button 
+            onClick={() => {
+              handleOpenModal('exam');
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+            }}
+            className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
+            aria-label="Crear Examen"
+          >
+            <GraduationCap size={20} className="text-primary" aria-hidden="true" />
+          </button>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Examen</span>
+        </div>
 
-        <button 
-          onClick={() => {
-            handleOpenModal('resource');
-            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-          }}
-          className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
-          title="Añadir Recurso (PDF, Info...)"
-          aria-label="Añadir Recurso"
+        {/* Añadir Recurso: Tooltip en desktop, Icono+Texto en mobile */}
+        <div 
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-accent relative" 
+          data-tip="Recurso"
         >
-          <FileText size={20} className="text-primary" aria-hidden="true" />
-        </button>
+          <button 
+            onClick={() => {
+              handleOpenModal('resource');
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+            }}
+            className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
+            aria-label="Añadir Recurso"
+          >
+            <FileText size={20} className="text-primary" aria-hidden="true" />
+          </button>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Recurso</span>
+        </div>
       </div>
 
       <ModalForm
@@ -264,6 +282,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
                 onChange={(e) => setSelectedSubjectId(e.target.value)}
                 required
                 disabled={isSubmitting}
+                title="Selecciona una materia"
               >
                 <option value="" disabled>Selecciona un tema...</option>
                 {subjects.map((subject: any) => (
@@ -302,6 +321,8 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
                   onChange={(e) => setDueDate(e.target.value)}
                   required
                   disabled={isSubmitting}
+                  title={creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
+                  placeholder="Selecciona una fecha"
                 />
               </div>
             )}
@@ -319,6 +340,7 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   disabled={isSubmitting}
                   required
+                  title="Sube un archivo"
                 />
                 {selectedFile && (
                   <span className="text-xs text-warning/70 mt-1 block truncate">
