@@ -259,12 +259,12 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold text-warning/80">{config.nameLabel}</span>
+                <span className="label-text font-bold text-base-content/80 dark:text-warning/80">{config.nameLabel}</span>
               </label>
               <input
                 type="text"
                 placeholder={config.namePlaceholder}
-                className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -274,19 +274,23 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
+                <span className="label-text font-bold text-base-content/80 dark:text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
               </label>
               <select
-                className="select w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                className="select w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
                 value={selectedSubjectId}
                 onChange={(e) => setSelectedSubjectId(e.target.value)}
                 required
                 disabled={isSubmitting}
                 title="Selecciona una materia"
               >
-                <option value="" disabled>Selecciona un tema...</option>
+                <option value="" disabled className="bg-base-100 dark:bg-base-200">Selecciona un tema...</option>
                 {subjects.map((subject: any) => (
-                  <option key={subject._id?.toString() || subject.id} value={subject._id?.toString() || subject.id}>
+                  <option 
+                    key={subject._id?.toString() || subject.id} 
+                    value={subject._id?.toString() || subject.id}
+                    className="bg-base-100 dark:bg-base-200"
+                  >
                     {subject.title}
                   </option>
                 ))}
@@ -295,11 +299,11 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold text-warning/80">Descripción</span>
+                <span className="label-text font-bold text-base-content/80 dark:text-warning/80">Descripción</span>
               </label>
               <input
                 type="text"
-                className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
                 placeholder="Escribe una breve descripción..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -310,13 +314,13 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
             {(creationType === 'task' || creationType === 'exam') && (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-bold text-warning/80">
+                  <span className="label-text font-bold text-base-content/80 dark:text-warning/80">
                     {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
                   </span>
                 </label>
                 <input
                   type="date"
-                  className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                  className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                   required
@@ -330,13 +334,13 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
             {creationType === 'resource' && (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-bold text-warning/80 flex items-center gap-2">
-                    <Upload size={16} /> Subir archivo (Requerido)
+                  <span className="label-text font-bold text-base-content/80 dark:text-warning/80 flex items-center gap-2">
+                    <Upload size={16} /> Subir archivo
                   </span>
                 </label>
                 <input
                   type="file"
-                  className="file-input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                  className="file-input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   disabled={isSubmitting}
                   required

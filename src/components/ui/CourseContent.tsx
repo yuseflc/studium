@@ -52,10 +52,13 @@ export default function CourseContent({
    * No muta el estado anterior, solo invierte el valor actual.
    */
   const toggleSubject = (subjectId: string) => {
-    setOpenSubjects((prev) => ({
-      ...prev,
-      [subjectId]: !prev[subjectId],
-    }));
+    setOpenSubjects((prev) => {
+      const currentValue = prev[subjectId];
+      return {
+        ...prev,
+        [subjectId]: currentValue === undefined ? false : !currentValue,
+      };
+    });
   };
 
   // Ordenar las materias fuera del render principal para no mutar el arreglo de props.

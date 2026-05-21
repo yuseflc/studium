@@ -138,7 +138,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
             value={formData.title}
             onChange={handleChange}
             placeholder="Nombre de la clase"
-            className="input w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all"
+            className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             required
             disabled={loading}
           />
@@ -153,7 +153,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
             value={formData.description}
             onChange={handleChange}
             placeholder="Descripción del curso"
-            className="textarea w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all"
+            className="textarea w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             rows={3}
             required
             disabled={loading}

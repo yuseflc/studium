@@ -151,7 +151,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
                             setSearchTerm("");
                             searchModalRef.current?.showModal();
                         }}
-                        className="btn btn-outline btn-primary btn-sm w-full gap-2 hover:bg-primary/95 focus:bg-primary focus:border-primary active:bg-primary active:border-primary focus:outline-none"
+                        className="btn btn-outline btn-primary btn-sm w-full gap-2 hover:bg-primary hover:text-primary-content transition-all rounded-xl font-bold border-2"
                     >
                         <Search size={14} />
                         Buscador de Tareas
