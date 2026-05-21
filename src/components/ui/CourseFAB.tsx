@@ -175,16 +175,19 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
   return (
     <>
       <div className="fab fab-flower fixed bottom-8 right-8 z-50">
-        <div tabIndex={0} role="button" className="btn btn-circle btn-lg btn-primary shadow-lg" aria-label="Abrir menú de creación">
+        <div tabIndex={0} role="button" className="btn btn-circle btn-lg btn-primary shadow-lg border-none hover:bg-primary active:bg-primary focus:bg-primary" aria-label="Abrir menú de creación">
           <Plus size={24} aria-hidden="true" />
         </div>
 
-        <button className="fab-main-action btn btn-circle btn-lg btn-secondary shadow-lg" aria-label="Cerrar menú">
+        <button className="fab-main-action btn btn-circle btn-lg btn-primary shadow-lg border-none hover:bg-primary active:bg-primary focus:bg-primary" aria-label="Cerrar menú" onClick={() => (document.activeElement instanceof HTMLElement) && document.activeElement.blur()}>
           <X size={24} aria-hidden="true" />
         </button>
 
         <button 
-          onClick={() => handleOpenModal('task')}
+          onClick={() => {
+            handleOpenModal('task');
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+          }}
           className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
           title="Crear Tarea"
           aria-label="Crear Tarea"
@@ -193,7 +196,10 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
         </button>
 
         <button 
-          onClick={() => handleOpenModal('exam')}
+          onClick={() => {
+            handleOpenModal('exam');
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+          }}
           className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
           title="Crear Examen"
           aria-label="Crear Examen"
@@ -202,7 +208,10 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
         </button>
 
         <button 
-          onClick={() => handleOpenModal('resource')}
+          onClick={() => {
+            handleOpenModal('resource');
+            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+          }}
           className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
           title="Añadir Recurso (PDF, Info...)"
           aria-label="Añadir Recurso"
