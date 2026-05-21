@@ -1,6 +1,7 @@
-import { ClipboardList, GraduationCap, FileText, Plus, X, CheckCircle, Upload } from 'lucide-react';
+import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { ModalForm } from './modals';
 
 interface CourseFABProps {
   onAddTask: (task: any) => void;
@@ -220,150 +221,124 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
         </button>
       </div>
 
-      <dialog ref={modalRef} className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box bg-base-100 border border-base-300">
-          <form method="dialog">
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" disabled={isSubmitting}>✕</button>
-          </form>
-
-          {!isSuccess ? (
-            <>
-              <h3 className="font-bold text-lg text-primary mb-6 flex items-center gap-2">
-                {config.icon}
-                {config.title}
-              </h3>
-              
-              <form onSubmit={handleSave} className="flex flex-col gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">{config.nameLabel}</span>
-                  </label>
-                  <input 
-                    type="text" 
-                    placeholder={config.namePlaceholder} 
-                    className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    required
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">Tema / Materia<span className="text-error"> *</span></span>
-                  </label>
-                  <select 
-                    className="select w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
-                    value={selectedSubjectId}
-                    onChange={(e) => setSelectedSubjectId(e.target.value)}
-                    required
-                    disabled={isSubmitting}
-                  >
-                    <option value="" disabled>Selecciona un tema...</option>
-                    {subjects.map((subject: any) => (
-                      <option key={subject._id?.toString() || subject.id} value={subject._id?.toString() || subject.id}>
-                        {subject.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">Descripción</span>
-                  </label>
-                  <input 
-                    type="text"
-                    className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
-                    placeholder="Escribe una breve descripción..."
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={isSubmitting}
-                  />
-                </div>
-
-                {(creationType === 'task' || creationType === 'exam') && (
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-semibold">
-                        {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
-                      </span>
-                    </label>
-                    <input 
-                      type="date" 
-                      className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      required
-                      disabled={isSubmitting}
-                    />
-                  </div>
-                )}
-
-                {creationType === 'resource' && (
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text font-semibold flex items-center gap-2">
-                        <Upload size={16} /> Subir archivo (Requerido)
-                      </span>
-                    </label>
-                    <input 
-                      type="file" 
-                      className="file-input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100" 
-                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                      disabled={isSubmitting}
-                      required
-                    />
-                    {selectedFile && (
-                      <span className="text-xs text-base-content/60 mt-1 block truncate">
-                        Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                      </span>
-                    )}
-                  </div>
-                )}
-
-                <div className="modal-action mt-6">
-                  <button 
-                    type="button" 
-                    className="btn btn-ghost" 
-                    onClick={() => modalRef.current?.close()}
-                    disabled={isSubmitting}
-                  >
-                    Cancelar
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary min-w-[120px] hover:bg-primary/90 focus:bg-primary focus:border-primary active:bg-primary active:border-primary focus:outline-none" 
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : config.btnText}
-                  </button>
-                </div>
-              </form>
-            </>
-          ) : (
-            <div className="py-12 flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-success/20 text-success rounded-full flex items-center justify-center mb-4">
-                <CheckCircle size={32} />
-              </div>
-              <h3 className="font-bold text-2xl text-base-content">{config.successText}</h3>
-              <p className="text-base-content/70">{config.successDesc}</p>
-              <div className="modal-action justify-center mt-8 gap-4 w-full">
-                <button type="button" className="btn btn-ghost" onClick={() => modalRef.current?.close()}>
-                  Cerrar
-                </button>
-                <button type="button" className="btn btn-primary" onClick={handleRedirect}>
-                  {config.redirectText}
-                </button>
-              </div>
+      <ModalForm
+        dialogRef={modalRef}
+        title={config.title}
+        onClose={() => modalRef.current?.close()}
+        onConfirm={() => handleSave({ preventDefault: () => { } } as any)}
+        confirmLabel={config.btnText}
+        isLoading={isSubmitting}
+        success={isSuccess}
+        successMessage={config.successText}
+        className="max-w-2xl"
+      >
+        {!isSuccess ? (
+          <>
+            <div className="flex items-center gap-2 mb-2 text-primary">
+              {config.icon}
+              <span className="font-semibold">Nuevo Registro</span>
             </div>
-          )}
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button disabled={isSubmitting}>close</button>
-        </form>
-      </dialog>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">{config.nameLabel}</span>
+              </label>
+              <input
+                type="text"
+                placeholder={config.namePlaceholder}
+                className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">Tema / Materia<span className="text-error"> *</span></span>
+              </label>
+              <select
+                className="select w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                value={selectedSubjectId}
+                onChange={(e) => setSelectedSubjectId(e.target.value)}
+                required
+                disabled={isSubmitting}
+              >
+                <option value="" disabled>Selecciona un tema...</option>
+                {subjects.map((subject: any) => (
+                  <option key={subject._id?.toString() || subject.id} value={subject._id?.toString() || subject.id}>
+                    {subject.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text font-semibold">Descripción</span>
+              </label>
+              <input
+                type="text"
+                className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                placeholder="Escribe una breve descripción..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={isSubmitting}
+              />
+            </div>
+
+            {(creationType === 'task' || creationType === 'exam') && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-semibold">
+                    {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
+                  </span>
+                </label>
+                <input
+                  type="date"
+                  className="input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
+              </div>
+            )}
+
+            {creationType === 'resource' && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-semibold flex items-center gap-2">
+                    <Upload size={16} /> Subir archivo (Requerido)
+                  </span>
+                </label>
+                <input
+                  type="file"
+                  className="file-input w-full border border-base-300 focus:border-base-content/30 focus:outline-none focus:ring-2 focus:ring-base-content/5 bg-base-100"
+                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                  disabled={isSubmitting}
+                  required
+                />
+                {selectedFile && (
+                  <span className="text-xs text-base-content/60 mt-1 block truncate">
+                    Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                  </span>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="py-6 flex flex-col items-center text-center space-y-4">
+            <p className="text-base-content/70">{config.successDesc}</p>
+            <div className="modal-action justify-center mt-4 w-full">
+              <button type="button" className="btn btn-primary" onClick={handleRedirect}>
+                {config.redirectText}
+              </button>
+            </div>
+          </div>
+        )}
+      </ModalForm>
     </>
   );
 }

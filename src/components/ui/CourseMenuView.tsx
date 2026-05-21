@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";
+import { ModalDanger, ModalAdvise } from "@/components/ui/modals";
 import { useEffect, useState } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
 
@@ -208,100 +209,40 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
       </div>
 
       {/* Modales de confirmación de eliminación para cada curso */}
-      {courses.map((course) => {
-        const courseId = course._id;
-        return (
-          <dialog key={`dialog_${courseId}`} id={`confirm_delete_${courseId}`} className="modal">
-            <div className="modal-box border border-error/30 bg-error/5 backdrop-blur">
-              <h3 className="font-bold text-lg text-error">Eliminar curso</h3>
-              <p className="py-4">
-                ¿Estás seguro de que deseas eliminar el curso <strong>"{course.title}"</strong>? Esta acción no se puede deshacer.
-              </p>
-              {deleteError && (
-                <div className="alert alert-error mb-4">
-                  <span>{deleteError}</span>
-                </div>
-              )}
-              <div className="modal-action gap-2">
-                <button
-                  type="button"
-                  onClick={() => (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.close()}
-                  className="btn btn-ghost"
-                  disabled={deletingId === courseId}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDeleteCourse(courseId)}
-                  className="btn btn-error"
-                  disabled={deletingId === courseId}
-                >
-                  {deletingId === courseId ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Eliminando...
-                    </>
-                  ) : (
-                    "Eliminar"
-                  )}
-                </button>
-              </div>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-              <button>cerrar</button>
-            </form>
-          </dialog>
-        );
-      })}
+      {courses.map((course) => (
+        <ModalDanger
+          key={`dialog_${course._id}`}
+          id={`confirm_delete_${course._id}`}
+          title="Eliminar curso"
+          description={
+            <p>
+              ¿Estás seguro de que deseas eliminar el curso <strong>"{course.title}"</strong>? Esta acción no se puede deshacer.
+            </p>
+          }
+          confirmLabel="Eliminar"
+          onConfirm={() => handleDeleteCourse(course._id)}
+          isLoading={deletingId === course._id}
+          error={deletingId === course._id ? deleteError : null}
+        />
+      ))}
 
       {/* Modales de confirmación de desincripción para cada curso */}
-      {courses.map((course) => {
-        const courseId = course._id;
-        return (
-          <dialog key={`unenroll_dialog_${courseId}`} id={`confirm_unenroll_${courseId}`} className="modal">
-            <div className="modal-box border border-warning/30 bg-warning/5 backdrop-blur">
-              <h3 className="font-bold text-lg text-warning">Cancelar registro</h3>
-              <p className="py-4">
-                ¿Estás seguro de que deseas cancelar tu registro en el curso <strong>"{course.title}"</strong>? No podrás acceder al contenido hasta que te vuelvas a inscribir.
-              </p>
-              {unenrollError && (
-                <div className="alert alert-error mb-4">
-                  <span>{unenrollError}</span>
-                </div>
-              )}
-              <div className="modal-action gap-2">
-                <button
-                  type="button"
-                  onClick={() => (document.getElementById(`confirm_unenroll_${courseId}`) as HTMLDialogElement)?.close()}
-                  className="btn btn-ghost"
-                  disabled={unenrollingId === courseId}
-                >
-                  Volver
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleUnenrollCourse(courseId)}
-                  className="btn btn-warning"
-                  disabled={unenrollingId === courseId}
-                >
-                  {unenrollingId === courseId ? (
-                    <>
-                      <span className="loading loading-spinner loading-sm"></span>
-                      Cancelando...
-                    </>
-                  ) : (
-                    "Sí, cancelar registro"
-                  )}
-                </button>
-              </div>
-            </div>
-            <form method="dialog" className="modal-backdrop">
-              <button>cerrar</button>
-            </form>
-          </dialog>
-        );
-      })}
+      {courses.map((course) => (
+        <ModalAdvise
+          key={`unenroll_dialog_${course._id}`}
+          id={`confirm_unenroll_${course._id}`}
+          title="Cancelar registro"
+          description={
+            <p>
+              ¿Estás seguro de que deseas cancelar tu registro en el curso <strong>"{course.title}"</strong>? No podrás acceder al contenido hasta que te vuelvas a inscribir.
+            </p>
+          }
+          confirmLabel="Sí, cancelar registro"
+          onConfirm={() => handleUnenrollCourse(course._id)}
+          isLoading={unenrollingId === course._id}
+          error={unenrollingId === course._id ? unenrollError : null}
+        />
+      ))}
     </main>
   );
 }

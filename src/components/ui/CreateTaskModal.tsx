@@ -1,7 +1,8 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { IconPlus, IconX, IconBook, IconCheck } from '@tabler/icons-react';
+import { IconPlus } from '@tabler/icons-react';
+import { ModalForm } from './modals';
 
 interface CreateTaskModalProps {
   courseName?: string;
@@ -78,102 +79,48 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
         Crear tarea
       </button>
 
-      <dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle">
-        <div className="modal-box bg-base-100 border border-base-300 max-w-2xl">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="font-bold text-2xl">
-              {success ? '¡Tarea creada!' : `Crear tarea${courseName ? ` en ${courseName}` : ''}`}
-            </h3>
-            <button onClick={closeModal} className="btn btn-sm btn-circle btn-ghost">
-              <IconX size={20} />
-            </button>
-          </div>
-
-          {success ? (
-            <div className="space-y-6 py-4">
-              <div className="flex flex-col items-center gap-4">
-                <div className="rounded-full bg-success/20 p-4">
-                  <IconCheck size={40} className="text-success" />
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-semibold">¡Tarea creada correctamente!</p>
-                  <p className="text-sm text-base-content/70 mt-1">
-                    Esta vista es solo de demostración y no guarda datos en el backend.
-                  </p>
-                </div>
-              </div>
-
-              <div className="modal-action gap-2">
-                <button type="button" onClick={closeModal} className="btn btn-ghost">
-                  Cerrar
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              {error && (
-                <div className="alert alert-error mb-6">
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-bold">Título de la tarea<span className="text-error"> *</span></span>
-                  </label>
-                  <input
-                    name="title"
-                    type="text"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Nombre de la tarea"
-                    className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Descripción de la tarea"
-                    className="textarea w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
-                    rows={4}
-                    required
-                    disabled={loading}
-                  />
-                </div>
-
-                <div className="modal-action mt-8">
-                  <button type="button" onClick={closeModal} className="btn btn-ghost" disabled={loading}>
-                    Cancelar
-                  </button>
-                  <button type="submit" disabled={loading} className="btn btn-primary px-8">
-                    {loading ? (
-                      <>
-                        <span className="loading loading-spinner loading-sm"></span>
-                        Creando...
-                      </>
-                    ) : (
-                      'Crear'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
+      <ModalForm
+        dialogRef={dialogRef}
+        title={`Crear tarea${courseName ? ` en ${courseName}` : ''}`}
+        onClose={closeModal}
+        onConfirm={() => handleSubmit({ preventDefault: () => {} } as any)}
+        isLoading={loading}
+        error={error}
+        success={success}
+        successMessage="¡Tarea creada correctamente!"
+      >
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-bold">Título de la tarea<span className="text-error"> *</span></span>
+          </label>
+          <input
+            name="title"
+            type="text"
+            value={formData.title}
+            onChange={handleChange}
+            placeholder="Nombre de la tarea"
+            className="input w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+            required
+            disabled={loading}
+          />
         </div>
 
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={closeModal}>cerrar</button>
-        </form>
-      </dialog>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-bold">Descripción<span className="text-error"> *</span></span>
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Descripción de la tarea"
+            className="textarea w-full border-2 border-primary-200 focus:border-primary-300 focus:outline-none"
+            rows={4}
+            required
+            disabled={loading}
+          />
+        </div>
+      </ModalForm>
     </>
   );
 }
