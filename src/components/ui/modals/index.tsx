@@ -203,7 +203,7 @@ export const ModalForm = ({
     className = "max-w-2xl"
 }: ModalFormProps) => {
     return (
-        <Modal id={id} dialogRef={dialogRef} onClose={onClose} showClose={true} className={`bg-warning/5 border-warning/30 p-6 backdrop-blur-md ${className}`}>
+        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`bg-warning/5 border-warning/30 p-6 backdrop-blur-md ${className}`}>
             <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bold text-2xl text-warning">
                     {success ? "¡Completado!" : title}
@@ -279,7 +279,6 @@ export const ModalSearch = ({
             id={id} 
             dialogRef={dialogRef} 
             onClose={onClose} 
-            showClose={true} 
             className="max-w-xl bg-warning/5 border-warning/30 p-6 backdrop-blur-md"
         >
             <div className="flex justify-between items-center mb-6">
