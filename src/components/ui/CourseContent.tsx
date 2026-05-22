@@ -94,7 +94,7 @@ export default function CourseContent({
               className="scroll-mt-24"
             >
               {/* Cabecera: Título, botón de toggle y línea decorativa */}
-              <div className="mb-6 flex flex-col gap-2 group">
+              <div className="mb-6 flex flex-col gap-2 group border border-base-200 rounded-lg p-4 hover:bg-base-50 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <h3 className="font-bold text-2xl text-base-content/90 tracking-tight">
@@ -161,7 +161,7 @@ export default function CourseContent({
         id="tasks-global-section"
         className="scroll-mt-24"
       >
-        <div className="mb-6 flex flex-col gap-2 group">
+        <div className="mb-6 flex flex-col gap-2 group border border-base-200 rounded-lg p-4 hover:bg-base-50 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <h3 className="font-bold text-2xl text-base-content/90 tracking-tight">

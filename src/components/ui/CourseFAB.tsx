@@ -2,17 +2,22 @@ import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X } 
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ModalForm } from './modals';
+import { createTask } from '@/app/actions/taskActions';
+import { createResource } from '@/app/actions/resourceActions';
+import { createSubject } from '@/app/actions/courseActions';
 
 interface CourseFABProps {
   onAddTask: (task: any) => void;
+  onAddSubject?: (subject: any) => void;
+  onAddResource?: (resource: any) => void;
   courseId?: string;
   defaultSubjectId?: string;
   subjects?: any[];
 }
 
-type CreationType = 'task' | 'exam' | 'resource' | null;
+type CreationType = 'task' | 'exam' | 'resource' | 'subject' | null;
 
-export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subjects = [] }: CourseFABProps) {
+export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, courseId, defaultSubjectId, subjects = [] }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
   const courseid = params?.courseid || 'course-1';
@@ -51,67 +56,96 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !selectedSubjectId) return;
+    if (!title.trim()) return;
+    if (creationType !== 'subject' && !selectedSubjectId) return;
 
     setIsSubmitting(true);
 
     try {
-      let response;
-      if (creationType === 'resource' && selectedFile) {
-        const formData = new FormData();
-        formData.append('title', title);
-        formData.append('description', description);
-        formData.append('courseId', courseId || '');
-        formData.append('subjectId', selectedSubjectId);
-        formData.append('file', selectedFile);
+      const isTaskCreation = creationType === 'task';
+      const isExamCreation = creationType === 'exam';
 
-        response = await fetch('/api/resources', {
-          method: 'POST',
-          body: formData,
-        });
-      } else {
-        let endpoint = '';
-        let bodyData: any = {
+      if (isTaskCreation || isExamCreation) {
+        const result = await createTask({
           title,
           description,
-          courseId,
-          subjectId: selectedSubjectId
-        };
+          courseId: courseId || '',
+          subjectId: selectedSubjectId,
+          dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
+          startDate: new Date().toISOString(),
+          type: isExamCreation ? 'quiz' : 'assignment',
+          maxPoints: 100,
+          allowLateSubmission: false,
+          active: true,
+        });
 
-        if (creationType === 'task') {
-          endpoint = '/api/tasks';
-          bodyData.dueDate = dueDate ? new Date(dueDate).toISOString() : new Date().toISOString();
-        } else if (creationType === 'exam') {
-          endpoint = '/api/exams';
-          bodyData.dueDate = dueDate ? new Date(dueDate).toISOString() : new Date().toISOString();
-        } else if (creationType === 'resource') {
-          endpoint = '/api/resources';
+        if (!result.success) {
+          throw new Error(result.error || 'Error al guardar');
         }
 
-        response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(bodyData)
+        const createdItem = { task: result.task };
+
+        if (isTaskCreation && onAddTask) {
+          onAddTask(createdItem.task || createdItem);
+        }
+
+        setIsSubmitting(false);
+        setIsSuccess(true);
+
+        const itemId = createdItem.task?._id;
+        setCreatedItemId(itemId || null);
+
+        return;
+      }
+
+      if (creationType === 'subject') {
+        const result = await createSubject({
+          courseId: courseId || '',
+          title,
+          description,
         });
+
+        if (!result.success) {
+          throw new Error(result.error || 'Error al guardar');
+        }
+
+        if (onAddSubject && result.subject) {
+          onAddSubject(result.subject);
+        }
+
+        setIsSubmitting(false);
+        setIsSuccess(true);
+        setCreatedItemId(result.subject?._id || null);
+        return;
       }
 
-      if (!response.ok) {
-        throw new Error('Error al guardar');
+      if (creationType === 'resource' && selectedFile) {
+        const result = await createResource({
+          title,
+          description,
+          courseId: courseId || '',
+          subjectId: selectedSubjectId,
+          fileName: selectedFile.name,
+        });
+
+        if (!result.success) {
+          throw new Error(result.error || 'Error al guardar');
+        }
+
+        const createdItem = { resource: result.resource };
+
+        if (onAddResource && createdItem.resource) {
+          onAddResource(createdItem.resource);
+        }
+
+        setIsSubmitting(false);
+        setIsSuccess(true);
+
+        setCreatedItemId(createdItem.resource?._id || null);
+        return;
       }
 
-      const createdItem = await response.json();
-      
-      // Si es tarea, se llama a onAddTask
-      if (creationType === 'task' && onAddTask) {
-        onAddTask(createdItem.task || createdItem);
-      }
-      
-      setIsSubmitting(false);
-      setIsSuccess(true);
-      
-      // Intentar obtener el ID independientemente de la estructura
-      const itemId = createdItem.task?._id || createdItem.exam?._id || createdItem.resource?._id || createdItem._id;
-      setCreatedItemId(itemId || null);
+      throw new Error('Tipo de creación no soportado');
     } catch (error) {
       console.error(error);
       setIsSubmitting(false);
@@ -128,12 +162,25 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
         router.push(`/mycourses/${courseid}/exams/${createdItemId}`);
       } else if (creationType === 'resource') {
         router.push(`/mycourses/${courseid}/resources/${createdItemId}`);
+      } else if (creationType === 'subject') {
+        modalRef.current?.close();
       }
     }
   };
 
   const getModalConfig = () => {
     switch (creationType) {
+      case 'subject':
+        return {
+          icon: <CheckCircle size={20} />,
+          title: 'Crear Nueva Materia',
+          successText: '¡Materia creada con éxito!',
+          successDesc: 'La materia se ha añadido al curso correctamente.',
+          btnText: 'Crear Materia',
+          redirectText: 'Cerrar',
+          nameLabel: 'Nombre de la materia',
+          namePlaceholder: 'Ej: Matemáticas Aplicadas'
+        };
       case 'exam':
         return {
           icon: <GraduationCap size={20} />,
@@ -237,6 +284,24 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
           </button>
           <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Recurso</span>
         </div>
+
+        {/* Crear Materia: Tooltip en desktop, Icono+Texto en mobile */}
+        <div
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-info relative"
+          data-tip="Materia"
+        >
+          <button
+            onClick={() => {
+              handleOpenModal('subject');
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+            }}
+            className="btn btn-circle btn-lg shadow-md hover:bg-base-200"
+            aria-label="Crear Materia"
+          >
+            <CheckCircle size={20} className="text-primary" aria-hidden="true" />
+          </button>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Materia</span>
+        </div>
       </div>
 
       <ModalForm
@@ -272,30 +337,27 @@ export default function CourseFAB({ onAddTask, courseId, defaultSubjectId, subje
               />
             </div>
 
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text font-bold text-base-content/80 dark:text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
-              </label>
-              <select
-                className="select w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
-                value={selectedSubjectId}
-                onChange={(e) => setSelectedSubjectId(e.target.value)}
-                required
-                disabled={isSubmitting}
-                title="Selecciona una materia"
-              >
-                <option value="" disabled className="bg-base-100 dark:bg-base-200">Selecciona un tema...</option>
-                {subjects.map((subject: any) => (
-                  <option 
-                    key={subject._id?.toString() || subject.id} 
-                    value={subject._id?.toString() || subject.id}
-                    className="bg-base-100 dark:bg-base-200"
-                  >
-                    {subject.title}
-                  </option>
-                ))}
-              </select>
-            </div>
+            {creationType !== 'subject' && (
+              <div className="form-control">
+                <label className="label">
+                  <span className="label-text font-bold text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
+                </label>
+                <select
+                  className="select w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
+                  value={selectedSubjectId}
+                  onChange={(e) => setSelectedSubjectId(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                >
+                  <option value="" disabled>Selecciona un tema...</option>
+                  {subjects.map((subject: any) => (
+                    <option key={subject._id?.toString() || subject.id} value={subject._id?.toString() || subject.id}>
+                      {subject.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="form-control">
               <label className="label">
