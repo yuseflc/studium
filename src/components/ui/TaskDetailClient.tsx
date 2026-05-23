@@ -1,14 +1,9 @@
 "use client";
 
-// Importaciones principales
-// - `useState`: estado local del componente.
-// - Iconos de `lucide-react` para la UI.
-// - `Link` de Next.js para navegación del curso.
 import { useState } from 'react';
 import { ClipboardList, Calendar, ArrowLeft, Upload } from 'lucide-react';
 import Link from 'next/link';
 
-// Props del componente: información de la tarea y el id del curso.
 interface TaskDetailClientProps {
   taskInfo: {
     _id?: string;
