@@ -26,7 +26,7 @@ export default async function TaskDetailPage({
     if (seedTask) {
       taskInfo = {
         title: seedTask.taskTitle,
-        description: "Esta es una tarea de demostración que proviene de las calificaciones estáticas. No tiene una descripción extendida en la base de datos.",
+        description: "Dominio de Flexbox y CSS Grid para layouts complejos.",
         dueDate: new Date(),
         maxPoints: seedTask.maxScore
       };
