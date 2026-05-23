@@ -20,6 +20,9 @@ export default function RootLayout({
       lang="es"
       className={`${manrope.variable} ${googleSans.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="icon" href="/favicon.ico" />
+      </head>
       <body className="min-h-full flex flex-col font-sans">
         <SessionProviderLayout>
           <ThemeProvider>
