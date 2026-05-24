@@ -1,6 +1,7 @@
 import { IconBell, IconMessageCircle, IconX, IconMenu2 } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES } from "@/seed/data";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
@@ -78,13 +79,17 @@ export default async function CourseNavbar() {
             */}
             <div className="navbar bg-base-100/80 backdrop-blur-md px-4 h-16 border-b border-base-300 transition-all">
                 {/* Logo/Branding - Lado izquierdo del navbar */}
-                <div className="flex-1">
-                    <a className="btn btn-ghost text-xl text-base-content" href="/">
-                        Studium
-                    </a>
+                <div className="navbar-start">
+                    <Link href="/" className="inline-flex items-center justify-center p-0 leading-none">
+                        <img
+                            src="/img/logo_small_blur.svg"
+                            alt="Studium"
+                            className="block h-4 w-auto"
+                        />
+                    </Link>
                 </div>
 
-                <div className="flex flex-row gap-3 items-center">
+                <div className="navbar-end flex flex-row gap-3 items-center">
                     {/* Theme Switcher - Visible solo en desktop (md:) */}
                     <div className="hidden md:block">
                         <ThemeSwitcher />

@@ -10,8 +10,12 @@ export default function Navbar() {
         <div className="navbar bg-transparent hover:bg-base-100/50 backdrop-blur-sm shadow-sm px-4 top-0 sticky z-50 transition-all h-16">
             {/* Logo */}
             <div className="navbar-start">
-                <Link href="/" className="btn btn-ghost text-xl text-base-content">
-                    Studium
+                <Link href="/" className="inline-flex items-center justify-center p-0 leading-none">
+                    <img
+                        src="/img/logo_small_blur.svg"
+                        alt="Studium"
+                        className="block h-4 w-auto"
+                    />
                 </Link>
             </div>
             
