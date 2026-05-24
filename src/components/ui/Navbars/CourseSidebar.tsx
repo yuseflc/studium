@@ -1,16 +1,15 @@
 "use client";
-import { ChevronRight, Circle, X, Search, ClipboardList } from "lucide-react";
+import { ChevronRight, Search, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
 import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
-import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
 import { useRef, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ModalSearch } from "../modals";
 
 interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
-  units?: (IUnit & { resources?: IResource[] })[];
+    units?: (IUnit & { resources?: unknown[] })[];
   unitIds?: any[];
   tasks?: ITask[];
 }
@@ -79,6 +78,20 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
         router.push(`/mycourses/${courseid}/tasks/${taskId}`);
     };
 
+    const handleScrollToSubject = (subjectId: string) => {
+        const element = document.getElementById(`subject-${subjectId}`);
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    };
+
+    const handleScrollToUnit = (unitId: string) => {
+        const element = document.getElementById(`unit-${unitId}`);
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    };
+
     const sortedSubjects = [...subjects].sort((a, b) => a.order - b.order);
 
     return (
@@ -102,7 +115,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
                                     variants={itemVariants}
                                     className="relative"
                                 >
-                                    <details className="group relative">
+                                    <details className="group relative rounded-xl border border-base-200 bg-base-100/50">
                                         <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
                                             <div className="flex items-center gap-3">
                                                 <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
@@ -110,27 +123,37 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
                                                     {subject.title}
                                                 </span>
                                             </div>
+                                            <span className="badge badge-ghost badge-sm">{subject.units?.length || 0}</span>
                                         </summary>
                                         <div className="pb-2">
-                                            <ul className="space-y-1 mt-1">
-                                                {subject.tasks && subject.tasks.length > 0 ? (
-                                                    subject.tasks.map((task: any) => (
-                                                            <li
-                                                                key={task._id?.toString() || task.id}
-                                                                onClick={() => {
-                                                                    const element = document.getElementById(subject._id?.toString() || "");
-                                                                    if (element) {
-                                                                        element.scrollIntoView({ behavior: 'smooth' });
-                                                                    }
-                                                                }}
-                                                                className="flex items-center gap-3 px-8 py-2 hover:bg-base-200 cursor-pointer text-sm text-base-content/70 rounded-lg transition-colors mx-2"
+                                            <ul className="space-y-1 mt-1 px-2 pb-2">
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleScrollToSubject(subject._id?.toString() || "")}
+                                                        className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
+                                                    >
+                                                        <ClipboardList size={14} className="text-base-content/30" />
+                                                        <span className="truncate">Ver materia</span>
+                                                    </button>
+                                                </li>
+                                                {subject.units && subject.units.length > 0 ? (
+                                                    subject.units.map((unit, unitIndex) => (
+                                                        <li key={unit._id?.toString() || `${subject._id}-${unitIndex}`}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleScrollToUnit(unit._id?.toString() || "")}
+                                                                className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
                                                             >
-                                                                <ClipboardList size={14} className="text-base-content/30" />
-                                                                <span className="truncate">{task.title}</span>
-                                                            </li>
-                                                        ))
+                                                                <span className="badge badge-primary badge-sm min-w-10 justify-center">
+                                                                    {unitIndex + 1}
+                                                                </span>
+                                                                <span className="truncate">{unit.title}</span>
+                                                            </button>
+                                                        </li>
+                                                    ))
                                                 ) : (
-                                                    <li className="px-8 py-2 text-xs italic text-base-content/40">Sin tareas</li>
+                                                    <li className="px-4 py-2 text-xs italic text-base-content/40">Sin unidades</li>
                                                 )}
                                             </ul>
                                         </div>

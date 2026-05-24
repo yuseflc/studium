@@ -779,7 +779,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
             const sortedTasks = [...(subject.tasks || [])];
 
             return (
-              <div key={subject._id} className="card bg-base-100 border border-base-300 shadow-sm">
+              <div key={subject._id} id={`subject-${subject._id}`} className="card scroll-mt-24 bg-base-100 border border-base-300 shadow-sm">
                 <div className="card-body gap-5">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-2">
@@ -828,7 +828,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                             const resources = [...(unit.resources || [])];
 
                             return (
-                              <div key={unit._id} className="rounded-2xl border border-base-200 bg-base-100/60 p-4">
+                              <div key={unit._id} id={`unit-${unit._id}`} className="scroll-mt-24 rounded-2xl border border-base-200 bg-base-100/60 p-4">
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="space-y-1">
                                     <div className="flex items-center gap-2">
