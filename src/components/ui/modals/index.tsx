@@ -19,7 +19,7 @@ export interface ModalProps {
 export const Modal = ({ id, dialogRef, onClose, children, className = "max-w-2xl", showClose = false }: ModalProps) => {
     return (
         <dialog id={id} ref={dialogRef} className="modal">
-            <div className={`modal-box bg-base-100 text-base-content border border-base-300 shadow-2xl ${className}`}>
+            <div className={`modal-box bg-base-100/80 text-base-content border border-base-200/60 shadow-2xl backdrop-blur-xl ${className}`}>
                 {showClose && (
                     <button
                         onClick={onClose}
@@ -203,30 +203,21 @@ export const ModalForm = ({
     className = "max-w-2xl"
 }: ModalFormProps) => {
     return (
-        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`p-6 ${className}`}>
-            {/* Cabecera */}
-            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-base-200">
-                <h3 className="font-bold text-xl text-base-content flex-1">
-                    {success ? '¡Completado!' : title}
+        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`bg-base-100 dark:bg-warning/5 border-base-200 dark:border-warning/30 p-6 backdrop-blur-md shadow-2xl ${className}`}>
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-2xl text-base-content dark:text-warning">
+                    {success ? "¡Completado!" : title}
                 </h3>
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="btn btn-sm btn-circle btn-ghost"
-                    aria-label="Cerrar"
-                >
-                    <IconX size={18} />
-                </button>
             </div>
 
             {success ? (
                 <div className="space-y-6 py-4">
                     <div className="flex flex-col items-center gap-4">
-                        <div className="rounded-full bg-success/15 p-4">
+                        <div className="rounded-full bg-success/20 p-4">
                             <IconCheck size={40} className="text-success" />
                         </div>
                         <div className="text-center">
-                            <p className="text-lg font-semibold text-base-content">{successMessage}</p>
+                            <p className="text-lg font-semibold">{successMessage}</p>
                         </div>
                     </div>
                     <div className="modal-action gap-2">
@@ -245,7 +236,7 @@ export const ModalForm = ({
                     )}
                     <form onSubmit={(e) => { e.preventDefault(); onConfirm(e); }} className="space-y-4">
                         {children}
-                        <div className="modal-action gap-2 pt-2 border-t border-base-200">
+                        <div className="modal-action gap-2 pt-4">
                             <button type="button" onClick={onClose} className="btn btn-ghost" disabled={isLoading}>
                                 Cancelar
                             </button>
