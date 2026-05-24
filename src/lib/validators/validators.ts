@@ -231,6 +231,17 @@ export const updateSubjectSchema = z.object({
 
 export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
 
+export const reorderSubjectsSchema = z.object({
+  courseId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  subjectIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"))
+    .min(1, "Debe existir al menos una materia"),
+});
+
+export type ReorderSubjectsInput = z.infer<typeof reorderSubjectsSchema>;
+
 // ============ ESQUEMAS DE UNIDADES ============
 
 /**
@@ -284,6 +295,17 @@ export const updateUnitSchema = z.object({
 });
 
 export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
+
+export const reorderUnitsSchema = z.object({
+  subjectId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+  unitIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido"))
+    .min(1, "Debe existir al menos una unidad"),
+});
+
+export type ReorderUnitsInput = z.infer<typeof reorderUnitsSchema>;
 
 // ============ ESQUEMAS DE RECURSOS ============
 
@@ -342,6 +364,17 @@ export const updateResourceSchema = z.object({
 });
 
 export type UpdateResourceInput = z.infer<typeof updateResourceSchema>;
+
+export const reorderResourcesSchema = z.object({
+  unitId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido"),
+  resourceIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de recurso inválido"))
+    .min(1, "Debe existir al menos un recurso"),
+});
+
+export type ReorderResourcesInput = z.infer<typeof reorderResourcesSchema>;
 
 // ============ ESQUEMAS DE TAREAS ============
 
@@ -432,3 +465,14 @@ export const updateTaskSchema = z.object({
 });
 
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
+
+export const reorderSubjectTasksSchema = z.object({
+  subjectId: z
+    .string()
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+  taskIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de tarea inválido"))
+    .min(1, "Debe existir al menos una tarea"),
+});
+
+export type ReorderSubjectTasksInput = z.infer<typeof reorderSubjectTasksSchema>;

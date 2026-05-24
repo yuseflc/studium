@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
@@ -20,7 +20,7 @@ import {
   X,
 } from "lucide-react";
 import CourseSidebar from "./Navbars/CourseSidebar";
-import CourseContent from "./CourseContent";
+import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager";
 import CourseParticipants from "./CourseParticipants";
 import GradesView from "./grades/GradesView";
 import CourseFAB from "./CourseFAB";
@@ -385,11 +385,11 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
           <div className="space-y-6">
             {activeTab === "content" && (
-              <CourseContent
-                subjects={subjects}
-                deletedItems={deletedItems}
-                onDeleteItem={handleDeleteItem}
-                isTeacher={isTeacher}
+              <CourseStructureManager
+                courseId={courseId}
+                subjects={subjects as CourseSubjectItem[]}
+                setSubjects={setSubjects as Dispatch<SetStateAction<CourseSubjectItem[]>>}
+                canEdit={isTeacher}
               />
             )}
 

@@ -3,14 +3,23 @@
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
 import Subject from "@/models/Subject";
+import Unit from "@/models/Unit";
+import Resource from "@/models/Resource";
+import Task from "@/models/Task";
 import User from "@/models/User";
 import { CURSOS } from "@/seed/data";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/config/auth.config";
 import { ICourse } from "@/models/Course";
-import { createSubjectSchema, updateCourseSchema } from "@/lib/validators/validators";
+import {
+  createSubjectSchema,
+  updateCourseSchema,
+  updateSubjectSchema,
+  reorderSubjectsSchema,
+} from "@/lib/validators/validators";
 import { LOGGER } from "@/config/logger";
 import { emailSchema } from "@/lib/validators/validators";
+import mongoose from "mongoose";
 
 // Interfaces serializadas para pasar a Client Components
 export interface SerializedResource {
@@ -192,7 +201,7 @@ export async function updateCourse(
 
     const currentUserId = currentUser._id.toString();
     const isOwner = course.ownerId.toString() === currentUserId;
-    const isTeacher = course.teachers.some((teacherId) => teacherId.toString() === currentUserId);
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
 
     if (!isOwner && !isTeacher) {
       return { success: false, error: "No tienes permiso para actualizar este curso" };
@@ -259,7 +268,7 @@ export async function inviteStudentByEmail(
 
     const currentUserId = currentUser._id.toString();
     const isOwner = course.ownerId.toString() === currentUserId;
-    const isTeacher = course.teachers.some((teacherId) => teacherId.toString() === currentUserId);
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
 
     if (!isOwner && !isTeacher) {
       return { success: false, error: "No tienes permiso para invitar participantes" };
@@ -270,7 +279,7 @@ export async function inviteStudentByEmail(
       return { success: false, error: "No existe un usuario con ese email" };
     }
 
-    if (course.enrolledStudents.some((studentId) => studentId.toString() === student._id.toString())) {
+    if (course.enrolledStudents.some((studentId: mongoose.Types.ObjectId) => studentId.toString() === student._id.toString())) {
       return { success: true };
     }
 
@@ -326,7 +335,7 @@ export async function transferCourseOwnership(
     const previousOwnerId = course.ownerId;
     course.ownerId = newOwner._id;
 
-    if (!course.teachers.some((teacherId) => teacherId.toString() === previousOwnerId.toString())) {
+    if (!course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === previousOwnerId.toString())) {
       course.teachers.push(previousOwnerId);
     }
 
@@ -454,7 +463,7 @@ export async function createSubject(input: CreateSubjectActionInput): Promise<Su
 
     const currentUserId = currentUser._id.toString();
     const isOwner = course.ownerId.toString() === currentUserId;
-    const isTeacher = course.teachers.some((teacherId) => teacherId.toString() === currentUserId);
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
 
     if (!isOwner && !isTeacher) {
       return { success: false, error: "No tienes permiso para crear materias en este curso" };
@@ -480,13 +489,207 @@ export async function createSubject(input: CreateSubjectActionInput): Promise<Su
         title: subject.title,
         description: subject.description,
         order: subject.order,
-        unitIds: subject.unitIds?.map((id) => id.toString()) || [],
-        taskIds: subject.taskIds?.map((id) => id.toString()) || [],
+        unitIds: subject.unitIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
+        taskIds: subject.taskIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
         createdAt: subject.createdAt.toISOString(),
         updatedAt: subject.updatedAt.toISOString(),
       },
     };
   } catch (error: any) {
     return { success: false, error: error.message || "Error al crear la materia" };
+  }
+}
+
+export async function updateSubject(
+  subjectId: string,
+  input: { title?: string; description?: string; order?: number }
+): Promise<SubjectActionResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const validationResult = updateSubjectSchema.safeParse(input);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: validationResult.error.issues[0]?.message || "Datos de materia inválidos",
+      };
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+      return { success: false, error: "ID de materia inválido" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const subject = await Subject.findById(subjectId);
+    if (!subject) {
+      return { success: false, error: "Materia no encontrada" };
+    }
+
+    const course = await Course.findById(subject.courseId);
+    if (!course) {
+      return { success: false, error: "Curso no encontrado" };
+    }
+
+    const currentUserId = currentUser._id.toString();
+    const isOwner = course.ownerId.toString() === currentUserId;
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para actualizar esta materia" };
+    }
+
+    const data = validationResult.data;
+    if (data.title !== undefined) {
+      subject.title = data.title;
+    }
+    if (data.description !== undefined) {
+      subject.description = data.description;
+    }
+    if (data.order !== undefined) {
+      subject.order = data.order;
+    }
+
+    subject.updatedAt = new Date();
+    await subject.save();
+
+    return {
+      success: true,
+      subject: {
+        _id: subject._id.toString(),
+        courseId: subject.courseId.toString(),
+        title: subject.title,
+        description: subject.description,
+        order: subject.order,
+        unitIds: subject.unitIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
+        taskIds: subject.taskIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
+        createdAt: subject.createdAt.toISOString(),
+        updatedAt: subject.updatedAt.toISOString(),
+      },
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al actualizar la materia";
+    LOGGER.error({ error, subjectId }, "Error updating subject from action");
+    return { success: false, error: message };
+  }
+}
+
+export async function deleteSubject(subjectId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
+      return { success: false, error: "ID de materia inválido" };
+    }
+
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const subject = await Subject.findById(subjectId);
+    if (!subject) {
+      return { success: false, error: "Materia no encontrada" };
+    }
+
+    const course = await Course.findById(subject.courseId);
+    if (!course) {
+      return { success: false, error: "Curso no encontrado" };
+    }
+
+    const currentUserId = currentUser._id.toString();
+    const isOwner = course.ownerId.toString() === currentUserId;
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para eliminar esta materia" };
+    }
+
+    const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds : [];
+
+    await Promise.all([
+      Task.deleteMany({ subjectId: subject._id }),
+      Resource.deleteMany({ unitId: { $in: unitIds } }),
+      Unit.deleteMany({ subjectId: subject._id }),
+      Subject.findByIdAndDelete(subjectId),
+      Course.findByIdAndUpdate(course._id, { $pull: { subjectIds: subject._id } }),
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al eliminar la materia";
+    LOGGER.error({ error, subjectId }, "Error deleting subject from action");
+    return { success: false, error: message };
+  }
+}
+
+export async function reorderSubjects(
+  courseId: string,
+  subjectIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const validationResult = reorderSubjectsSchema.safeParse({ courseId, subjectIds });
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: validationResult.error.issues[0]?.message || "Orden de materias inválido",
+      };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return { success: false, error: "Curso no encontrado" };
+    }
+
+    const currentUserId = currentUser._id.toString();
+    const isOwner = course.ownerId.toString() === currentUserId;
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para reordenar las materias" };
+    }
+
+    const subjects = await Subject.find({ _id: { $in: subjectIds }, courseId }).select("_id").lean();
+    if (subjects.length !== subjectIds.length) {
+      return { success: false, error: "Una o más materias no pertenecen al curso" };
+    }
+
+    await Promise.all([
+      Course.findByIdAndUpdate(courseId, { subjectIds }),
+      ...subjectIds.map((subjectId, index) =>
+        Subject.findByIdAndUpdate(subjectId, { order: index })
+      ),
+    ]);
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al reordenar las materias";
+    LOGGER.error({ error, courseId }, "Error reordering subjects from action");
+    return { success: false, error: message };
   }
 }

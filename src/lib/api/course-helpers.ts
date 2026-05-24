@@ -11,6 +11,27 @@ import Task from "@/models/Task";
 import Course from "@/models/Course";
 import { LOGGER } from "@/config/logger";
 
+function normalizeResource(resource: any) {
+  return {
+    _id: resource._id,
+    unitId: resource.unitId,
+    courseId: resource.courseId,
+    title: resource.title,
+    type: resource.type,
+    url: resource.url,
+    description: resource.description,
+    createdAt: resource.createdAt,
+    updatedAt: resource.updatedAt,
+  };
+}
+
+function normalizeUnit(unit: any) {
+  return {
+    ...unit,
+    resources: Array.isArray(unit.resourceIds) ? unit.resourceIds.map((resource: any) => normalizeResource(resource)) : [],
+  };
+}
+
 /**
  * Obtiene un curso completo con todas sus materias, unidades y recursos
  * Retorna la estructura completa poblada para consumo en componentes
@@ -83,7 +104,7 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
 
           return {
             ...subject,
-            units: units || [], // Retornar units pobladas en lugar de unitIds
+            units: (units || []).map((unit: any) => normalizeUnit(unit)), // Retornar units con resources normalizados
             unitIds: unitIds, // Mantener también los IDs
             tasks: tasks || [], // Incluir tareas
           };
@@ -141,7 +162,7 @@ export async function getSubjectWithUnits(subjectId: string | mongoose.Types.Obj
           path: "resourceIds",
           select: "_id title type url description createdAt",
         });
-        return unitDoc;
+        return unitDoc ? normalizeUnit(unitDoc.toObject()) : unitDoc;
       })
     );
 
@@ -165,7 +186,7 @@ export async function getUnitWithResources(unitId: string | mongoose.Types.Objec
       select: "_id title type url description createdAt updatedAt",
     });
 
-    return unit;
+    return unit ? normalizeUnit(unit.toObject()) : unit;
   } catch (error) {
     LOGGER.error({ unitId, error }, "Error fetching unit with resources");
     throw error;

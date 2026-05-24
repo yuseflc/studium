@@ -10,7 +10,7 @@ const TaskStatusIcon = () => {
 };
 
 interface TasksViewProps {
-  tasks: any[];
+  tasks?: any[];
   deletedItems?: string[];
   onDeleteItem?: (id: string) => void;
   isTeacher?: boolean;
@@ -32,7 +32,11 @@ const TasksView = ({
 
   return (
     <div className="space-y-3">
-      {filteredTasks.map((task) => {
+      {filteredTasks.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/55">
+          No hay tareas publicadas todavía.
+        </div>
+      ) : filteredTasks.map((task) => {
         const taskId = task._id?.toString();
         const taskTitle = task.title;
         const taskDescription = task.description || "Nueva tarea publicada";
