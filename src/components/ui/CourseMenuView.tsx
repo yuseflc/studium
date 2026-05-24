@@ -3,9 +3,107 @@
 import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";
-import { ModalDanger, ModalAdvise } from "@/components/ui/modals";
-import { useEffect, useState } from "react";
+import { ModalAdvise } from "@/components/ui/modals";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
+
+/** Duración en ms que hay que sostener el botón para eliminar el curso */
+const HOLD_DURATION_MS = 3000;
+
+/**
+ * HoldDeleteButton
+ *
+ * Botón de eliminar que requiere mantener pulsado 3 segundos.
+ * El fondo rojo avanza de izquierda a derecha (clip-path) como feedback visual.
+ * Si se suelta antes, el progreso se reinicia a 0 sin ejecutar ninguna acción.
+ */
+function HoldDeleteButton({ onDelete, isDeleting }: { onDelete: () => void; isDeleting: boolean }) {
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
+  const pressingRef = useRef(false);
+
+  const cancel = useCallback(() => {
+    if (!pressingRef.current) return;
+    pressingRef.current = false;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    startRef.current = null;
+    setProgress(0);
+  }, []);
+
+  const tick = useCallback(() => {
+    if (!pressingRef.current || startRef.current === null) return;
+    const elapsed = Date.now() - startRef.current;
+    const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
+    setProgress(p);
+    if (p >= 1) {
+      pressingRef.current = false;
+      rafRef.current = null;
+      startRef.current = null;
+      onDelete();
+      return;
+    }
+    rafRef.current = requestAnimationFrame(tick);
+  }, [onDelete]);
+
+  const start = useCallback(() => {
+    if (pressingRef.current || isDeleting) return;
+    pressingRef.current = true;
+    startRef.current = Date.now();
+    rafRef.current = requestAnimationFrame(tick);
+  }, [tick, isDeleting]);
+
+  // Limpiar RAF al desmontar
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const isActive = progress > 0;
+
+  return (
+    <button
+      type="button"
+      disabled={isDeleting}
+      aria-label="Mantén pulsado 3 segundos para eliminar el curso"
+      className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium select-none touch-none overflow-hidden transition-colors"
+      style={{
+        // Color de texto: blanco cuando hay progreso (sobre el fondo rojo), rojo cuando está en reposo
+        color: isActive ? "white" : "oklch(var(--er))",
+        cursor: isDeleting ? "wait" : "pointer",
+        userSelect: "none",
+      }}
+      onMouseDown={(e) => { if (e.button === 0) start(); }}
+      onMouseUp={cancel}
+      onMouseLeave={cancel}
+      onTouchStart={(e) => { e.preventDefault(); start(); }}
+      onTouchEnd={cancel}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {/* Capa de relleno rojo que crece de izquierda a derecha */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 bg-red-700 origin-left rounded-lg"
+        style={{
+          transform: `scaleX(${progress})`,
+          transition: "none",
+        }}
+      />
+
+      {/* Contenido encima del relleno */}
+      <span className="relative flex items-center gap-2">
+        {isDeleting ? (
+          <span className="loading loading-spinner loading-xs" />
+        ) : (
+          <IconTrash size={16} />
+        )}
+        {isDeleting ? "Eliminando..." : isActive ? "Suelta para cancelar" : "Eliminar curso"}
+      </span>
+    </button>
+  );
+}
 
 export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
   const [courses, setCourses] = useState<SerializedCourse[]>([]);
@@ -186,16 +284,13 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                             <IconCancel size={16} /> Cancelar registro
                           </button>
                         </li>
-                        {/* Opción de eliminar solo visible para el propietario */}
+                        {/* Opción de eliminar solo visible para el propietario — requiere mantener 3s */}
                         {c.ownerId && c.ownerId === currentUserId && (
                           <li>
-                            <button
-                              className="text-error hover:bg-error/10"
-                              onClick={() => (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.showModal()}
-                            >
-                              <IconTrash size={16} />
-                              Eliminar curso
-                            </button>
+                            <HoldDeleteButton
+                              onDelete={() => handleDeleteCourse(courseId)}
+                              isDeleting={deletingId === courseId}
+                            />
                           </li>
                         )}
                       </ul>
@@ -208,23 +303,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
         )}
       </div>
 
-      {/* Modales de confirmación de eliminación para cada curso */}
-      {courses.map((course) => (
-        <ModalDanger
-          key={`dialog_${course._id}`}
-          id={`confirm_delete_${course._id}`}
-          title="Eliminar curso"
-          description={
-            <p>
-              ¿Estás seguro de que deseas eliminar el curso <strong>"{course.title}"</strong>? Esta acción no se puede deshacer.
-            </p>
-          }
-          confirmLabel="Eliminar"
-          onConfirm={() => handleDeleteCourse(course._id)}
-          isLoading={deletingId === course._id}
-          error={deletingId === course._id ? deleteError : null}
-        />
-      ))}
+      {/* El modal de confirmación fue reemplazado por el HoldDeleteButton — eliminación directa tras 3s */}
 
       {/* Modales de confirmación de desincripción para cada curso */}
       {courses.map((course) => (

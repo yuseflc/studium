@@ -1,8 +1,99 @@
 "use client";
 
-import { useEffect, useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
+
+/** Duración en ms que hay que sostener el botón para confirmar */
+const HOLD_DURATION_MS = 3000;
+
+function HoldConfirmButton({ 
+  onConfirm, 
+  disabled, 
+  children,
+  className = ""
+}: { 
+  onConfirm: () => void; 
+  disabled?: boolean; 
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+  const startRef = useRef<number | null>(null);
+  const pressingRef = useRef(false);
+
+  const cancel = useCallback(() => {
+    if (!pressingRef.current) return;
+    pressingRef.current = false;
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    startRef.current = null;
+    setProgress(0);
+  }, []);
+
+  const tick = useCallback(() => {
+    if (!pressingRef.current || startRef.current === null) return;
+    const elapsed = Date.now() - startRef.current;
+    const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
+    setProgress(p);
+    if (p >= 1) {
+      pressingRef.current = false;
+      rafRef.current = null;
+      startRef.current = null;
+      setProgress(0); // Reiniciar al confirmar
+      onConfirm();
+      return;
+    }
+    rafRef.current = requestAnimationFrame(tick);
+  }, [onConfirm]);
+
+  const start = useCallback(() => {
+    if (pressingRef.current || disabled) return;
+    pressingRef.current = true;
+    startRef.current = Date.now();
+    rafRef.current = requestAnimationFrame(tick);
+  }, [tick, disabled]);
+
+  useEffect(() => () => {
+    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  }, []);
+
+  const isActive = progress > 0;
+
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      className={`relative overflow-hidden select-none touch-none transition-colors ${className}`}
+      style={{
+        userSelect: "none",
+        color: isActive ? "white" : undefined,
+      }}
+      onMouseDown={(e) => { if (e.button === 0) start(); }}
+      onMouseUp={cancel}
+      onMouseLeave={cancel}
+      onTouchStart={(e) => { e.preventDefault(); start(); }}
+      onTouchEnd={cancel}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {/* Capa de relleno rojo */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-0 bg-red-700 origin-left"
+        style={{
+          transform: `scaleX(${progress})`,
+          transition: "none",
+        }}
+      />
+      <span className="relative z-10 flex items-center justify-center gap-2">
+        {isActive ? "Suelta para cancelar" : children}
+      </span>
+    </button>
+  );
+}
 import {
   BookOpen,
   Users,
@@ -963,14 +1054,13 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               >
                 Cancelar
               </button>
-              <button
-                className="btn btn-error"
-                onClick={handleDeleteCourse}
+              <HoldConfirmButton
+                className="btn btn-error text-white"
+                onConfirm={handleDeleteCourse}
                 disabled={deleteConfirmationText !== "ELIMINAR"}
-                type="button"
               >
                 Eliminar permanentemente
-              </button>
+              </HoldConfirmButton>
             </div>
           </div>
           <form method="dialog" className="modal-backdrop">
