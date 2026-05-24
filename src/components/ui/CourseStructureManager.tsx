@@ -1100,12 +1100,45 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                 <input className="input input-bordered w-full" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej: PDF del tema" required />
               </label>
               <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Tipo</span>
-                <select className="select select-bordered w-full" value={resourceType} onChange={(event) => setResourceType(event.target.value as "link" | "file" | "text") }>
-                  <option value="file">Archivo</option>
-                  <option value="link">Enlace</option>
-                  <option value="text">Texto</option>
-                </select>
+                <span className="label-text font-semibold text-base-content/90 mb-2">Tipo de recurso</span>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setResourceType("file")}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl border-2 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      resourceType === "file"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                        : "border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/70"
+                    }`}
+                  >
+                    <FileText size={18} />
+                    Archivo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResourceType("link")}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl border-2 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      resourceType === "link"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                        : "border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/70"
+                    }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                    Enlace
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResourceType("text")}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl border-2 text-xs font-bold transition-all duration-200 cursor-pointer ${
+                      resourceType === "text"
+                        ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                        : "border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/70"
+                    }`}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-sticky-note"><path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9z"/><path d="M15 3v6h6"/></svg>
+                    Texto
+                  </button>
+                </div>
               </label>
               {resourceType === "link" && (
                 <label className="form-control w-full">
@@ -1132,15 +1165,33 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
               </label>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="form-control w-full">
-                  <span className="label-text font-medium mb-2">Tipo</span>
-                  <select
-                    className="select select-bordered w-full"
-                    value={editor.taskType}
-                    onChange={(event) => setEditor({ ...editor, taskType: event.target.value as TaskDraftType })}
-                  >
-                    <option value="assignment">Tarea</option>
-                    <option value="quiz">Examen</option>
-                  </select>
+                  <span className="label-text font-semibold text-base-content/90 mb-2">Tipo de actividad</span>
+                  <div className="grid grid-cols-2 gap-3 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => setEditor({ ...editor, taskType: "assignment" })}
+                      className={`flex items-center justify-center gap-2 p-3.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                        editor.taskType === "assignment"
+                          ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                          : "border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/70"
+                      }`}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-clipboard-list"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M9 9h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>
+                      Tarea
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditor({ ...editor, taskType: "quiz" })}
+                      className={`flex items-center justify-center gap-2 p-3.5 rounded-xl border-2 text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                        editor.taskType === "quiz"
+                          ? "border-primary bg-primary/5 text-primary shadow-sm ring-1 ring-primary/20"
+                          : "border-base-200 bg-base-100 hover:bg-base-200/50 text-base-content/70"
+                      }`}
+                    >
+                      <GraduationCap size={16} />
+                      Examen
+                    </button>
+                  </div>
                 </label>
                 <label className="form-control w-full">
                   <span className="label-text font-medium mb-2">Puntos máximos</span>

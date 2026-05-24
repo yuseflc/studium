@@ -36,6 +36,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
   const [dueDate, setDueDate] = useState('');
   const [selectedSubjectId, setSelectedSubjectId] = useState(defaultSubjectId || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isOpenSubjectDropdown, setIsOpenSubjectDropdown] = useState(false);
   
   const handleOpenModal = (type: CreationType) => {
     // Resetear estados al abrir
@@ -45,6 +46,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
     setDueDate('');
     setSelectedSubjectId(defaultSubjectId || '');
     setSelectedFile(null);
+    setIsOpenSubjectDropdown(false);
     setIsSubmitting(false);
     setIsSuccess(false);
     setCreatedItemId(null);
@@ -317,19 +319,19 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
       >
         {!isSuccess ? (
           <>
-            <div className="flex items-center gap-2 mb-2 text-warning">
+            <div className="flex items-center gap-2 mb-2 text-primary">
               {config.icon}
-              <span className="font-semibold">Nuevo Registro</span>
+              <span className="font-semibold text-base-content">Nuevo Registro</span>
             </div>
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold text-base-content/80 dark:text-warning/80">{config.nameLabel}</span>
+                <span className="label-text font-semibold text-base-content/90">{config.nameLabel}</span>
               </label>
               <input
                 type="text"
                 placeholder={config.namePlaceholder}
-                className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
+                className="input input-bordered w-full bg-base-100 text-base-content placeholder:text-base-content/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-medium rounded-xl shadow-sm"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -338,34 +340,71 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
             </div>
 
             {creationType !== 'subject' && (
-              <div className="form-control">
+              <div className="form-control relative">
                 <label className="label">
-                  <span className="label-text font-bold text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
+                  <span className="label-text font-semibold text-base-content/90">Tema / Materia <span className="text-error">*</span></span>
                 </label>
-                <select
-                  className="select w-full border border-warning/20 bg-warning/5 focus:border-warning/50 focus:outline-none focus:ring-1 focus:ring-warning/30 transition-all font-medium"
-                  value={selectedSubjectId}
-                  onChange={(e) => setSelectedSubjectId(e.target.value)}
-                  required
-                  disabled={isSubmitting}
-                >
-                  <option value="" disabled>Selecciona un tema...</option>
-                  {subjects.map((subject: any) => (
-                    <option key={subject._id?.toString() || subject.id} value={subject._id?.toString() || subject.id}>
-                      {subject.title}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsOpenSubjectDropdown(!isOpenSubjectDropdown)}
+                    className="input input-bordered w-full flex items-center justify-between bg-base-100 text-base-content border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium cursor-pointer"
+                    disabled={isSubmitting}
+                  >
+                    <span>
+                      {subjects.find(s => (s._id?.toString() || s.id) === selectedSubjectId)?.title || "Selecciona un tema..."}
+                    </span>
+                    <span className="pointer-events-none flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isOpenSubjectDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
+                    </span>
+                  </button>
+                  
+                  {isOpenSubjectDropdown && (
+                    <>
+                      <div className="fixed inset-0 z-40" onClick={() => setIsOpenSubjectDropdown(false)} />
+                      <ul className="absolute left-0 w-full mt-1.5 p-1 bg-base-100 border border-base-300 dark:border-white/10 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
+                        <li className="px-3 py-2 text-xs font-semibold text-base-content/40 uppercase tracking-wider border-b border-base-200/50 mb-1">
+                          Selecciona un tema
+                        </li>
+                        {subjects.map((subject: any) => {
+                          const id = subject._id?.toString() || subject.id;
+                          const isSelected = id === selectedSubjectId;
+                          return (
+                            <li key={id}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedSubjectId(id);
+                                  setIsOpenSubjectDropdown(false);
+                                }}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors text-left cursor-pointer ${
+                                  isSelected
+                                    ? "bg-primary/10 text-primary font-bold"
+                                    : "hover:bg-base-200 text-base-content/85"
+                                }`}
+                              >
+                                <span className="truncate">{subject.title}</span>
+                                {isSelected && (
+                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
+                                )}
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-bold text-base-content/80 dark:text-warning/80">Descripción</span>
+                <span className="label-text font-semibold text-base-content/90">Descripción</span>
               </label>
               <input
                 type="text"
-                className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
+                className="input input-bordered w-full bg-base-100 text-base-content placeholder:text-base-content/40 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-medium rounded-xl shadow-sm"
                 placeholder="Escribe una breve descripción..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -376,19 +415,18 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
             {(creationType === 'task' || creationType === 'exam') && (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-bold text-base-content/80 dark:text-warning/80">
+                  <span className="label-text font-semibold text-base-content/90">
                     {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
                   </span>
                 </label>
                 <input
                   type="date"
-                  className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
+                  className="input input-bordered w-full bg-base-100 text-base-content focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-medium rounded-xl shadow-sm"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
                   required
                   disabled={isSubmitting}
                   title={creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
-                  placeholder="Selecciona una fecha"
                 />
               </div>
             )}
@@ -396,20 +434,20 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
             {creationType === 'resource' && (
               <div className="form-control">
                 <label className="label">
-                  <span className="label-text font-bold text-base-content/80 dark:text-warning/80 flex items-center gap-2">
+                  <span className="label-text font-semibold text-base-content/90 flex items-center gap-2">
                     <Upload size={16} /> Subir archivo
                   </span>
                 </label>
                 <input
                   type="file"
-                  className="file-input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
+                  className="file-input file-input-bordered w-full bg-base-100 text-base-content focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-medium"
                   onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                   disabled={isSubmitting}
                   required
                   title="Sube un archivo"
                 />
                 {selectedFile && (
-                  <span className="text-xs text-warning/70 mt-1 block truncate">
+                  <span className="text-xs text-base-content/50 mt-1 block truncate">
                     Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
                   </span>
                 )}

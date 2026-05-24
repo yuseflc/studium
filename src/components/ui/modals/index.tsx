@@ -19,7 +19,7 @@ export interface ModalProps {
 export const Modal = ({ id, dialogRef, onClose, children, className = "max-w-2xl", showClose = false }: ModalProps) => {
     return (
         <dialog id={id} ref={dialogRef} className="modal">
-            <div className={`modal-box border shadow-xl backdrop-blur-md ${className}`}>
+            <div className={`modal-box bg-base-100 text-base-content border border-base-300 shadow-2xl ${className}`}>
                 {showClose && (
                     <button
                         onClick={onClose}
@@ -31,7 +31,7 @@ export const Modal = ({ id, dialogRef, onClose, children, className = "max-w-2xl
                 )}
                 {children}
             </div>
-            <form method="dialog" className="modal-backdrop">
+            <form method="dialog" className="modal-backdrop backdrop-blur-sm">
                 <button onClick={onClose}>cerrar</button>
             </form>
         </dialog>
@@ -203,21 +203,30 @@ export const ModalForm = ({
     className = "max-w-2xl"
 }: ModalFormProps) => {
     return (
-        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`bg-base-100 dark:bg-warning/5 border-base-200 dark:border-warning/30 p-6 backdrop-blur-md shadow-2xl ${className}`}>
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-2xl text-base-content dark:text-warning">
-                    {success ? "¡Completado!" : title}
+        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`p-6 ${className}`}>
+            {/* Cabecera */}
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-base-200">
+                <h3 className="font-bold text-xl text-base-content flex-1">
+                    {success ? '¡Completado!' : title}
                 </h3>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="btn btn-sm btn-circle btn-ghost"
+                    aria-label="Cerrar"
+                >
+                    <IconX size={18} />
+                </button>
             </div>
 
             {success ? (
                 <div className="space-y-6 py-4">
                     <div className="flex flex-col items-center gap-4">
-                        <div className="rounded-full bg-success/20 p-4">
+                        <div className="rounded-full bg-success/15 p-4">
                             <IconCheck size={40} className="text-success" />
                         </div>
                         <div className="text-center">
-                            <p className="text-lg font-semibold">{successMessage}</p>
+                            <p className="text-lg font-semibold text-base-content">{successMessage}</p>
                         </div>
                     </div>
                     <div className="modal-action gap-2">
@@ -236,7 +245,7 @@ export const ModalForm = ({
                     )}
                     <form onSubmit={(e) => { e.preventDefault(); onConfirm(e); }} className="space-y-4">
                         {children}
-                        <div className="modal-action gap-2 pt-4">
+                        <div className="modal-action gap-2 pt-2 border-t border-base-200">
                             <button type="button" onClick={onClose} className="btn btn-ghost" disabled={isLoading}>
                                 Cancelar
                             </button>
@@ -275,29 +284,41 @@ export const ModalSearch = ({
     onClose,
 }: ModalSearchProps) => {
     return (
-        <Modal 
-            id={id} 
-            dialogRef={dialogRef} 
-            onClose={onClose} 
-            className="max-w-xl bg-base-100lack dark:bg-base-200 border border-base-300 dark:border-black/10 p-6 shadow-2xl backdrop-blur-xl"
+        <Modal
+            id={id}
+            dialogRef={dialogRef}
+            onClose={onClose}
+            className="max-w-xl p-6"
         >
-            <div className="flex justify-between items-center mb-6">
-                <h3 className="font-extrabold text-2xl text-base-content dark:text-black flex items-center gap-3 tracking-tight">
-                    <IconSearch size={28} className="text-primary dark:text-warning" />
-                    Buscador de Tareas
+            {/* Cabecera */}
+            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-base-200">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <IconSearch size={20} className="text-primary" />
+                </div>
+                <h3 className="font-bold text-xl text-base-content flex-1 tracking-tight">
+                    Buscador de tareas
                 </h3>
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="btn btn-sm btn-circle btn-ghost"
+                    aria-label="Cerrar buscador"
+                >
+                    <IconX size={18} />
+                </button>
             </div>
 
-            <div className="form-control mb-6">
-                <div className="relative group">
-                    <IconSearch 
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50 dark:text-warning/70 z-10" 
-                        size={20} 
+            {/* Campo de búsqueda */}
+            <div className="form-control mb-5">
+                <div className="relative">
+                    <IconSearch
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-base-content/40 z-10"
+                        size={18}
                     />
-                    <input 
+                    <input
                         type="text"
                         placeholder="Buscar tarea o examen por título..."
-                        className="input w-full pl-12 h-14 border-2 border-base-300 dark:border-white/10 bg-base-100 dark:bg-base-300 text-base-content dark:text-black placeholder:text-base-content/40 dark:placeholder:text-black/30 focus:border-primary dark:focus:border-warning focus:outline-none focus:ring-4 focus:ring-primary/10 dark:focus:ring-warning/10 transition-all font-semibold rounded-2xl shadow-sm"
+                        className="input input-bordered w-full pl-10 bg-base-200/50 text-base-content placeholder:text-base-content/40 focus:outline-none focus:border-primary transition-all"
                         value={searchTerm}
                         onChange={(e) => onSearchChange(e.target.value)}
                         autoFocus
@@ -305,59 +326,62 @@ export const ModalSearch = ({
                 </div>
             </div>
 
-            <div className="space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
-                <h4 className="font-black text-[11px] uppercase tracking-[0.15em] text-base-content/60 dark:text-warning/80 mb-3 flex items-center justify-between px-1">
-                    <span>Resultados</span>
-                    <span className="badge badge-md bg-primary/10 dark:bg-warning/20 border-none text-primary dark:text-warning font-bold">
+            {/* Lista de resultados */}
+            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                <div className="flex items-center justify-between px-1 mb-2">
+                    <span className="text-xs font-semibold text-base-content/50 uppercase tracking-wider">Resultados</span>
+                    <span className="badge badge-sm bg-primary/10 border-none text-primary font-bold">
                         {filteredTasks.length}
                     </span>
-                </h4>
-                
+                </div>
+
                 {filteredTasks.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-base-content/30 dark:text-white/20 bg-base-200/50 dark:bg-base-300/50 rounded-3xl border-2 border-dashed border-base-300 dark:border-black/5">
-                        <IconSearch size={56} className="opacity-20 mb-4" />
-                        <p className="text-base font-medium italic">
-                            No se encontraron coincidencias
-                        </p>
+                    <div className="flex flex-col items-center justify-center py-10 rounded-2xl border-2 border-dashed border-base-300 text-base-content/30">
+                        <IconSearch size={40} className="opacity-30 mb-3" />
+                        <p className="text-sm font-medium italic">Sin coincidencias</p>
                     </div>
                 ) : (
                     filteredTasks.map((task) => {
                         const taskId = String(task._id || task.id);
-                        const title = task.title;
-                        const description = task.description || "Tarea del curso";
-                        
+                        const taskTitle = task.title;
+                        const description = task.description || 'Tarea del curso';
+
                         return (
                             <div
                                 key={taskId}
                                 onClick={() => onGoToTask(taskId)}
-                                className="group flex items-center gap-4 p-4 rounded-2xl border border-base-300 dark:border-white/5 bg-base-100 dark:bg-base-300/50 hover:bg-base-200  hover:border-primary/30 dark:hover:border-warning/30 transition-all cursor-pointer shadow-sm hover:shadow-md"
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => e.key === 'Enter' && onGoToTask(taskId)}
+                                className="group flex items-center gap-3 p-3.5 rounded-xl border border-base-200
+                                           bg-base-100 hover:bg-base-200/60 hover:border-primary/30
+                                           transition-all cursor-pointer"
                             >
-                                <div className="p-3 rounded-xl bg-primary/10 dark:bg-warning/10 text-primary dark:text-warning shadow-inner flex-shrink-0 group-hover:scale-110 transition-transform">
-                                    <IconClipboardText size={20} />
+                                <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                                    <IconClipboardText size={18} />
                                 </div>
-
                                 <div className="flex flex-col min-w-0 flex-1">
-                                    <p className="font-bold text-[15px] text-base-content dark:text-white truncate leading-tight group-hover:text-primary dark:group-hover:text-warning transition-colors">
-                                        {title}
+                                    <p className="font-semibold text-sm text-base-content truncate group-hover:text-primary transition-colors">
+                                        {taskTitle}
                                     </p>
-                                    <span className="text-xs font-medium text-base-content/60 dark:text-white/50 truncate mt-0.5">
+                                    <span className="text-xs text-base-content/50 truncate mt-0.5">
                                         {description}
                                     </span>
                                 </div>
-
-                                <div className="ml-2 text-xs font-black uppercase tracking-widest text-primary dark:text-warning opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0 transition-all">
-                                    Ver
-                                </div>
+                                <span className="text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+                                    Ver →
+                                </span>
                             </div>
                         );
                     })
                 )}
             </div>
 
-            <div className="modal-action border-t border-base-200 dark:border-white/5 pt-4 mt-6">
-                <button 
-                    type="button" 
-                    className="btn btn-ghost btn-sm text-base-content/50 dark:text-white/40 hover:text-primary dark:hover:text-warning font-bold" 
+            {/* Footer */}
+            <div className="pt-4 mt-4 border-t border-base-200">
+                <button
+                    type="button"
+                    className="btn btn-ghost btn-sm w-full text-base-content/50"
                     onClick={onClose}
                 >
                     Cerrar buscador

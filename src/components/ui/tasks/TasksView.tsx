@@ -1,7 +1,8 @@
-import { ClipboardList } from 'lucide-react';
+import { ClipboardList, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { CALIFICACIONES } from '@/seed/data';
 import { useParams } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 
 /* Vista de la tarea en el curso */
 
@@ -25,6 +26,65 @@ const TasksView = ({
   const params = useParams();
   const courseid = (params?.courseid as string) || 'course-1';
 
+  // Estados para eliminar manteniendo pulsado
+  const [holdingTaskId, setHoldingTaskId] = useState<string | null>(null);
+  const [holdProgress, setHoldProgress] = useState(0);
+  
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isLongPressRef = useRef(false);
+
+  // Limpiar temporizadores al desmontar
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, []);
+
+  const handleStartPress = (taskId: string) => {
+    if (!isTeacher || !onDeleteItem) return;
+    
+    isLongPressRef.current = false;
+    setHoldingTaskId(taskId);
+    setHoldProgress(0);
+
+    const startTime = Date.now();
+    
+    // Intervalo para actualizar la barra de progreso (cada 30ms incrementa el progreso)
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min((elapsed / 3000) * 100, 100);
+      setHoldProgress(progress);
+    }, 30);
+
+    // Timeout para ejecutar la acción después de 3 segundos
+    timerRef.current = setTimeout(() => {
+      isLongPressRef.current = true;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setHoldProgress(100);
+      onDeleteItem(taskId);
+      
+      setTimeout(() => {
+        setHoldingTaskId(null);
+        setHoldProgress(0);
+      }, 300);
+    }, 3000);
+  };
+
+  const handleCancelPress = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    setHoldingTaskId(null);
+    setHoldProgress(0);
+  };
+
   // Filtrar tareas eliminadas
   const filteredTasks = tasks.filter(
     (task) => !deletedItems.includes(String(task._id))
@@ -32,6 +92,26 @@ const TasksView = ({
 
   return (
     <div className="space-y-3">
+      {/* Estilos para el efecto de vibración */}
+      <style>{`
+        @keyframes task-shake {
+          0% { transform: translate(1px, 1px) rotate(0deg); }
+          10% { transform: translate(-1px, -1px) rotate(-0.5deg); }
+          20% { transform: translate(-2px, 0px) rotate(0.5deg); }
+          30% { transform: translate(0px, 1.5px) rotate(0deg); }
+          40% { transform: translate(1px, -0.5px) rotate(0.5deg); }
+          50% { transform: translate(-1px, 1px) rotate(-0.5deg); }
+          60% { transform: translate(-2px, 0.5px) rotate(0deg); }
+          70% { transform: translate(1.5px, 0.5px) rotate(-0.5deg); }
+          80% { transform: translate(-0.5px, -0.5px) rotate(0.5deg); }
+          90% { transform: translate(1px, 1.5px) rotate(0deg); }
+          100% { transform: translate(0.5px, -1px) rotate(-0.5deg); }
+        }
+        .task-shaking {
+          animation: task-shake 0.2s infinite;
+        }
+      `}</style>
+
       {filteredTasks.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-base-300 bg-base-100 p-6 text-center text-sm text-base-content/55">
           No hay tareas publicadas todavía.
@@ -42,17 +122,44 @@ const TasksView = ({
         const taskDescription = task.description || "Nueva tarea publicada";
         const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "";
         
+        const isCurrentHolding = holdingTaskId === taskId;
+
         return (
           <Link 
             href={`/mycourses/${courseid}/tasks/${taskId}`} 
             key={taskId}
             className="block"
             aria-label={`Ver tarea: ${taskTitle}`}
+            onClick={(e) => {
+              if (isLongPressRef.current) {
+                e.preventDefault();
+                e.stopPropagation();
+                isLongPressRef.current = false;
+              }
+            }}
           >
-            <div className="flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group">
+            <div 
+              onMouseDown={() => handleStartPress(taskId)}
+              onMouseUp={handleCancelPress}
+              onMouseLeave={handleCancelPress}
+              onTouchStart={(e) => {
+                handleStartPress(taskId);
+              }}
+              onTouchEnd={handleCancelPress}
+              onTouchMove={handleCancelPress}
+              onTouchCancel={handleCancelPress}
+              onContextMenu={(e) => {
+                if (isTeacher) {
+                  e.preventDefault();
+                }
+              }}
+              className={`relative flex items-center gap-4 p-4 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md cursor-pointer group select-none ${
+                isCurrentHolding ? 'task-shaking scale-[0.98] border-error/40 shadow-inner' : 'active:scale-[0.99]'
+              }`}
+            >
               <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
-                  <TaskStatusIcon />
-                </div>
+                <TaskStatusIcon />
+              </div>
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
@@ -72,25 +179,29 @@ const TasksView = ({
                 </p>
               </div>
               
-              {/* Menú de opciones opcional */}
+              {/* Indicador de ayuda táctil de pulsación */}
               {isTeacher && (
-                <div className="dropdown dropdown-end opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0" onClick={(e) => e.preventDefault()}>
-                  <div tabIndex={0} role="button" aria-label="Abrir opciones de tarea" className="btn btn-ghost btn-xs btn-circle text-base-content/50 hover:text-base-content">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+                <div className="text-xs text-base-content/40 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0 flex items-center gap-1 font-medium bg-base-200/50 px-2 py-1 rounded-lg">
+                  <Trash2 size={12} className="text-error" />
+                  <span>Mantén pulsado</span>
+                </div>
+              )}
+
+              {/* Capa de progreso interactiva roja al mantener pulsado */}
+              {isCurrentHolding && (
+                <div className="absolute inset-0 bg-error/5 pointer-events-none rounded-2xl overflow-hidden z-20">
+                  {/* Barra de progreso */}
+                  <div 
+                    className="absolute bottom-0 left-0 h-1.5 bg-error transition-all duration-75"
+                    style={{ width: `${holdProgress}%` }}
+                  />
+                  {/* Texto indicador */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-base-100/90 backdrop-blur-xs">
+                    <span className="text-error font-bold text-sm flex items-center gap-2">
+                      <Trash2 size={14} className="animate-bounce" />
+                      {holdProgress < 100 ? `Mantén presionado para eliminar (${Math.ceil((3000 - (holdProgress * 30)) / 1000)}s)` : "Eliminando..."}
+                    </span>
                   </div>
-                  <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32 border border-base-200">
-                    <li>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          onDeleteItem?.(String(taskId));
-                        }} 
-                        className="text-error hover:bg-error/10 hover:text-error"
-                      >
-                        Eliminar
-                      </button>
-                    </li>
-                  </ul>
                 </div>
               )}
             </div>
