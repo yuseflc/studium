@@ -34,6 +34,8 @@ import {
   transferCourseOwnership,
   updateCourse,
 } from "@/app/actions/courseActions";
+// Modales de Studium con blur
+import { ModalAdvise } from "@/components/ui/modals";
 
 interface CourseViewProps {
   courseData: ICourse | null;
@@ -71,12 +73,43 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   const [isInviting, setIsInviting] = useState(false);
   const [showCopied, setShowCopied] = useState(false);
 
+  // Modales existentes (con blur añadido)
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showVisibilityModal, setShowVisibilityModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transferEmail, setTransferEmail] = useState("");
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+
+  // Estados para modales de Studium (reemplazan alerts)
+  const [inviteModal, setInviteModal] = useState<{ isOpen: boolean; success: boolean; message: string; email?: string }>({
+    isOpen: false,
+    success: false,
+    message: "",
+  });
+  
+  const [regenerateModal, setRegenerateModal] = useState<{ isOpen: boolean; newCode: string }>({
+    isOpen: false,
+    newCode: "",
+  });
+  
+  const [visibilityResultModal, setVisibilityResultModal] = useState<{ isOpen: boolean; success: boolean; message: string }>({
+    isOpen: false,
+    success: false,
+    message: "",
+  });
+  
+  const [archiveResultModal, setArchiveResultModal] = useState<{ isOpen: boolean; success: boolean; message: string }>({
+    isOpen: false,
+    success: false,
+    message: "",
+  });
+  
+  const [transferResultModal, setTransferResultModal] = useState<{ isOpen: boolean; success: boolean; message: string; email?: string }>({
+    isOpen: false,
+    success: false,
+    message: "",
+  });
 
   const courseId = String(courseData?._id || "");
 
@@ -173,6 +206,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
+  // ✅ Usando Server Action updateCourse (NO fetch)
   const handleSaveGeneralInfo = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -201,6 +235,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
+  // ✅ Usando Server Action inviteStudentByEmail (NO fetch, NO alert)
   const handleInviteByEmail = async () => {
     if (!inviteEmail || !courseId) return;
     setIsInviting(true);
@@ -211,11 +246,20 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         throw new Error(result.error || "Error al enviar invitación");
       }
 
-      alert(`Invitacion enviada a ${inviteEmail}`);
+      setInviteModal({
+        isOpen: true,
+        success: true,
+        message: `Invitación enviada correctamente a ${inviteEmail}`,
+        email: inviteEmail,
+      });
       setInviteEmail("");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al enviar la invitacion";
-      alert(message);
+      const message = error instanceof Error ? error.message : "Error al enviar la invitación";
+      setInviteModal({
+        isOpen: true,
+        success: false,
+        message,
+      });
     } finally {
       setIsInviting(false);
     }
@@ -231,12 +275,18 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
+  // ✅ Modal de confirmación en lugar de alert
   const handleRegenerateCode = () => {
     const newCode = `COURSE-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-    setInviteCode(newCode);
-    alert("Codigo regenerado correctamente");
+    setRegenerateModal({ isOpen: true, newCode });
   };
 
+  const confirmRegenerateCode = () => {
+    setInviteCode(regenerateModal.newCode);
+    setRegenerateModal({ isOpen: false, newCode: "" });
+  };
+
+  // ✅ Usando Server Action updateCourse (NO fetch, NO alert)
   const handleChangeVisibility = async () => {
     if (!courseId) return;
 
@@ -250,13 +300,23 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
       setStatus(newStatus);
       setShowVisibilityModal(false);
-      alert(`Curso ${newStatus === "active" ? "publicado" : "guardado como borrador"} correctamente`);
+      
+      setVisibilityResultModal({
+        isOpen: true,
+        success: true,
+        message: `Curso ${newStatus === "active" ? "publicado" : "guardado como borrador"} correctamente`,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al cambiar la visibilidad";
-      alert(message);
+      setVisibilityResultModal({
+        isOpen: true,
+        success: false,
+        message,
+      });
     }
   };
 
+  // ✅ Usando Server Action updateCourse (NO fetch, NO alert)
   const handleArchiveCourse = async () => {
     if (!courseId) return;
 
@@ -268,13 +328,23 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
       setStatus("archived");
       setShowArchiveModal(false);
-      alert("Curso archivado correctamente");
+      
+      setArchiveResultModal({
+        isOpen: true,
+        success: true,
+        message: "Curso archivado correctamente",
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al archivar el curso";
-      alert(message);
+      setArchiveResultModal({
+        isOpen: true,
+        success: false,
+        message,
+      });
     }
   };
 
+  // ✅ Usando Server Action transferCourseOwnership (NO fetch, NO alert)
   const handleTransferOwnership = async () => {
     if (!transferEmail || !courseId) return;
 
@@ -285,14 +355,25 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       }
 
       setShowTransferModal(false);
-      alert(`Curso transferido a ${transferEmail}`);
+      
+      setTransferResultModal({
+        isOpen: true,
+        success: true,
+        message: `Curso transferido correctamente a ${transferEmail}`,
+        email: transferEmail,
+      });
       setTransferEmail("");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al transferir el curso";
-      alert(message);
+      setTransferResultModal({
+        isOpen: true,
+        success: false,
+        message,
+      });
     }
   };
 
+  // ✅ Usando Server Action deleteCourseAction (NO fetch)
   const handleDeleteCourse = async () => {
     if (!courseId) return;
 
@@ -305,7 +386,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       router.push("/mycourses");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al eliminar el curso";
-      alert(message);
+      console.error(message);
     }
   };
 
@@ -407,13 +488,14 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
             {activeTab === "settings" && isTeacher && (
               <div className="space-y-6 w-full">
                 <div className="max-w-3xl mx-auto px-4 sm:px-0">
+                  {/* Información General */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
-                      <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Informacion General</h2>
+                      <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Información General</h2>
                       <form onSubmit={handleSaveGeneralInfo} className="space-y-4 sm:space-y-6">
                         <div className="form-control flex flex-col items-start">
                           <label htmlFor="course-title" className="label p-0">
-                            <span className="label-text font-medium mb-2">Titulo del Curso</span>
+                            <span className="label-text font-medium mb-2">Título del Curso</span>
                           </label>
                           <input
                             id="course-title"
@@ -428,7 +510,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
                         <div className="form-control flex flex-col items-start">
                           <label htmlFor="course-description" className="label p-0">
-                            <span className="label-text font-medium mb-2">Descripcion</span>
+                            <span className="label-text font-medium mb-2">Descripción</span>
                           </label>
                           <textarea
                             id="course-description"
@@ -481,7 +563,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
 
                         {saveMessage && (
-                          <div className={`alert ${saveMessage.type === "success" ? "alert-success" : "alert-error"} text-sm`}>
+                          <div className={`alert ${saveMessage.type === "success" ? "alert-success" : "alert-error"} text-sm backdrop-blur-sm`}>
                             {saveMessage.type === "success" ? <Check size={16} /> : <X size={16} />}
                             <span>{saveMessage.text}</span>
                           </div>
@@ -496,16 +578,17 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
                   </div>
 
+                  {/* Configuración de Visualización */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
-                      <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Configuracion de Visualizacion</h2>
+                      <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Configuración de Visualización</h2>
                       <div className="space-y-4">
                         <div className="form-control">
                           <label className="cursor-pointer label flex-row items-center justify-between gap-3">
                             <div className="flex-1">
                               <span className="label-text font-medium block">Mostrar participantes en la barra horizontal</span>
                               <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-                                Muestra la lista de participantes en la barra de navegacion superior
+                                Muestra la lista de participantes en la barra de navegación superior
                               </p>
                             </div>
                             <input
@@ -537,7 +620,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                             <div className="flex-1">
                               <span className="label-text font-medium block">Notificar nuevas tareas por email</span>
                               <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-                                Envia notificaciones por correo cuando se crean nuevas tareas
+                                Envía notificaciones por correo cuando se crean nuevas tareas
                               </p>
                             </div>
                             <input
@@ -552,9 +635,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
                   </div>
 
+                  {/* Gestión de Participantes */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
-                      <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Gestion de Participantes</h2>
+                      <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Gestión de Participantes</h2>
                       <div className="space-y-6">
                         <div className="form-control">
                           <label htmlFor="invite-email" className="label">
@@ -585,7 +669,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
                         <div className="form-control">
                           <label htmlFor="invite-code" className="label">
-                            <span className="label-text font-medium mb-2">Codigo de invitacion</span>
+                            <span className="label-text font-medium mb-2">Código de invitación</span>
                           </label>
                           <div className="flex flex-col sm:flex-row gap-2 mt-2">
                             <input
@@ -616,7 +700,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                           <div className="mt-3">
                             <p className="text-xs sm:text-sm text-base-content/60 break-words">
-                              Comparte este codigo con tus estudiantes para que se unan al curso
+                              Comparte este código con tus estudiantes para que se unan al curso
                             </p>
                           </div>
                         </div>
@@ -624,6 +708,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
                   </div>
 
+                  {/* Zona de Peligro */}
                   <div className="border-2 border-red-200 dark:border-red-800/50 rounded-xl overflow-hidden shadow-sm">
                     <div className="bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-950/10 px-6 py-4 border-b-2 border-red-200 dark:border-red-800/30">
                       <div className="flex items-center gap-2">
@@ -636,6 +721,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
 
                     <div className="divide-y divide-red-100 dark:divide-red-800/20">
+                      {/* Cambiar visibilidad */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -644,7 +730,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                               <div>
                                 <p className="font-semibold text-base-content">Cambiar visibilidad del curso</p>
                                 <p className="text-sm text-base-content/60 mt-1">
-                                  Este curso esta actualmente <span className="font-medium text-base-content/80">{status === "active" ? "publico" : "en borrador"}</span>.
+                                  Este curso está actualmente <span className="font-medium text-base-content/80">{status === "active" ? "público" : "en borrador"}</span>.
                                   {status === "active"
                                     ? " Los estudiantes pueden ver y acceder al contenido."
                                     : " Solo los profesores pueden ver el curso."}
@@ -663,6 +749,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
                       </div>
 
+                      {/* Transferir propiedad */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -671,8 +758,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                               <div>
                                 <p className="font-semibold text-base-content">Transferir propiedad</p>
                                 <p className="text-sm text-base-content/60 mt-1">
-                                  Transferir este curso a otro usuario u organizacion donde tengas permisos para crear cursos.
-                                  Esta accion notificara al nuevo propietario.
+                                  Transferir este curso a otro usuario u organización donde tengas permisos para crear cursos.
+                                  Esta acción notificará al nuevo propietario.
                                 </p>
                               </div>
                             </div>
@@ -688,6 +775,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
                       </div>
 
+                      {/* Archivar curso */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -696,8 +784,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                               <div>
                                 <p className="font-semibold text-amber-700 dark:text-amber-400">Archivar este curso</p>
                                 <p className="text-sm text-base-content/60 mt-1">
-                                  Marcar este curso como archivado y de solo lectura. Los estudiantes ya no podran acceder,
-                                  pero podras restaurarlo mas tarde.
+                                  Marcar este curso como archivado y de solo lectura. Los estudiantes ya no podrán acceder,
+                                  pero podrás restaurarlo más tarde.
                                 </p>
                               </div>
                             </div>
@@ -714,6 +802,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
                       </div>
 
+                      {/* Eliminar curso */}
                       <div className="px-6 py-5 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -723,7 +812,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                                 <p className="font-semibold text-red-600 dark:text-red-400">Eliminar este curso</p>
                                 <p className="text-sm text-base-content/60 mt-1">
                                   <span className="font-medium text-red-600 dark:text-red-400">Advertencia:</span> Una vez que eliminas un curso,
-                                  no hay vuelta atras. Se perdera todo el contenido, tareas, calificaciones y datos de participantes.
+                                  no hay vuelta atrás. Se perderá todo el contenido, tareas, calificaciones y datos de participantes.
                                 </p>
                               </div>
                             </div>
@@ -758,15 +847,18 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
+      {/* ========== MODALES CON backdrop-blur-md ========== */}
+
+      {/* Modal de Visibilidad (confirmación) */}
       {showVisibilityModal && (
         <dialog className="modal modal-open">
-          <div className="modal-box">
+          <div className="modal-box backdrop-blur-md">
             <h3 className="font-bold text-lg">Cambiar visibilidad del curso</h3>
             <p className="py-4">
-              Estas seguro de que quieres {status === "active" ? "cambiar el curso a borrador" : "publicar el curso"}?
+              ¿Estás seguro de que quieres {status === "active" ? "cambiar el curso a borrador" : "publicar el curso"}?
               {status === "active"
-                ? " Los estudiantes ya no podran acceder al curso."
-                : " Los estudiantes podran ver y acceder al contenido."}
+                ? " Los estudiantes ya no podrán acceder al curso."
+                : " Los estudiantes podrán ver y acceder al contenido."}
             </p>
             <div className="modal-action">
               <button className="btn" onClick={() => setShowVisibilityModal(false)} type="button">
@@ -779,15 +871,16 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
           </div>
           <form method="dialog" className="modal-backdrop">
             <button onClick={() => setShowVisibilityModal(false)} type="button">
-              close
+              cerrar
             </button>
           </form>
         </dialog>
       )}
 
+      {/* Modal de Transferencia */}
       {showTransferModal && (
         <dialog className="modal modal-open">
-          <div className="modal-box">
+          <div className="modal-box backdrop-blur-md">
             <h3 className="font-bold text-lg">Transferir propiedad</h3>
             <p className="py-2">Ingresa el email del nuevo propietario:</p>
             <input
@@ -798,7 +891,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               className="input input-bordered w-full mt-2"
             />
             <p className="text-sm text-base-content/60 mt-2">
-              Esta accion es irreversible. El nuevo propietario recibira una notificacion.
+              Esta acción es irreversible. El nuevo propietario recibirá una notificación.
             </p>
             <div className="modal-action">
               <button className="btn" onClick={() => setShowTransferModal(false)} type="button">
@@ -811,19 +904,20 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
           </div>
           <form method="dialog" className="modal-backdrop">
             <button onClick={() => setShowTransferModal(false)} type="button">
-              close
+              cerrar
             </button>
           </form>
         </dialog>
       )}
 
+      {/* Modal de Archivar */}
       {showArchiveModal && (
         <dialog className="modal modal-open">
-          <div className="modal-box">
+          <div className="modal-box backdrop-blur-md">
             <h3 className="font-bold text-lg">Archivar curso</h3>
             <p className="py-4">
-              Estas seguro de que quieres archivar este curso? Los estudiantes ya no podran acceder al contenido,
-              pero podras restaurarlo mas tarde.
+              ¿Estás seguro de que quieres archivar este curso? Los estudiantes ya no podrán acceder al contenido,
+              pero podrás restaurarlo más tarde.
             </p>
             <div className="modal-action">
               <button className="btn" onClick={() => setShowArchiveModal(false)} type="button">
@@ -836,19 +930,20 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
           </div>
           <form method="dialog" className="modal-backdrop">
             <button onClick={() => setShowArchiveModal(false)} type="button">
-              close
+              cerrar
             </button>
           </form>
         </dialog>
       )}
 
+      {/* Modal de Eliminar */}
       {showDeleteModal && (
         <dialog className="modal modal-open">
-          <div className="modal-box">
+          <div className="modal-box backdrop-blur-md">
             <h3 className="font-bold text-lg text-error">Eliminar curso</h3>
             <p className="py-4">
-              Esta accion es irreversible. Estas absolutamente seguro?
-              Se perdera todo el contenido, tareas, calificaciones y datos de participantes.
+              Esta acción es irreversible. ¿Estás absolutamente seguro?
+              Se perderá todo el contenido, tareas, calificaciones y datos de participantes.
             </p>
             <p className="text-sm font-semibold">Escribe "ELIMINAR" para confirmar:</p>
             <input
@@ -886,10 +981,100 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               }}
               type="button"
             >
-              close
+              cerrar
             </button>
           </form>
         </dialog>
+      )}
+
+      {/* ========== MODALES DE STUDIUM (reemplazan alerts) ========== */}
+
+      {/* Modal de invitación (éxito/error) */}
+      {inviteModal.isOpen && (
+        <ModalAdvise
+          id="invite-modal"
+          title={inviteModal.success ? "Invitación Enviada" : "Error al Invitar"}
+          description={
+            inviteModal.success ? (
+              <p>Se ha enviado la invitación a <strong>{inviteModal.email}</strong> correctamente.</p>
+            ) : (
+              <p className="text-error">{inviteModal.message}</p>
+            )
+          }
+          confirmLabel="Aceptar"
+          onConfirm={() => setInviteModal({ isOpen: false, success: false, message: "" })}
+        />
+      )}
+
+      {/* Modal de regenerar código */}
+      {regenerateModal.isOpen && (
+        <ModalAdvise
+          id="regenerate-modal"
+          title="Regenerar Código"
+          description={
+            <div>
+              <p>¿Estás seguro de que quieres regenerar el código de invitación?</p>
+              <p className="text-sm text-base-content/60 mt-2">
+                El código actual <strong>{inviteCode}</strong> será reemplazado por:
+              </p>
+              <p className="font-mono text-sm bg-base-200 p-2 rounded mt-2">{regenerateModal.newCode}</p>
+            </div>
+          }
+          confirmLabel="Regenerar"
+          cancelLabel="Cancelar"
+          onConfirm={confirmRegenerateCode}
+        />
+      )}
+
+      {/* Modal de resultado de visibilidad */}
+      {visibilityResultModal.isOpen && (
+        <ModalAdvise
+          id="visibility-result-modal"
+          title={visibilityResultModal.success ? "Visibilidad Actualizada" : "Error"}
+          description={
+            visibilityResultModal.success ? (
+              <p>{visibilityResultModal.message}</p>
+            ) : (
+              <p className="text-error">{visibilityResultModal.message}</p>
+            )
+          }
+          confirmLabel="Aceptar"
+          onConfirm={() => setVisibilityResultModal({ isOpen: false, success: false, message: "" })}
+        />
+      )}
+
+      {/* Modal de resultado de archivado */}
+      {archiveResultModal.isOpen && (
+        <ModalAdvise
+          id="archive-result-modal"
+          title={archiveResultModal.success ? "Curso Archivado" : "Error al Archivar"}
+          description={
+            archiveResultModal.success ? (
+              <p>{archiveResultModal.message}</p>
+            ) : (
+              <p className="text-error">{archiveResultModal.message}</p>
+            )
+          }
+          confirmLabel="Aceptar"
+          onConfirm={() => setArchiveResultModal({ isOpen: false, success: false, message: "" })}
+        />
+      )}
+
+      {/* Modal de resultado de transferencia */}
+      {transferResultModal.isOpen && (
+        <ModalAdvise
+          id="transfer-result-modal"
+          title={transferResultModal.success ? "Propiedad Transferida" : "Error al Transferir"}
+          description={
+            transferResultModal.success ? (
+              <p>El curso ha sido transferido a <strong>{transferResultModal.email}</strong> correctamente.</p>
+            ) : (
+              <p className="text-error">{transferResultModal.message}</p>
+            )
+          }
+          confirmLabel="Aceptar"
+          onConfirm={() => setTransferResultModal({ isOpen: false, success: false, message: "" })}
+        />
       )}
     </div>
   );
