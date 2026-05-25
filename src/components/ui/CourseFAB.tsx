@@ -239,7 +239,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
 
         {/* Crear Tarea: Tooltip en desktop, Icono+Texto en mobile */}
         <div 
-          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-primary relative" 
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-warning relative" 
           data-tip="Tarea"
         >
           <button 
@@ -252,12 +252,12 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           >
             <ClipboardList size={20} className="text-primary" aria-hidden="true" />
           </button>
-          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Tarea</span>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Tarea</span>
         </div>
 
         {/* Crear Examen: Tooltip en desktop, Icono+Texto en mobile */}
         <div 
-          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-secondary relative" 
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-warning relative" 
           data-tip="Examen"
         >
           <button 
@@ -270,12 +270,12 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           >
             <GraduationCap size={20} className="text-primary" aria-hidden="true" />
           </button>
-          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Examen</span>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Examen</span>
         </div>
 
         {/* Añadir Recurso: Tooltip en desktop, Icono+Texto en mobile */}
         <div 
-          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-accent relative" 
+          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-warning relative" 
           data-tip="Recurso"
         >
           <button 
@@ -288,12 +288,12 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           >
             <FileText size={20} className="text-primary" aria-hidden="true" />
           </button>
-          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Recurso</span>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Recurso</span>
         </div>
 
         {/* Crear Materia: Tooltip en desktop, Icono+Texto en mobile */}
         <div
-          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-info relative"
+          className="md:tooltip md:tooltip-hover md:tooltip-top md:tooltip-warning relative"
           data-tip="Materia"
         >
           <button
@@ -306,7 +306,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           >
             <CheckCircle size={20} className="text-primary" aria-hidden="true" />
           </button>
-          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium">Materia</span>
+          <span className="absolute left-1/2 bottom-[110%] -translate-x-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Materia</span>
         </div>
       </div>
 
