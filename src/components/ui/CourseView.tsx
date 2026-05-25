@@ -927,7 +927,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         </div>
       </main>
 
-      {isTeacher && (
+      {isTeacher && activeTab === "content" && (
         <CourseFAB
           onAddTask={handleAddTask}
           onAddSubject={handleAddSubject}
