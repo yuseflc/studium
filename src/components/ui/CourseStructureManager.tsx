@@ -939,7 +939,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                 <div className="flex items-start justify-between gap-3">
                                   <div className="space-y-1">
                                     <div className="flex items-center gap-2">
-                                      <span className="badge badge-primary badge-sm">Unidad {unitIndex + 1}</span>
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">Unidad {unitIndex + 1}</span>
                                       <h4 className="text-lg font-semibold">{unit.title}</h4>
                                     </div>
                                     <p className="text-sm text-base-content/60 whitespace-pre-wrap">{unit.content}</p>
@@ -973,13 +973,13 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                       {resources.map((resource, resourceIndex) => (
                                         <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
                                           <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
-                                            <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary shadow-sm">
+                                            <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                                               {getResourceTypeIcon(resource.type)}
                                             </div>
 
                                             <div className="min-w-0 flex-1">
                                               <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="badge badge-ghost badge-sm">{getResourceTypeLabel(resource.type)}</span>
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{getResourceTypeLabel(resource.type)}</span>
                                                 <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
                                               </div>
                                               {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
@@ -1054,13 +1054,13 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                 className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
                                 aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
                               >
-                                <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
+                                <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                                   <ClipboardList size={18} aria-hidden="true" />
                                 </div>
 
                                 <div className="flex min-w-0 flex-1 flex-col">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="badge badge-ghost badge-sm border border-primary">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
                                     <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                   </div>
                                   <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>

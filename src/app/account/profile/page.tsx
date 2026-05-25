@@ -20,7 +20,9 @@ export default function ProfilePage() {
 
                 <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
                     <div className="card-body">
-                        <h2 className="badge badge-soft badge-warning badge-xl m-2 border border-primary font-bold">Detalles del Usuario</h2>
+                        <div className="flex mb-4">
+                            <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">Detalles del Usuario</span>
+                        </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 --font-manrope">
                             {/* Cada campo se renderiza como entrada de solo lectura para mantener la apariencia del formulario sin editar datos. */}
                             <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
@@ -55,7 +57,9 @@ export default function ProfilePage() {
                 </div>
                 <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
                     <div className="card-body">
-                        <h2 className="badge badge-soft badge-warning badge-xl m-2 border border-primary font-bold">Cursos</h2>
+                        <div className="flex mb-4">
+                            <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">Cursos</span>
+                        </div>
                         <div className="grid grid-cols-1 gap-4 justify-items-center">
                             {CURSOS.slice(0, 3).map((curso, index) => {
                               const courseId = curso._id?.toString() || `seed-${index}`;

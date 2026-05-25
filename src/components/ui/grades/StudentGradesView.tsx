@@ -65,7 +65,9 @@ export default function StudentGradesView({ subjects = [] }: StudentGradesViewPr
                                                 <tr key={task.id} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10">
                                                     <td className="pl-12 font-medium text-base-content/70">{task.title}</td>
                                                     <td className="text-center">
-                                                        <span className="text-success text-sm font-semibold">Entregado</span>
+                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 shadow-sm">
+                                                            Entregado
+                                                        </span>
                                                     </td>
                                                     <td className="text-center">
                                                         <div className="flex flex-col items-center">

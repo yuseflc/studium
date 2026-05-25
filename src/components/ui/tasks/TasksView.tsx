@@ -157,11 +157,12 @@ const TasksView = ({
                 isCurrentHolding ? 'task-shaking scale-[0.98] border-error/40 shadow-inner' : 'active:scale-[0.99]'
               }`}
             >
-              <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
+              <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                 <TaskStatusIcon />
               </div>
               <div className="flex flex-col min-w-0 flex-1">
                 <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm flex-shrink-0">Tarea</span>
                   <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
                     {taskTitle}
                   </span>

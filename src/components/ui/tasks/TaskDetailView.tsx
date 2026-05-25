@@ -98,10 +98,11 @@ const TaskDetailView = () => {
           <div className="space-y-6 flex-1">
             <div className="flex items-center gap-2">
               <StatusIconComponent status={memoizedTask.status} />
-              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
-                memoizedTask.status === 'graded' ? 'bg-success/5 border-success/20 text-success' : 
-                memoizedTask.status === 'pending' ? 'bg-warning/5 border-warning/20 text-warning' : 
-                'bg-base-300 border-base-400 text-base-content/50'
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm ${
+                memoizedTask.status === 'graded' ? 'bg-success/10 border-success/20 text-success' : 
+                memoizedTask.status === 'pending' ? 'bg-primary/10 border-primary/20 text-primary' : 
+                memoizedTask.status === 'late' ? 'bg-error/10 border-error/20 text-error' :
+                'bg-base-200 border-base-300 text-base-content/50'
               }`}>
                 {statusLabel.text}
               </span>

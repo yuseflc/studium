@@ -57,7 +57,7 @@ export default function TaskDetailClient({ taskInfo, courseid }: TaskDetailClien
                 (entregado / pendiente) no está implementada y se hará
                 en el futuro cuando se integre con el backend. */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="badge badge-warning text-white font-semibold text-xs flex items-center gap-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">
                 <Upload size={12} /> Pendiente
               </span>
             </div>
@@ -80,7 +80,7 @@ export default function TaskDetailClient({ taskInfo, courseid }: TaskDetailClien
             <div className="card bg-base-100 shadow-md border border-base-300 h-full flex flex-col overflow-hidden">
               <div className="card-body p-5 sm:p-6 flex flex-col min-h-0 h-full">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                  <div className="p-2.5 rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm">
                     <ClipboardList size={24} />
                   </div>
                   <h2 className="card-title text-2xl font-bold text-base-content break-words">{taskInfo.title}</h2>

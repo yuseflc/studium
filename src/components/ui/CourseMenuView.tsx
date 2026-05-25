@@ -240,7 +240,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                     </div>
                   </figure>
 
-                  <span className="badge absolute -bottom-3 left-20 text-xs min-[1280px]:max-[1300px]:text-[5px] min-[1300px]:max-[1550px]:text-[7px] font-bold uppercase tracking-widest drop-shadow-md z-40">
+                  <span className="absolute -bottom-3 left-20 inline-flex items-center px-3 py-1 rounded-full text-[10px] min-[1280px]:max-[1300px]:text-[6px] min-[1300px]:max-[1550px]:text-[8px] font-black uppercase tracking-[0.15em] bg-yellow-400 text-black border-2 border-base-100 shadow-lg z-40 transform hover:scale-105 transition-transform duration-200">
                     Ignacio Miguel Mateos
                   </span>
 

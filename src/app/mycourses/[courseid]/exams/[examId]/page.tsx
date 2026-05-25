@@ -59,7 +59,7 @@ export default async function ExamDetailPage({
                     <Calendar size={18} />
                     <span>Fecha límite: <strong className="text-base-content">{new Date(examInfo.dueDate).toLocaleDateString()}</strong></span>
                   </div>
-                  <div className="badge badge-primary badge-outline">
+                  <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-yellow-100 text-yellow-800 border border-yellow-200 shadow-sm">
                     Puntaje: {examInfo.maxPoints || 100} pts
                   </div>
                 </div>

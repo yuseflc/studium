@@ -491,13 +491,13 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
             <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">
               {title || "Cargando curso..."}
               {status === "draft" && (
-                <span className="badge bg-secondary text-base-content ml-2 align-middle">BORRADOR</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 ml-2 align-middle shadow-sm">BORRADOR</span>
               )}
               {status === "active" && (
-                <span className="badge bg-success text-white ml-2 align-middle">PUBLICADO</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 ml-2 align-middle shadow-sm">PUBLICADO</span>
               )}
               {status === "archived" && (
-                <span className="badge bg-warning text-base-content ml-2 align-middle">ARCHIVADO</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 ml-2 align-middle shadow-sm">ARCHIVADO</span>
               )}
             </h1>
           </div>

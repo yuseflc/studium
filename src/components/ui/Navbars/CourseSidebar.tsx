@@ -102,7 +102,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
                                                 {subject.title}
                                             </span>
                                         </div>
-                                        <span className="badge badge-ghost badge-sm">{subject.units?.length || 0}</span>
+                                        <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-base-200 text-base-content/60 border border-base-300 shadow-sm">{subject.units?.length || 0}</span>
                                     </summary>
                                     <div className="pb-2">
                                         <ul className="space-y-1 mt-1 px-2 pb-2">
@@ -124,7 +124,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
                                                             onClick={() => handleScrollToUnit(unit._id?.toString() || "")}
                                                             className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
                                                         >
-                                                            <span className="badge badge-primary badge-sm min-w-10 justify-center">
+                                                            <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm">
                                                                 {unitIndex + 1}
                                                             </span>
                                                             <span className="truncate">{unit.title}</span>
