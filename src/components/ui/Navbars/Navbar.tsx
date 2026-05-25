@@ -14,14 +14,19 @@ export default function Navbar() {
                     <img
                         src="/img/logo_small_blur.svg"
                         alt="Studium"
-                        className="block h-4 w-auto"
+                        className="hidden md:block h-4 w-auto"
+                    />
+                    <img
+                        src="/img/studium_blur.svg"
+                        alt="Studium"
+                        className="block md:hidden h-10 w-auto"
                     />
                 </Link>
             </div>
             
 
             {/* Lista central */}
-            <div className="navbar-center">
+            <div className="navbar-center hidden lg:flex">
                 <ul className="menu menu-horizontal px-1">
                     
                     <li>
@@ -42,7 +47,8 @@ export default function Navbar() {
 
                 <a
                     href="/mycourses"
-                    className="btn btn-primary hidden md:inline-flex">
+                    className="btn btn-primary hidden md:inline-flex py-0.5 h-8"
+>
                     Mis cursos
                 </a>
 
