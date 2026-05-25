@@ -29,6 +29,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdItemId, setCreatedItemId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form states
   const [title, setTitle] = useState('');
@@ -50,6 +51,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
     setIsSubmitting(false);
     setIsSuccess(false);
     setCreatedItemId(null);
+    setErrorMessage(null);
 
     if (modalRef.current) {
       modalRef.current.showModal();
@@ -62,6 +64,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
     if (creationType !== 'subject' && !selectedSubjectId) return;
 
     setIsSubmitting(true);
+    setErrorMessage(null);
 
     try {
       const isTaskCreation = creationType === 'task';
@@ -73,7 +76,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           description,
           courseId: courseId || '',
           subjectId: selectedSubjectId,
-          dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
+          dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
           startDate: new Date().toISOString(),
           type: isExamCreation ? 'quiz' : 'assignment',
           maxPoints: 100,
@@ -87,8 +90,8 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
 
         const createdItem = { task: result.task };
 
-        if (isTaskCreation && onAddTask) {
-          onAddTask(createdItem.task || createdItem);
+        if (isTaskCreation) {
+          router.refresh();
         }
 
         setIsSubmitting(false);
@@ -149,7 +152,8 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
 
       throw new Error('Tipo de creación no soportado');
     } catch (error) {
-      console.error(error);
+      const message = error instanceof Error ? error.message : 'Error al guardar';
+      setErrorMessage(message);
       setIsSubmitting(false);
       // Aquí se podría mostrar un toast de error
     }
@@ -310,9 +314,10 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
         dialogRef={modalRef}
         title={config.title}
         onClose={() => modalRef.current?.close()}
-        onConfirm={() => handleSave({ preventDefault: () => { } } as any)}
+        onConfirm={handleSave}
         confirmLabel={config.btnText}
         isLoading={isSubmitting}
+        error={errorMessage}
         success={isSuccess}
         successMessage={config.successText}
         className="max-w-2xl"
@@ -424,7 +429,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
                   className="input input-bordered w-full bg-base-100 text-base-content focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all font-medium rounded-xl shadow-sm"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  required
+                  required={creationType === 'exam'}
                   disabled={isSubmitting}
                   title={creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
                 />

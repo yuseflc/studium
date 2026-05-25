@@ -8,7 +8,7 @@ import Resource from "@/models/Resource";
 import Task from "@/models/Task";
 import User from "@/models/User";
 import { CURSOS } from "@/seed/data";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { ICourse } from "@/models/Course";
 import {

@@ -18,7 +18,7 @@ export interface ITask {
   maxPoints: number; // Puntuación máxima
   criteria?: ICriteria[]; // Criterios de evaluación
   startDate: Date; // Fecha de inicio
-  dueDate: Date; // Fecha de entrega
+  dueDate?: Date; // Fecha de entrega opcional
   allowLateSubmission: boolean; // Permite entregas tardías
   active: boolean; // Activa
   createdAt: Date; // Fecha de creación
@@ -90,7 +90,7 @@ const TaskSchema = new mongoose.Schema<ITask>(
     },
     dueDate: {
       type: Date,
-      required: true, // Requerido
+      required: false,
     },
     allowLateSubmission: {
       type: Boolean,
@@ -107,11 +107,9 @@ const TaskSchema = new mongoose.Schema<ITask>(
 );
 
 // Middleware pre-guardado: Validar fechas
-TaskSchema.pre('save', function (next: any) {
-  if (this.dueDate <= this.startDate) {
-    next(new Error('La fecha de entrega debe ser posterior a la fecha de inicio')); // Error si la fecha de entrega no es posterior
-  } else {
-    next();
+TaskSchema.pre('save', function () {
+  if (this.dueDate && this.startDate && this.dueDate <= this.startDate) {
+    throw new Error('La fecha de entrega debe ser posterior a la fecha de inicio');
   }
 });
 
@@ -139,5 +137,8 @@ TaskSchema.index({ courseId: 1, dueDate: 1 }); // Índice compuesto por curso y 
 TaskSchema.index({ title: 'text', description: 'text' }); // Índice de texto para búsqueda por título y descripción
 
 // Prevenir que se sobrescriba el modelo si ya existe
-export default mongoose.models.Task ||
-  mongoose.model<ITask>("Task", TaskSchema); // Exporta el modelo Task
+if (mongoose.models.Task) {
+  delete mongoose.models.Task;
+}
+
+export default mongoose.model<ITask>("Task", TaskSchema); // Exporta el modelo Task

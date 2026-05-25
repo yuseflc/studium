@@ -95,6 +95,7 @@ function HoldConfirmButton({
 import {
   ArrowDown,
   ArrowUp,
+  ClipboardList,
   BookOpen,
   FileText,
   FolderOpen,
@@ -123,6 +124,7 @@ import {
   reorderResources,
   updateResource,
 } from "@/app/actions/resourceActions";
+import Link from "next/link";
 import {
   createTask,
   deleteTask,
@@ -1001,17 +1003,31 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                       ) : (
                         <div className="space-y-2">
                           {sortedTasks.map((task, taskIndex) => (
-                            <div key={task._id} className="flex items-start justify-between gap-3 rounded-2xl border border-base-200 bg-base-100 px-4 py-3">
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="badge badge-outline badge-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
-                                  <p className="font-medium truncate">{task.title}</p>
+                            <div key={task._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
+                              <Link
+                                href={`/mycourses/${courseId}/tasks/${task._id}`}
+                                className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
+                                aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
+                              >
+                                <div className="p-2.5 rounded-full flex-shrink-0 bg-yellow-100 text-yellow-600 shadow-sm">
+                                  <ClipboardList size={18} aria-hidden="true" />
                                 </div>
-                                <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
-                              </div>
+
+                                <div className="flex min-w-0 flex-1 flex-col">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="badge badge-outline badge-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                    <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
+                                  </div>
+                                  <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
+                                </div>
+
+                                <div className="hidden sm:block text-right flex-shrink-0 ml-2">
+                                  <p className="text-xs text-base-content/60">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : ""}</p>
+                                </div>
+                              </Link>
 
                               {canEdit && (
-                                <div className="dropdown dropdown-end">
+                                <div className="dropdown dropdown-end self-center pr-2">
                                   {renderMenuButton()}
                                   <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
                                     <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>

@@ -412,7 +412,8 @@ export const createTaskSchema = z.object({
   dueDate: z
     .string()
     .datetime({ message: "Fecha de entrega inválida" })
-    .transform((val) => new Date(val)),
+    .transform((val) => new Date(val))
+    .optional(),
   allowLateSubmission: z
     .boolean()
     .default(false),

@@ -1,6 +1,6 @@
 "use server";
 
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import mongoose from "mongoose";
 import { authOptions } from "@/config/auth.config";
 import { LOGGER } from "@/config/logger";
@@ -20,7 +20,7 @@ export interface CreateTaskActionInput {
   subjectId: string;
   title: string;
   description: string;
-  dueDate: string;
+  dueDate?: string;
   startDate?: string;
   type?: "assignment" | "quiz" | "forum" | "project";
   maxPoints?: number;
@@ -40,7 +40,7 @@ export interface TaskActionResult {
     type: "assignment" | "quiz" | "forum" | "project";
     maxPoints: number;
     startDate: string;
-    dueDate: string;
+    dueDate?: string;
     allowLateSubmission: boolean;
     active: boolean;
     createdAt: string;
@@ -58,7 +58,7 @@ function serializeTask(task: any): NonNullable<TaskActionResult["task"]> {
     type: task.type,
     maxPoints: task.maxPoints,
     startDate: task.startDate.toISOString(),
-    dueDate: task.dueDate.toISOString(),
+    dueDate: task.dueDate ? task.dueDate.toISOString() : undefined,
     allowLateSubmission: Boolean(task.allowLateSubmission),
     active: Boolean(task.active),
     createdAt: task.createdAt.toISOString(),
@@ -129,7 +129,7 @@ export async function createTask(input: CreateTaskActionInput): Promise<TaskActi
       type: type || "assignment",
       maxPoints: maxPoints ?? 100,
       startDate,
-      dueDate,
+      dueDate: dueDate ?? undefined,
       allowLateSubmission: allowLateSubmission ?? false,
       active: active !== false,
       criteria: [],
