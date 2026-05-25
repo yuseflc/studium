@@ -1,4 +1,4 @@
-import { ClipboardList, Trash2 } from 'lucide-react';
+import { Calendar, ClipboardList, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { CALIFICACIONES } from '@/seed/data';
 import { useParams } from 'next/navigation';
@@ -173,11 +173,12 @@ const TasksView = ({
                 </div>
               </div>
 
-              <div className="text-right flex-shrink-0 ml-2">
-                <p className="text-xs text-base-content/60">
-                  {dueDate}
-                </p>
-              </div>
+              {dueDate && (
+                <div className="text-right flex-shrink-0 ml-2 flex items-center gap-1.5 text-xs text-base-content/60">
+                  <Calendar size={14} className="text-primary" aria-hidden="true" />
+                  <p>{dueDate}</p>
+                </div>
+              )}
               
               {/* Indicador de ayuda táctil de pulsación */}
               {isTeacher && (

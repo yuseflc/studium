@@ -95,14 +95,18 @@ function HoldConfirmButton({
 import {
   ArrowDown,
   ArrowUp,
+  Calendar,
   ClipboardList,
   BookOpen,
+  Download,
   FileText,
   FolderOpen,
   GraduationCap,
+  Link2,
   MoreVertical,
   Pencil,
   Plus,
+  Type,
   Trash2,
 } from "lucide-react";
 import { ModalForm } from "./modals";
@@ -251,6 +255,16 @@ function getResourceTypeLabel(type: CourseResourceItem["type"]) {
   if (type === "file") return "Archivo";
   if (type === "link") return "Enlace";
   return "Texto";
+}
+
+function getResourceTypeIcon(type: CourseResourceItem["type"]) {
+  if (type === "file") return <FileText size={18} aria-hidden="true" />;
+  if (type === "link") return <Link2 size={18} aria-hidden="true" />;
+  return <Type size={18} aria-hidden="true" />;
+}
+
+function isResourceDownloadable(resource: CourseResourceItem) {
+  return resource.type === "file";
 }
 
 export default function CourseStructureManager({ courseId, subjects, setSubjects, canEdit = true }: CourseStructureManagerProps) {
@@ -957,25 +971,56 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                   ) : (
                                     <div className="space-y-2">
                                       {resources.map((resource, resourceIndex) => (
-                                        <div key={resource._id} className="flex items-start justify-between gap-3 rounded-xl border border-base-200 bg-base-100 px-3 py-3">
-                                          <div className="min-w-0">
-                                            <div className="flex items-center gap-2">
-                                              <span className="badge badge-ghost badge-sm">{getResourceTypeLabel(resource.type)}</span>
-                                              <p className="font-medium truncate">{resource.title}</p>
+                                        <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
+                                          <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
+                                            <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary shadow-sm">
+                                              {getResourceTypeIcon(resource.type)}
                                             </div>
-                                            {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
+
+                                            <div className="min-w-0 flex-1">
+                                              <div className="flex items-center gap-2 flex-wrap">
+                                                <span className="badge badge-ghost badge-sm">{getResourceTypeLabel(resource.type)}</span>
+                                                <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
+                                              </div>
+                                              {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
+                                            </div>
                                           </div>
 
                                           {canEdit && (
-                                            <div className="dropdown dropdown-end">
-                                              {renderMenuButton()}
-                                              <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
-                                                <li><button type="button" onClick={() => openEditResource(subject._id, unit._id, resource)}><Pencil size={14} />Editar recurso</button></li>
-                                                <li className="menu-title"><span>Reordenar</span></li>
-                                                <li><button type="button" disabled={resourceIndex === 0} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, -1)}><ArrowUp size={14} />Subir</button></li>
-                                                <li><button type="button" disabled={resourceIndex === resources.length - 1} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, 1)}><ArrowDown size={14} />Bajar</button></li>
-                                                <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "resource", id: resource._id, title: resource.title, subjectId: subject._id, unitId: unit._id })}><Trash2 size={14} />Eliminar recurso</button></li>
-                                              </ul>
+                                            <div className="flex items-center gap-1 pr-2 self-center">
+                                              {isResourceDownloadable(resource) && (
+                                                resource.url ? (
+                                                  <a
+                                                    href={resource.url}
+                                                    download
+                                                    className="btn btn-ghost btn-xs btn-circle"
+                                                    aria-label={`Descargar ${resource.title}`}
+                                                    title="Descargar recurso"
+                                                  >
+                                                    <Download size={16} aria-hidden="true" />
+                                                  </a>
+                                                ) : (
+                                                  <button
+                                                    type="button"
+                                                    className="btn btn-ghost btn-xs btn-circle"
+                                                    disabled
+                                                    aria-label={`Descargar ${resource.title}`}
+                                                    title="Este recurso no tiene archivo asociado"
+                                                  >
+                                                    <Download size={16} aria-hidden="true" />
+                                                  </button>
+                                                )
+                                              )}
+                                              <div className="dropdown dropdown-end">
+                                                {renderMenuButton()}
+                                                <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
+                                                  <li><button type="button" onClick={() => openEditResource(subject._id, unit._id, resource)}><Pencil size={14} />Editar recurso</button></li>
+                                                  <li className="menu-title"><span>Reordenar</span></li>
+                                                  <li><button type="button" disabled={resourceIndex === 0} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                                  <li><button type="button" disabled={resourceIndex === resources.length - 1} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                                  <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "resource", id: resource._id, title: resource.title, subjectId: subject._id, unitId: unit._id })}><Trash2 size={14} />Eliminar recurso</button></li>
+                                                </ul>
+                                              </div>
                                             </div>
                                           )}
                                         </div>
@@ -1015,27 +1060,32 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
                                 <div className="flex min-w-0 flex-1 flex-col">
                                   <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="badge badge-outline badge-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                    <span className="badge badge-ghost badge-sm border border-primary">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
                                     <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                   </div>
                                   <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
                                 </div>
-
-                                <div className="hidden sm:block text-right flex-shrink-0 ml-2">
-                                  <p className="text-xs text-base-content/60">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : ""}</p>
-                                </div>
                               </Link>
 
                               {canEdit && (
-                                <div className="dropdown dropdown-end self-center pr-2">
-                                  {renderMenuButton()}
-                                  <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
-                                    <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
-                                    <li className="menu-title"><span>Reordenar</span></li>
-                                    <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
-                                    <li><button type="button" disabled={taskIndex === sortedTasks.length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
-                                    <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
-                                  </ul>
+                                <div className="flex items-center gap-1 pr-2 self-center">
+                                  {task.dueDate && (
+                                    <div className="flex items-center gap-1.5 text-xs text-base-content/60 mr-1 whitespace-nowrap">
+                                      <Calendar size={14} className="text-primary" aria-hidden="true" />
+                                      <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                                    </div>
+                                  )}
+
+                                  <div className="dropdown dropdown-end">
+                                    {renderMenuButton()}
+                                    <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
+                                      <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                      <li className="menu-title"><span>Reordenar</span></li>
+                                      <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                      <li><button type="button" disabled={taskIndex === sortedTasks.length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                      <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                    </ul>
+                                  </div>
                                 </div>
                               )}
                             </div>
