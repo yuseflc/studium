@@ -68,10 +68,10 @@ function HoldDeleteButton({ onDelete, isDeleting }: { onDelete: () => void; isDe
       type="button"
       disabled={isDeleting}
       aria-label="Mantén pulsado 3 segundos para eliminar el curso"
-      className="relative flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium select-none touch-none overflow-hidden transition-colors"
+      className="relative flex items-center justify-center gap-2 w-full h-12 px-4 rounded-lg text-sm font-bold select-none touch-none overflow-hidden transition-colors border border-error bg-base-100"
       style={{
         // Color de texto: blanco cuando hay progreso (sobre el fondo rojo), rojo cuando está en reposo
-        color: isActive ? "white" : "oklch(var(--er))",
+        color: isActive || isDeleting ? "white" : "oklch(var(--er))",
         cursor: isDeleting ? "wait" : "pointer",
         userSelect: "none",
       }}
@@ -99,7 +99,7 @@ function HoldDeleteButton({ onDelete, isDeleting }: { onDelete: () => void; isDe
         ) : (
           <IconTrash size={16} />
         )}
-        {isDeleting ? "Eliminando..." : isActive ? "Suelta para cancelar" : "Eliminar curso"}
+        {isDeleting ? "Eliminando..." : isActive ? "Suelta para cancelar" : "Mantén para eliminar"}
       </span>
     </button>
   );
@@ -111,6 +111,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
   const [currentUserId, setCurrentUserId] = useState<string>("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState("");
+  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
   const [unenrollingId, setUnenrollingId] = useState<string | null>(null);
   const [unenrollError, setUnenrollError] = useState("");
 
@@ -152,6 +153,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
       // Eliminar del estado local
       setCourses((prevCourses) => prevCourses.filter((c: SerializedCourse) => c._id !== courseId));
       setDeletingId(null);
+      setCourseToDelete(null);
 
       // Cerrar modal de confirmación
       (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.close();
@@ -284,13 +286,20 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                             <IconCancel size={16} /> Cancelar registro
                           </button>
                         </li>
-                        {/* Opción de eliminar solo visible para el propietario — requiere mantener 3s */}
+                        {/* Opción de eliminar solo visible para el propietario */}
                         {c.ownerId && c.ownerId === currentUserId && (
                           <li>
-                            <HoldDeleteButton
-                              onDelete={() => handleDeleteCourse(courseId)}
-                              isDeleting={deletingId === courseId}
-                            />
+                            <button
+                              className="text-error hover:bg-error/10"
+                              onClick={() => {
+                                setCourseToDelete(courseId);
+                                if (document.activeElement instanceof HTMLElement) {
+                                  document.activeElement.blur();
+                                }
+                              }}
+                            >
+                              <IconTrash size={16} /> Eliminar curso
+                            </button>
                           </li>
                         )}
                       </ul>
@@ -322,6 +331,58 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
           error={unenrollingId === course._id ? unenrollError : null}
         />
       ))}
+
+      {/* Modal para confirmar eliminación con pulsación de 3s */}
+      {courseToDelete && (
+        <dialog className="modal modal-open">
+          <div className="modal-box backdrop-blur-md border border-error/20 bg-base-100">
+            <h3 className="font-bold text-lg text-error flex items-center gap-2 mb-2">
+              <IconTrash size={22} /> Eliminar curso
+            </h3>
+            
+            {deleteError && (
+              <div className="alert alert-error text-sm py-2 mb-4">
+                {deleteError}
+              </div>
+            )}
+
+            <p className="py-2">
+              ¿Estás seguro de que quieres eliminar este curso permanentemente? Se borrarán todos sus contenidos y tareas.
+            </p>
+            <p className="py-2 font-medium text-warning text-sm">
+              Para confirmar, mantén pulsado el botón rojo durante 3 segundos.
+            </p>
+            
+            <div className="modal-action mt-6 flex items-center justify-end gap-3">
+              <button
+                className="btn btn-ghost"
+                onClick={() => setCourseToDelete(null)}
+                type="button"
+                disabled={deletingId !== null}
+              >
+                Cancelar
+              </button>
+              <div className="w-56">
+                <HoldDeleteButton
+                  onDelete={() => handleDeleteCourse(courseToDelete)}
+                  isDeleting={deletingId === courseToDelete}
+                />
+              </div>
+            </div>
+          </div>
+          <form method="dialog" className="modal-backdrop">
+            <button
+              onClick={() => {
+                if (deletingId === null) setCourseToDelete(null);
+              }}
+              type="button"
+              disabled={deletingId !== null}
+            >
+              cerrar
+            </button>
+          </form>
+        </dialog>
+      )}
     </main>
   );
 }
