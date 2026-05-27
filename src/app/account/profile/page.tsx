@@ -1,4 +1,5 @@
 import { USUARIO, CURSOS } from "@/seed/data";
+import Link from "next/link";
 import { IconUser, IconMail, IconPhone, IconCalendar, IconHome, IconKey} from "@tabler/icons-react";
 
 // Página de perfil de usuario basada en datos de ejemplo del seed.
@@ -24,7 +25,6 @@ export default function ProfilePage() {
                             <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">Detalles del Usuario</span>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 --font-manrope">
-                            {/* Cada campo se renderiza como entrada de solo lectura para mantener la apariencia del formulario sin editar datos. */}
                             <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
                                 <IconUser size={30} />
                                 <input type="text" placeholder={USUARIO.name} readOnly className="input input-ghost w-full" />
@@ -32,6 +32,10 @@ export default function ProfilePage() {
                             <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
                                 <IconMail size={30} />
                                 <input type="text" placeholder={USUARIO.email} readOnly className="input input-ghost w-full" />
+                            </label>
+                            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2 col-span-2 text-xs">
+                                <IconKey size={30} />
+                                <input type="text" placeholder={USUARIO.id} readOnly className="input input-ghost input-sm w-full text-xs" />
                             </label>
                             <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
                                 <IconPhone size={30} />
@@ -51,10 +55,8 @@ export default function ProfilePage() {
                             </label>
                         </div>
                     </div>
-
-
-
                 </div>
+
                 <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
                     <div className="card-body">
                         <div className="flex mb-4">
@@ -71,19 +73,16 @@ export default function ProfilePage() {
                                                 <h2 className="card-title">{curso.title}</h2>
                                                 <p>{curso.description}</p>
                                             </div>
-                                            <button className="btn btn-warning btn-sm">Entrar</button>
+                                            <Link href={`/mycourses/${courseId}`} className="btn btn-warning btn-sm">Entrar</Link>
                                         </div>
                                     </div>
                                 </div>
                               );
-                            })
-                            }
+                            })}
                         </div>
                     </div>
-                </div >
-
+                </div>
             </div>
-
-        </div >
+        </div>
     );
 }

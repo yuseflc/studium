@@ -1,5 +1,4 @@
-"use client";
-import Navbar from "@/components/ui/Navbars/Navbar";
+import CourseNavbar from "@/components/ui/Navbars/CourseNavbar";
 
 export default function ProfilePageLayout({
   children,
@@ -8,7 +7,7 @@ export default function ProfilePageLayout({
 }>) {
   return (
     <>
-      <Navbar />
+      <CourseNavbar />
       {children}
     </>
   );
