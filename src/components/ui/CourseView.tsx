@@ -165,6 +165,7 @@ import {
 import CourseSidebar from "./Navbars/CourseSidebar"; 
 import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
 import CourseParticipants from "./CourseParticipants"; 
+import CourseInviteCodesManager from "./CourseInviteCodesManager";
 import GradesView from "./grades/GradesView"; 
 import CourseFAB from "./CourseFAB"; 
 import { PARTICIPANTES } from "@/seed/data"; 
@@ -533,6 +534,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   /**
    * Cambia la visibilidad del curso (borrador <-> publicado).
    * Usa updateCourse server action.
+   * Si se publica un curso en borrador, auto-genera un código de invitación.
    */
   const handleChangeVisibility = async () => {
     if (!courseId) return;
@@ -548,12 +550,34 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       setStatus(newStatus);                 // actualizo estado local
       setShowVisibilityModal(false);        // cierro modal de confirmación
       
-      // Muestro modal de resultado
-      setVisibilityResultModal({
-        isOpen: true,
-        success: true,
-        message: `Curso ${newStatus === "active" ? "publicado" : "guardado como borrador"} correctamente`,
-      });
+      // Si se publica el curso desde borrador, generar automáticamente un código
+      if (newStatus === "active" && status === "draft") {
+        try {
+          const { generateInviteCode } = await import("@/app/actions/courseActions");
+          const inviteResult = await generateInviteCode(courseId);
+          
+          // Muestro modal de resultado con el mensaje especial sobre la auto-generación
+          setVisibilityResultModal({
+            isOpen: true,
+            success: true,
+            message: `Curso publicado correctamente.\nAl convertir el curso de borrador a activo se autogeneró un código de invitación${inviteResult.success ? ` (${inviteResult.code})` : ""}`,
+          });
+        } catch (inviteError) {
+          // Si la generación automática falla, solo mostrar que se publicó
+          setVisibilityResultModal({
+            isOpen: true,
+            success: true,
+            message: `Curso ${newStatus === "active" ? "publicado" : "guardado como borrador"} correctamente`,
+          });
+        }
+      } else {
+        // Para otros cambios de estado, mostrar mensaje normal
+        setVisibilityResultModal({
+          isOpen: true,
+          success: true,
+          message: `Curso ${newStatus === "active" ? "publicado" : "guardado como borrador"} correctamente`,
+        });
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al cambiar la visibilidad";
       setVisibilityResultModal({
@@ -972,44 +996,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
                         <div className="divider">O</div>
 
-                        {/* Código de invitación */}
-                        <div className="form-control">
-                          <label htmlFor="invite-code" className="label">
-                            <span className="label-text font-medium mb-2">Código de invitación</span>
-                          </label>
-                          <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                            <input
-                              id="invite-code"
-                              type="text"
-                              value={inviteCode}
-                              readOnly
-                              className="input input-bordered flex-1 bg-base-200 text-sm sm:text-base font-mono"
-                            />
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleCopyInviteCode}
-                                className="btn btn-outline flex-1 sm:flex-none gap-2"
-                                type="button"
-                              >
-                                {showCopied ? <Check size={16} /> : <Copy size={16} />}
-                                {showCopied ? "Copiado" : "Copiar"}
-                              </button>
-                              <button
-                                onClick={handleRegenerateCode}
-                                className="btn btn-outline btn-secondary flex-1 sm:flex-none gap-2"
-                                type="button"
-                              >
-                                <RefreshCw size={16} />
-                                Regenerar
-                              </button>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <p className="text-xs sm:text-sm text-base-content/60 break-words">
-                              Comparte este código con tus estudiantes para que se unan al curso
-                            </p>
-                          </div>
-                        </div>
+                        {/* COMPONENTE: Gestor de códigos de invitación */}
+                        <CourseInviteCodesManager courseId={courseId} courseStatus={status} />
                       </div>
                     </div>
                   </div>

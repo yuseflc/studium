@@ -182,6 +182,11 @@ export interface ModalFormProps extends Omit<ModalProps, 'children'> {
     error?: string | null;
     success?: boolean;
     successMessage?: string;
+    successAction?: {
+        label: string;
+        onClick: () => void;
+        icon?: React.ReactNode;
+    };
 }
 
 /**
@@ -200,6 +205,7 @@ export const ModalForm = ({
     error = null,
     success = false,
     successMessage = "¡Operación completada con éxito!",
+    successAction,
     className = "max-w-2xl"
 }: ModalFormProps) => {
     return (
@@ -224,6 +230,12 @@ export const ModalForm = ({
                         <button type="button" onClick={onClose} className="btn btn-ghost">
                             Cerrar
                         </button>
+                        {successAction && (
+                            <button type="button" onClick={successAction.onClick} className="btn btn-primary gap-2">
+                                {successAction.icon}
+                                {successAction.label}
+                            </button>
+                        )}
                     </div>
                 </div>
             ) : (

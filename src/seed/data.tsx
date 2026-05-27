@@ -184,6 +184,7 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    invitationCodes: [],
     // Materias/Temas que componen el curso
     subjects: [
       {
@@ -269,6 +270,7 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    invitationCodes: [],
   },
   {
     _id: "course-3" as any,
@@ -281,6 +283,7 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    invitationCodes: [],
   },
   {
     _id: "course-4" as any,
@@ -293,6 +296,7 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    invitationCodes: [],
   },
   {
     _id: "course-5" as any,
@@ -305,6 +309,7 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    invitationCodes: [],
   },
   {
     _id: "course-6" as any,
@@ -317,6 +322,7 @@ const CURSOS: ICourse[] = [
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
+    invitationCodes: [],
   },
 ];
 

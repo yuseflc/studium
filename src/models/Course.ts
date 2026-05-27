@@ -1,5 +1,12 @@
 import mongoose from "mongoose";
 
+export interface IInviteCode {
+  code: string; // Alfanumérico único (6 caracteres)
+  createdAt: Date;
+  lastUsedAt?: Date;
+  active: boolean;
+}
+
 export interface ICourse {
   _id?: mongoose.Types.ObjectId;
   title: string;
@@ -10,6 +17,7 @@ export interface ICourse {
   subjectIds: mongoose.Types.ObjectId[]; // Referencias a las materias del curso
   subjects?: any[]; // Campo virtual o poblado para la UI
   enrolledStudents: mongoose.Types.ObjectId[];
+  invitationCodes: IInviteCode[]; // Array máx 10 códigos (FIFO rotation)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,6 +62,26 @@ const CourseSchema = new mongoose.Schema<ICourse>(
         ref: "User",
       },
     ],
+    invitationCodes: [
+      {
+        code: {
+          type: String,
+          required: true,
+          maxlength: [6, "El código debe tener 6 caracteres"],
+        },
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+        lastUsedAt: {
+          type: Date,
+        },
+        active: {
+          type: Boolean,
+          default: true,
+        },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -75,6 +103,7 @@ CourseSchema.index({ status: 1 });
 CourseSchema.index({ enrolledStudents: 1 });
 CourseSchema.index({ ownerId: 1, status: 1 });
 CourseSchema.index({ title: 'text', description: 'text' });
+CourseSchema.index({ "invitationCodes.code": 1 }); // Para búsquedas rápidas por código
 
 // Prevenir que se sobrescriba el modelo si ya existe
 export default mongoose.models.Course ||

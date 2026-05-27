@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";
+import JoinCourseButton from "@/components/ui/JoinCourseButton";
 import { ModalAdvise } from "@/components/ui/modals";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
@@ -163,9 +164,20 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
     }
   };
 
-  const handleRefresh = () => {
-    setLoading(true);
-    window.location.reload();
+  /**
+   * Recarga la lista de cursos sin hacer un full page reload
+   * Se usa cuando el usuario crea o se une a un curso
+   */
+  const handleRefresh = async () => {
+    try {
+      setLoading(true);
+      const allCourses = await fetchCourses();
+      setCourses(allCourses);
+    } catch (error) {
+      console.error("Error refreshing courses:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleUnenrollCourse = async (courseId: string) => {
@@ -198,7 +210,10 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
     <main className="p-8 bg-base-100 min-h-[calc(100vh-64px)]">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-4xl font-bold">Catálogo de cursos</h1>
-        {isTeacher && <CreateCourseModal onCourseCreated={handleRefresh} />}
+        <div className="flex gap-3">
+          <JoinCourseButton onCourseJoined={handleRefresh} />
+          {isTeacher && <CreateCourseModal onCourseCreated={handleRefresh} />}
+        </div>
       </div>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 relative z-10">
         {loading ? (

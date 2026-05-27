@@ -1,6 +1,7 @@
 "use server";
 
 import { connectDB } from "@/lib/database/database";
+import { revalidatePath } from "next/cache";
 import Course from "@/models/Course";
 import Subject from "@/models/Subject";
 import Unit from "@/models/Unit";
@@ -10,7 +11,7 @@ import User from "@/models/User";
 import { CURSOS } from "@/seed/data";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
-import { ICourse } from "@/models/Course";
+import { ICourse, IInviteCode } from "@/models/Course";
 import {
   createSubjectSchema,
   updateCourseSchema,
@@ -105,6 +106,34 @@ export interface InviteStudentActionResult {
 export interface TransferOwnershipActionResult {
   success: boolean;
   error?: string;
+}
+
+export interface GenerateInviteCodeResult {
+  success: boolean;
+  error?: string;
+  code?: string;
+}
+
+export interface DeactivateInviteCodeResult {
+  success: boolean;
+  error?: string;
+}
+
+export interface JoinCourseByCodeResult {
+  success: boolean;
+  error?: string;
+  courseTitle?: string;
+}
+
+export interface ListInviteCodesResult {
+  success: boolean;
+  error?: string;
+  codes?: Array<{
+    code: string;
+    createdAt: string;
+    lastUsedAt?: string;
+    active: boolean;
+  }>;
 }
 
 // Funciones para serializar objetos anidados
@@ -242,6 +271,14 @@ export async function updateCourse(
     }
     if (data.status !== undefined) {
       course.status = data.status;
+      
+      // Si el curso se cambia a "draft" o "archived", desactivar todos los códigos de invitación
+      if (data.status === "draft" || data.status === "archived") {
+        course.invitationCodes = course.invitationCodes.map((code: IInviteCode) => ({
+          ...code,
+          active: false,
+        }));
+      }
     }
 
     course.updatedAt = new Date();
@@ -769,6 +806,252 @@ export async function reorderSubjects(
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al reordenar las materias";
     LOGGER.error({ error, courseId }, "Error reordering subjects from action");
+    return { success: false, error: message };
+  }
+}
+
+// Función helper para generar código alfanumérico único de 6 caracteres
+function generateRandomCode(): string {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
+// Generar código de invitación para un curso
+export async function generateInviteCode(
+  courseId: string
+): Promise<GenerateInviteCodeResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return { success: false, error: "Curso no encontrado" };
+    }
+
+    const currentUserId = currentUser._id.toString();
+    const isOwner = course.ownerId.toString() === currentUserId;
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para generar códigos de invitación" };
+    }
+
+    // Generar código único que no exista ya en el curso
+    let code: string;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    do {
+      code = generateRandomCode();
+      attempts++;
+    } while (
+      course.invitationCodes.some((ic: IInviteCode) => ic.code === code) &&
+      attempts < maxAttempts
+    );
+
+    if (attempts >= maxAttempts) {
+      return { success: false, error: "No se pudo generar un código único" };
+    }
+
+    // FIFO rotation: si ya hay 10 códigos, elimina el más antiguo
+    if (course.invitationCodes.length >= 10) {
+      course.invitationCodes.shift(); // Elimina el primer elemento (más antiguo)
+    }
+
+    // Agregar nuevo código
+    course.invitationCodes.push({
+      code,
+      createdAt: new Date(),
+      active: true,
+    });
+
+    await course.save();
+
+    LOGGER.info({ courseId, code }, "Invitation code generated");
+    return { success: true, code };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al generar código de invitación";
+    LOGGER.error({ error, courseId }, "Error generating invite code");
+    return { success: false, error: message };
+  }
+}
+
+// Desactivar código de invitación
+export async function deactivateInviteCode(
+  courseId: string,
+  code: string
+): Promise<DeactivateInviteCodeResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return { success: false, error: "Curso no encontrado" };
+    }
+
+    const currentUserId = currentUser._id.toString();
+    const isOwner = course.ownerId.toString() === currentUserId;
+    const isTeacher = course.teachers.some((teacherId: mongoose.Types.ObjectId) => teacherId.toString() === currentUserId);
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para desactivar códigos de invitación" };
+    }
+
+    const inviteCodeIndex = course.invitationCodes.findIndex((ic: IInviteCode) => ic.code === code);
+    if (inviteCodeIndex === -1) {
+      return { success: false, error: "Código de invitación no encontrado" };
+    }
+
+    course.invitationCodes[inviteCodeIndex].active = false;
+    await course.save();
+
+    LOGGER.info({ courseId, code }, "Invitation code deactivated");
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al desactivar código de invitación";
+    LOGGER.error({ error, courseId, code }, "Error deactivating invite code");
+    return { success: false, error: message };
+  }
+}
+
+// Unirse a un curso usando código de invitación
+export async function joinCourseByCode(
+  code: string
+): Promise<JoinCourseByCodeResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email });
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    // Buscar curso con ese código de invitación
+    const course = await Course.findOne({
+      "invitationCodes.code": code,
+    });
+
+    if (!course) {
+      return { success: false, error: "Código de invitación no válido o inactivo" };
+    }
+
+    // Verificar que el código esté activo
+    const inviteCodeIndex = course.invitationCodes.findIndex((ic: IInviteCode) => ic.code === code);
+    if (inviteCodeIndex === -1 || !course.invitationCodes[inviteCodeIndex].active) {
+      return { success: false, error: "Código de invitación no válido o inactivo" };
+    }
+
+    // Verificar que el curso esté en estado "active"
+    if (course.status !== "active") {
+      return { success: false, error: "La clase no está disponible. El profesor ha pausado o archivado el curso." };
+    }
+
+    // Verificar si el usuario ya está inscrito
+    if (course.enrolledStudents.some((studentId: mongoose.Types.ObjectId) => studentId.toString() === currentUser._id.toString())) {
+      return { success: true, courseTitle: course.title }; // Ya está inscrito, no es un error
+    }
+
+    // Actualizar lastUsedAt del código
+    course.invitationCodes[inviteCodeIndex].lastUsedAt = new Date();
+
+    // Actualizar bidireccional: Course + User
+    await Promise.all([
+      Course.findByIdAndUpdate(
+        course._id,
+        {
+          $addToSet: { enrolledStudents: currentUser._id },
+          "invitationCodes": course.invitationCodes, // Guardar los códigos actualizados
+        }
+      ),
+      User.findByIdAndUpdate(
+        currentUser._id,
+        { $addToSet: { enrolledCourses: course._id } }
+      ),
+    ]);
+
+    LOGGER.info({ courseId: course._id, userId: currentUser._id, code }, "User joined course with invitation code");
+    
+    // Revalidar la ruta /mycourses para que se actualice el caché
+    revalidatePath("/mycourses");
+    
+    return { success: true, courseTitle: course.title };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al unirse al curso";
+    LOGGER.error({ error, code }, "Error joining course by code");
+    return { success: false, error: message };
+  }
+}
+
+// Listar códigos de invitación de un curso
+export async function listInviteCodes(
+  courseId: string
+): Promise<ListInviteCodesResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const course = await Course.findById(courseId).lean();
+    if (!course) {
+      return { success: false, error: "Curso no encontrado" };
+    }
+
+    const currentUserId = currentUser._id.toString();
+    const isOwner = course.ownerId.toString() === currentUserId;
+    const isTeacher = course.teachers.some((teacherId: any) => teacherId.toString() === currentUserId);
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para ver los códigos de invitación" };
+    }
+
+    const codes = course.invitationCodes.map((ic: IInviteCode) => ({
+      code: ic.code,
+      createdAt: ic.createdAt.toISOString(),
+      lastUsedAt: ic.lastUsedAt?.toISOString(),
+      active: ic.active,
+    }));
+
+    return { success: true, codes };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al listar códigos de invitación";
+    LOGGER.error({ error, courseId }, "Error listing invite codes");
     return { success: false, error: message };
   }
 }

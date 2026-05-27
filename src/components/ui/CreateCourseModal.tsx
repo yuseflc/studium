@@ -5,7 +5,7 @@ import { useRef, useState } from 'react';
 import { IconPlus, IconBook } from '@tabler/icons-react';
 import { ModalForm } from './modals';
 
-export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated?: () => void }) {
+export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated?: () => void | Promise<void> }) {
   const router = useRouter();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [loading, setLoading] = useState(false);
@@ -89,6 +89,16 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
       setSuccess(true);
       setCourseId(data.data?.id);
       setLoading(false);
+      
+      // Actualizar la UI
+      setTimeout(async () => {
+        // Llamar al callback para refrescar la lista de cursos
+        if (onCourseCreated) {
+          await onCourseCreated();
+        }
+        // Refrescar datos del servidor
+        router.refresh();
+      }, 1000);
     } catch (err: any) {
       setError(err.message || "Error al crear el curso");
       setLoading(false);
@@ -127,6 +137,15 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
         error={error}
         success={success}
         successMessage="¡Curso creado correctamente!"
+        successAction={
+          courseId 
+            ? {
+                label: "Ir al curso",
+                onClick: handleNavigateToCourse,
+                icon: <IconBook size={18} />
+              }
+            : undefined
+        }
       >
         <div className="form-control">
           <label className="label">
@@ -159,19 +178,6 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
             disabled={loading}
           />
         </div>
-
-        {success && (
-          <div className="modal-action gap-2 w-full justify-center">
-            <button
-              type="button"
-              onClick={handleNavigateToCourse}
-              className="btn btn-primary gap-2"
-            >
-              <IconBook size={18} />
-              Ir al curso ahora
-            </button>
-          </div>
-        )}
       </ModalForm>
     </>
   );
