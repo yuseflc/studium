@@ -1,16 +1,23 @@
-"use client";
+"use client"; 
 
 import { useEffect, useMemo, useState, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
 /** Duración en ms que hay que sostener el botón para confirmar */
-const HOLD_DURATION_MS = 3000;
+const HOLD_DURATION_MS = 3000; 
 
+/**
+ * COMPONENTE: Botón de confirmación con "hold to confirm"
+ * 
+ * Lo usamos para acciones peligrosas como eliminar un curso.
+ * El usuario debe mantener presionado 3 segundos para ejecutar la acción.
+ * Si suelta antes, se cancela. Muestra una barra de progreso roja.
+ */
 function HoldConfirmButton({ 
-  onConfirm, 
-  disabled, 
-  children,
+  onConfirm,   
+  disabled,    
+  children,    
   className = ""
 }: { 
   onConfirm: () => void; 
@@ -18,50 +25,87 @@ function HoldConfirmButton({
   children: React.ReactNode;
   className?: string;
 }) {
+  // progress: 0 = sin presionar, 1 = completamente presionado (acción ejecutada)
   const [progress, setProgress] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-  const pressingRef = useRef(false);
+  
+  // Referencias para no perder valores entre renders y no causar re-renders innecesarios
+  const rafRef = useRef<number | null>(null); 
+  const startRef = useRef<number | null>(null); 
+  const pressingRef = useRef(false); 
 
+  /**
+   * Cancela el progreso actual.
+   * Se llama cuando el usuario suelta el botón, sale del área o se cancela la acción.
+   */
   const cancel = useCallback(() => {
-    if (!pressingRef.current) return;
+    if (!pressingRef.current) return; // si no está presionado, no hago nada
+    
     pressingRef.current = false;
+    
+    // Detengo la animación si existe
     if (rafRef.current !== null) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
+    
+    // Reseteo timestamps y progreso visual
     startRef.current = null;
     setProgress(0);
   }, []);
 
+  /**
+   * Actualiza el progreso mientras se mantiene presionado.
+   * Se llama recursivamente con requestAnimationFrame para una animación suave.
+   */
   const tick = useCallback(() => {
+    // Si ya no está presionado o no tengo timestamp de inicio, salgo
     if (!pressingRef.current || startRef.current === null) return;
+    
+    // Calculo cuánto tiempo ha pasado desde que empezó a presionar
     const elapsed = Date.now() - startRef.current;
+    // Calculo el progreso (0 a 1), no puede pasar de 1
     const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
     setProgress(p);
+    
+    // Si llegó a 1 (completó los 3 segundos)
     if (p >= 1) {
+      // Reseteo el estado interno
       pressingRef.current = false;
       rafRef.current = null;
       startRef.current = null;
-      setProgress(0); // Reiniciar al confirmar
-      onConfirm();
+      setProgress(0); // reinicio visual antes de ejecutar la acción
+      onConfirm(); // EJECUTO LA ACCIÓN PELIGROSA
       return;
     }
+    
+    // Si no completó, sigo animando en el próximo frame
     rafRef.current = requestAnimationFrame(tick);
   }, [onConfirm]);
 
+  /**
+   * Inicia el contador de presión.
+   * Se llama cuando el usuario hace click/touch sobre el botón.
+   */
   const start = useCallback(() => {
+    // Si ya está presionado o el botón está deshabilitado, ignoro
     if (pressingRef.current || disabled) return;
+    
     pressingRef.current = true;
-    startRef.current = Date.now();
-    rafRef.current = requestAnimationFrame(tick);
+    startRef.current = Date.now(); // guardo el momento exacto en que empezó a presionar
+    rafRef.current = requestAnimationFrame(tick); // arranco la animación
   }, [tick, disabled]);
 
-  useEffect(() => () => {
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+  /**
+   * Limpieza al desmontar el componente.
+   * Muy importante para evitar memory leaks con animaciones.
+   */
+  useEffect(() => {
+    return () => {
+      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+    };
   }, []);
 
-  const isActive = progress > 0;
+  const isActive = progress > 0; // si hay progreso activo, cambio el texto del botón
 
   return (
     <button
@@ -69,153 +113,220 @@ function HoldConfirmButton({
       disabled={disabled}
       className={`relative overflow-hidden select-none touch-none transition-colors ${className}`}
       style={{
-        userSelect: "none",
-        color: isActive ? "white" : undefined,
+        userSelect: "none", // evito que se seleccione texto accidentalmente
+        color: isActive ? "white" : undefined, // cuando está activo, texto blanco
       }}
-      onMouseDown={(e) => { if (e.button === 0) start(); }}
+      // Eventos para mouse
+      onMouseDown={(e) => { if (e.button === 0) start(); }} // solo botón izquierdo
       onMouseUp={cancel}
-      onMouseLeave={cancel}
-      onTouchStart={(e) => { e.preventDefault(); start(); }}
+      onMouseLeave={cancel} // si el mouse sale del botón mientras presiona, cancelo
+      // Eventos para touch (móvil)
+      onTouchStart={(e) => { e.preventDefault(); start(); }} // evito scroll mientras presiona
       onTouchEnd={cancel}
+      // Evito menú contextual al hacer click derecho
       onContextMenu={(e) => e.preventDefault()}
     >
-      {/* Capa de relleno rojo */}
+      {/* Capa de relleno rojo que crece horizontalmente según el progreso */}
       <span
-        aria-hidden="true"
+        aria-hidden="true" // solo decorativo, no lo leen lectores de pantalla
         className="absolute inset-0 bg-red-700 origin-left"
         style={{
-          transform: `scaleX(${progress})`,
-          transition: "none",
+          transform: `scaleX(${progress})`, // escala de 0 a 1 en el eje X
+          transition: "none", // sin transición porque yo controlo la animación con RAF
         }}
       />
+      {/* Contenido real del botón, por encima de la capa roja */}
       <span className="relative z-10 flex items-center justify-center gap-2">
         {isActive ? "Suelta para cancelar" : children}
       </span>
     </button>
   );
 }
+
+// Importación de íconos de lucide-react
 import {
-  BookOpen,
-  Users,
-  GraduationCap,
-  Settings,
-  AlertTriangle,
-  Archive,
-  Trash2,
-  Send,
-  Copy,
-  RefreshCw,
-  Eye,
-  UserPlus,
-  Check,
-  X,
+  BookOpen,        
+  Users,           
+  GraduationCap,   
+  Settings,        
+  AlertTriangle,   
+  Archive,          
+  Trash2,          
+  Send,            
+  Copy,            
+  RefreshCw,       
+  Eye,             
+  UserPlus,       
+  Check,           
+  X,               
 } from "lucide-react";
-import CourseSidebar from "./Navbars/CourseSidebar";
-import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager";
-import CourseParticipants from "./CourseParticipants";
-import GradesView from "./grades/GradesView";
-import CourseFAB from "./CourseFAB";
-import { PARTICIPANTES } from "@/seed/data";
-import { ICourse } from "@/models/Course";
-import { CourseStructureGeneric } from "@/lib/api/types";
-import { deleteTask } from "@/app/actions/taskActions";
+
+// Componentes internos del curso
+import CourseSidebar from "./Navbars/CourseSidebar"; 
+import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
+import CourseParticipants from "./CourseParticipants"; 
+import GradesView from "./grades/GradesView"; 
+import CourseFAB from "./CourseFAB"; 
+import { PARTICIPANTES } from "@/seed/data"; 
+import { ICourse } from "@/models/Course"; 
+import { CourseStructureGeneric } from "@/lib/api/types"; 
+
+// SERVER ACTIONS: funciones que se ejecutan en el servidor (Next.js App Router)
+import { deleteTask } from "@/app/actions/taskActions"; 
 import {
-  deleteCourse as deleteCourseAction,
-  inviteStudentByEmail,
-  transferCourseOwnership,
-  updateCourse,
+  deleteCourse as deleteCourseAction,      
+  inviteStudentByEmail,                    
+  transferCourseOwnership,                
+  updateCourse,                           
 } from "@/app/actions/courseActions";
-// Modales de Studium con blur
+
+// Modales reutilizables con efecto blur
 import { ModalAdvise } from "@/components/ui/modals";
 
+/**
+ * PROPS DEL COMPONENTE PRINCIPAL
+ */
 interface CourseViewProps {
-  courseData: ICourse | null;
-  courseStructure: CourseStructureGeneric | null;
-  isTeacher: boolean;
+  courseData: ICourse | null;           
+  courseStructure: CourseStructureGeneric | null; 
+  isTeacher: boolean;                   
 }
 
+// Tipos posibles para el estado del curso
 type CourseStatus = "draft" | "active" | "archived";
 
+/**
+ * COMPONENTE PRINCIPAL: CourseView
+ * 
+ * Vista principal de un curso. Muestra:
+ * - Sidebar con materias
+ * - Tabs: Contenido, Participantes, Calificaciones, Ajustes (solo profesor)
+ * - Gestión completa del curso (editar info, invitar, archivar, eliminar, etc.)
+ */
 export default function CourseView({ courseData, courseStructure, isTeacher }: CourseViewProps) {
-  const router = useRouter();
-  const { data: session } = useSession();
+  // HOOKS de Next.js / NextAuth
+  const router = useRouter();            // para redireccionar después de eliminar curso
+  const { data: session } = useSession(); // sesión del usuario actual (para obtener su email)
 
+  // ========== ESTADOS DE NAVEGACIÓN ==========
+  // Pestaña activa: "content" | "participants" | "grades" | "settings"
   const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
+  
+  // Lista de IDs de tareas eliminadas (para feedback visual mientras se elimina)
   const [deletedItems, setDeletedItems] = useState<string[]>([]);
 
+  // ========== ESTADOS DE CONTENIDO ==========
+  // Inicializo las materias desde courseStructure o courseData (priorizo structure)
   const initialSubjects = useMemo(
     () => courseStructure?.subjects || courseData?.subjects || [],
     [courseStructure?.subjects, courseData?.subjects]
   );
   const [subjects, setSubjects] = useState<any[]>(initialSubjects as any[]);
 
+  // ========== ESTADOS DEL FORMULARIO DE INFORMACIÓN GENERAL ==========
   const [title, setTitle] = useState(courseData?.title || "");
   const [description, setDescription] = useState(courseData?.description || "");
   const [status, setStatus] = useState<CourseStatus>(courseData?.status || "draft");
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(false); // para deshabilitar botón mientras guarda
   const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const [showParticipants, setShowParticipants] = useState(true);
-  const [allowComments, setAllowComments] = useState(true);
-  const [emailNotifications, setEmailNotifications] = useState(false);
+  // ========== CONFIGURACIÓN DE VISUALIZACIÓN (LOCAL, AÚN SIN PERSISTIR) ==========
+  const [showParticipants, setShowParticipants] = useState(true);   // mostrar participantes en navbar horizontal
+  const [allowComments, setAllowComments] = useState(true);         // permitir comentarios en contenido
+  const [emailNotifications, setEmailNotifications] = useState(false); // notificaciones por email
 
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteCode, setInviteCode] = useState("COURSE-2024-ABC123");
-  const [isInviting, setIsInviting] = useState(false);
-  const [showCopied, setShowCopied] = useState(false);
+  // ========== GESTIÓN DE INVITACIONES ==========
+  const [inviteEmail, setInviteEmail] = useState("");               // email a invitar
+  const [inviteCode, setInviteCode] = useState("COURSE-2024-ABC123"); // código de invitación (mock)
+  const [isInviting, setIsInviting] = useState(false);              // estado de carga al invitar
+  const [showCopied, setShowCopied] = useState(false);              // feedback visual de "copiado"
 
-  // Modales existentes (con blur añadido)
-  const [showArchiveModal, setShowArchiveModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [showVisibilityModal, setShowVisibilityModal] = useState(false);
-  const [showTransferModal, setShowTransferModal] = useState(false);
-  const [transferEmail, setTransferEmail] = useState("");
-  const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  // ========== MODALES DE CONFIRMACIÓN (acciones peligrosas) ==========
+  const [showArchiveModal, setShowArchiveModal] = useState(false);   // modal de archivar
+  const [showDeleteModal, setShowDeleteModal] = useState(false);     // modal de eliminar
+  const [showVisibilityModal, setShowVisibilityModal] = useState(false); // modal de cambiar visibilidad
+  const [showTransferModal, setShowTransferModal] = useState(false); // modal de transferir propiedad
+  const [transferEmail, setTransferEmail] = useState("");            // email destino para transferencia
+  const [deleteConfirmationText, setDeleteConfirmationText] = useState(""); // texto de confirmación para eliminar (debe ser "ELIMINAR")
 
-  // Estados para modales de Studium (reemplazan alerts)
-  const [inviteModal, setInviteModal] = useState<{ isOpen: boolean; success: boolean; message: string; email?: string }>({
+  // ========== MODALES DE RESULTADO ==========
+  // Cada uno tiene su propio modal para mostrar éxito/error sin bloquear la UI
+  const [inviteModal, setInviteModal] = useState<{ 
+    isOpen: boolean; 
+    success: boolean; 
+    message: string; 
+    email?: string 
+  }>({
     isOpen: false,
     success: false,
     message: "",
   });
   
-  const [regenerateModal, setRegenerateModal] = useState<{ isOpen: boolean; newCode: string }>({
+  const [regenerateModal, setRegenerateModal] = useState<{ 
+    isOpen: boolean; 
+    newCode: string 
+  }>({
     isOpen: false,
     newCode: "",
   });
   
-  const [visibilityResultModal, setVisibilityResultModal] = useState<{ isOpen: boolean; success: boolean; message: string }>({
+  const [visibilityResultModal, setVisibilityResultModal] = useState<{ 
+    isOpen: boolean; 
+    success: boolean; 
+    message: string 
+  }>({
     isOpen: false,
     success: false,
     message: "",
   });
   
-  const [archiveResultModal, setArchiveResultModal] = useState<{ isOpen: boolean; success: boolean; message: string }>({
+  const [archiveResultModal, setArchiveResultModal] = useState<{ 
+    isOpen: boolean; 
+    success: boolean; 
+    message: string 
+  }>({
     isOpen: false,
     success: false,
     message: "",
   });
   
-  const [transferResultModal, setTransferResultModal] = useState<{ isOpen: boolean; success: boolean; message: string; email?: string }>({
+  const [transferResultModal, setTransferResultModal] = useState<{ 
+    isOpen: boolean; 
+    success: boolean; 
+    message: string; 
+    email?: string 
+  }>({
     isOpen: false,
     success: false,
     message: "",
   });
 
+  // ID del curso como string (para pasarlo a las server actions)
   const courseId = String(courseData?._id || "");
 
+  // ========== EFECTOS PARA SINCRONIZAR ESTADO CON PROPS ==========
+  
+  // Cuando cambian los subjects iniciales (por ejemplo, después de guardar cambios), actualizo el estado local
   useEffect(() => {
     setSubjects(initialSubjects as any[]);
   }, [initialSubjects]);
 
+  // Cuando cambian título, descripción o estado desde courseData (por ejemplo, después de actualizar), sincronizo
   useEffect(() => {
     setTitle(courseData?.title || "");
     setDescription(courseData?.description || "");
     setStatus(courseData?.status || "draft");
   }, [courseData?.title, courseData?.description, courseData?.status]);
 
+  // ========== HANDLERS PARA AGREGAR CONTENIDO (optimista local) ==========
+  
+  /**
+   * Agrega una tarea al subject correspondiente.
+   * Actualización optimista: actualizo el estado local inmediatamente,
+   * luego el servidor confirmará (o no) pero asumo éxito porque es creación.
+   */
   const handleAddTask = (task: any) => {
-    if (!task?.subjectId) return;
+    if (!task?.subjectId) return; // necesito saber a qué subject pertenece
 
     setSubjects((prev) =>
       prev.map((subject: any) => {
@@ -225,16 +336,21 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         const existingTasks = Array.isArray(subject.tasks) ? subject.tasks : [];
         return {
           ...subject,
-          tasks: [task, ...existingTasks],
+          tasks: [task, ...existingTasks], // agrego la nueva tarea al principio
         };
       })
     );
   };
 
+  /**
+   * Agrega un nuevo subject (materia) al curso.
+   * También optimista: lo pusheo localmente, el servidor ya lo guardó porque viene del FAB.
+   */
   const handleAddSubject = (subject: any) => {
-    if (!subject?._id) return;
+    if (!subject?._id) return; // necesito que tenga ID para identificar
 
     setSubjects((prev) => {
+      // Evito duplicados (por si el callback se llama múltiples veces)
       const alreadyExists = prev.some((s: any) => String(s?._id || s?.id || "") === String(subject._id));
       if (alreadyExists) return prev;
 
@@ -249,6 +365,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     });
   };
 
+  /**
+   * Agrega un recurso a una unidad específica.
+   * Busca el subject que contiene la unidad y actualiza esa unidad.
+   */
   const handleAddResource = (resource: any) => {
     if (!resource?.unitId) return;
 
@@ -274,8 +394,15 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     );
   };
 
+  // ========== HANDLER PARA ELIMINAR TAREA ==========
+  
+  /**
+   * Elimina una tarea usando la server action deleteTask.
+   * Actualización optimista: la marco como "deleting" visualmente con deletedItems,
+   * luego la elimino del estado local si la acción del servidor fue exitosa.
+   */
   const handleDeleteItem = async (id: string) => {
-    setDeletedItems((prev) => [...prev, id]);
+    setDeletedItems((prev) => [...prev, id]); // marco como "en proceso de eliminación"
 
     try {
       const result = await deleteTask(id);
@@ -283,6 +410,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         throw new Error(result.error || "Error deleting task");
       }
 
+      // Si llegó acá, la eliminación fue exitosa: la remuevo del estado local
       setSubjects((prev) =>
         prev.map((subject: any) => ({
           ...subject,
@@ -293,13 +421,19 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       );
     } catch (error) {
       console.error("Error deleting task:", error);
+      // Si hubo error, la saco de deletedItems para que reaparezca visualmente
       setDeletedItems((prev) => prev.filter((itemId) => itemId !== id));
     }
   };
 
-  // ✅ Usando Server Action updateCourse (NO fetch)
+  // ========== HANDLER PARA GUARDAR INFORMACIÓN GENERAL ==========
+  
+  /**
+   * Guarda título, descripción y estado del curso usando updateCourse server action.
+   * Muestra mensaje de éxito o error temporal.
+   */
   const handleSaveGeneralInfo = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // evito que recargue la página
 
     if (!courseId) {
       setSaveMessage({ type: "error", text: "Curso inválido" });
@@ -316,7 +450,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       }
 
       setSaveMessage({ type: "success", text: "Cambios guardados correctamente" });
-      setTimeout(() => setSaveMessage(null), 3000);
+      setTimeout(() => setSaveMessage(null), 3000); // el mensaje desaparece a los 3 segundos
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al guardar los cambios";
       setSaveMessage({ type: "error", text: message });
@@ -326,7 +460,12 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
-  // ✅ Usando Server Action inviteStudentByEmail (NO fetch, NO alert)
+  // ========== HANDLERS PARA INVITACIONES ==========
+  
+  /**
+   * Invita a un estudiante por email usando la server action.
+   * Muestra un modal de Studium con el resultado (éxito o error).
+   */
   const handleInviteByEmail = async () => {
     if (!inviteEmail || !courseId) return;
     setIsInviting(true);
@@ -337,15 +476,17 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         throw new Error(result.error || "Error al enviar invitación");
       }
 
+      // Modal de éxito
       setInviteModal({
         isOpen: true,
         success: true,
         message: `Invitación enviada correctamente a ${inviteEmail}`,
         email: inviteEmail,
       });
-      setInviteEmail("");
+      setInviteEmail(""); // limpio el input
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al enviar la invitación";
+      // Modal de error
       setInviteModal({
         isOpen: true,
         success: false,
@@ -356,6 +497,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
+  /**
+   * Copia el código de invitación al portapapeles.
+   * Muestra feedback visual "Copiado" por 2 segundos.
+   */
   const handleCopyInviteCode = async () => {
     try {
       await navigator.clipboard.writeText(inviteCode);
@@ -366,18 +511,29 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
-  // ✅ Modal de confirmación en lugar de alert
+  /**
+   * Genera un nuevo código de invitación y muestra modal de confirmación.
+   * (Por ahora solo es visual, no persiste en BD)
+   */
   const handleRegenerateCode = () => {
     const newCode = `COURSE-${Date.now()}-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     setRegenerateModal({ isOpen: true, newCode });
   };
 
+  /**
+   * Confirma el nuevo código generado y actualiza el estado.
+   */
   const confirmRegenerateCode = () => {
     setInviteCode(regenerateModal.newCode);
     setRegenerateModal({ isOpen: false, newCode: "" });
   };
 
-  // ✅ Usando Server Action updateCourse (NO fetch, NO alert)
+  // ========== HANDLERS PARA ACCIONES DE LA ZONA DE PELIGRO ==========
+  
+  /**
+   * Cambia la visibilidad del curso (borrador <-> publicado).
+   * Usa updateCourse server action.
+   */
   const handleChangeVisibility = async () => {
     if (!courseId) return;
 
@@ -389,9 +545,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         throw new Error(result.error || "Error al cambiar visibilidad");
       }
 
-      setStatus(newStatus);
-      setShowVisibilityModal(false);
+      setStatus(newStatus);                 // actualizo estado local
+      setShowVisibilityModal(false);        // cierro modal de confirmación
       
+      // Muestro modal de resultado
       setVisibilityResultModal({
         isOpen: true,
         success: true,
@@ -407,7 +564,9 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
-  // ✅ Usando Server Action updateCourse (NO fetch, NO alert)
+  /**
+   * Archiva el curso (cambia status a "archived").
+   */
   const handleArchiveCourse = async () => {
     if (!courseId) return;
 
@@ -435,7 +594,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
-  // ✅ Usando Server Action transferCourseOwnership (NO fetch, NO alert)
+  /**
+   * Transfiere la propiedad del curso a otro usuario por email.
+   * Usa transferCourseOwnership server action.
+   */
   const handleTransferOwnership = async () => {
     if (!transferEmail || !courseId) return;
 
@@ -453,7 +615,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         message: `Curso transferido correctamente a ${transferEmail}`,
         email: transferEmail,
       });
-      setTransferEmail("");
+      setTransferEmail(""); // limpio el campo
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al transferir el curso";
       setTransferResultModal({
@@ -464,7 +626,11 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     }
   };
 
-  // ✅ Usando Server Action deleteCourseAction (NO fetch)
+  /**
+   * Elimina el curso permanentemente.
+   * Usa deleteCourseAction y redirige a "/mycourses".
+   * Esta acción requiere confirmación con texto "ELIMINAR" y mantener presionado el botón.
+   */
   const handleDeleteCourse = async () => {
     if (!courseId) return;
 
@@ -474,35 +640,56 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         throw new Error(result.error || "Error al eliminar");
       }
 
-      router.push("/mycourses");
+      router.push("/mycourses"); // redirijo a la lista de cursos del usuario
     } catch (error) {
       const message = error instanceof Error ? error.message : "Error al eliminar el curso";
       console.error(message);
+      // Acá podría mostrar un modal de error, pero por ahora solo logueo
     }
   };
 
+  // ========== RENDERIZADO PRINCIPAL ==========
+  
   return (
     <div className="flex flex-col lg:flex-row">
+      {/* SIDEBAR: muestra la lista de materias para navegación rápida */}
       <CourseSidebar isTeacher={isTeacher} subjects={subjects} />
 
+      {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="w-full mx-auto">
+          
+          {/* ENCABEZADO: título del curso + badges de estado */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">
               {title || "Cargando curso..."}
+              
+              {/* Badge BORRADOR: solo visible cuando status === "draft" */}
               {status === "draft" && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 ml-2 align-middle shadow-sm">BORRADOR</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 ml-2 align-middle shadow-sm">
+                  BORRADOR
+                </span>
               )}
+              
+              {/* Badge PUBLICADO */}
               {status === "active" && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 ml-2 align-middle shadow-sm">PUBLICADO</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 ml-2 align-middle shadow-sm">
+                  PUBLICADO
+                </span>
               )}
+              
+              {/* Badge ARCHIVADO */}
               {status === "archived" && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 ml-2 align-middle shadow-sm">ARCHIVADO</span>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 ml-2 align-middle shadow-sm">
+                  ARCHIVADO
+                </span>
               )}
             </h1>
           </div>
 
+          {/* TABS DE NAVEGACIÓN */}
           <div className="flex border-b border-base-300 mb-6 overflow-x-auto relative z-10">
+            {/* Tab: Contenido del curso */}
             <button
               type="button"
               onClick={() => setActiveTab("content")}
@@ -515,6 +702,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               <BookOpen size={18} />
               <span className="text-sm sm:text-base">Curso</span>
             </button>
+            
+            {/* Tab: Participantes */}
             <button
               type="button"
               onClick={() => setActiveTab("participants")}
@@ -527,6 +716,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               <Users size={18} />
               <span className="text-sm sm:text-base">Participantes</span>
             </button>
+            
+            {/* Tab: Calificaciones */}
             <button
               type="button"
               onClick={() => setActiveTab("grades")}
@@ -539,6 +730,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               <GraduationCap size={18} />
               <span className="text-sm sm:text-base">Calificaciones</span>
             </button>
+            
+            {/* Tab: Ajustes (solo visible para profesores) */}
             {isTeacher && (
               <button
                 type="button"
@@ -555,7 +748,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
             )}
           </div>
 
+          {/* CONTENIDO DE CADA TAB */}
           <div className="space-y-6">
+            
+            {/* TAB CONTENIDO: administrador de estructura del curso */}
             {activeTab === "content" && (
               <CourseStructureManager
                 courseId={courseId}
@@ -565,8 +761,10 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               />
             )}
 
+            {/* TAB PARTICIPANTES: lista de alumnos y profesores (usando datos mock) */}
             {activeTab === "participants" && <CourseParticipants participants={PARTICIPANTES} />}
 
+            {/* TAB CALIFICACIONES: vista de notas por estudiante/materia */}
             {activeTab === "grades" && (
               <GradesView
                 participants={PARTICIPANTES}
@@ -576,14 +774,18 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               />
             )}
 
+            {/* TAB AJUSTES: panel completo para profesores */}
             {activeTab === "settings" && isTeacher && (
               <div className="space-y-6 w-full">
                 <div className="max-w-3xl mx-auto px-4 sm:px-0">
-                  {/* Información General */}
+                  
+                  {/* SECCIÓN 1: INFORMACIÓN GENERAL */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Información General</h2>
                       <form onSubmit={handleSaveGeneralInfo} className="space-y-4 sm:space-y-6">
+                        
+                        {/* Campo: Título del curso */}
                         <div className="form-control flex flex-col items-start">
                           <label htmlFor="course-title" className="label p-0">
                             <span className="label-text font-medium mb-2">Título del Curso</span>
@@ -599,6 +801,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           />
                         </div>
 
+                        {/* Campo: Descripción */}
                         <div className="form-control flex flex-col items-start">
                           <label htmlFor="course-description" className="label p-0">
                             <span className="label-text font-medium mb-2">Descripción</span>
@@ -612,6 +815,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           />
                         </div>
 
+                        {/* Campo: Estado (radio buttons) */}
                         <div className="form-control flex flex-col items-start">
                           <label className="label p-0">
                             <span className="label-text font-medium mb-2">Estado del Curso</span>
@@ -653,6 +857,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                         </div>
 
+                        {/* Mensaje temporal de guardado (éxito o error) */}
                         {saveMessage && (
                           <div className={`alert ${saveMessage.type === "success" ? "alert-success" : "alert-error"} text-sm backdrop-blur-sm`}>
                             {saveMessage.type === "success" ? <Check size={16} /> : <X size={16} />}
@@ -660,6 +865,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                         )}
 
+                        {/* Botón de guardar */}
                         <div className="card-actions justify-end">
                           <button type="submit" className="btn btn-primary w-full sm:w-auto" disabled={isSaving}>
                             {isSaving ? "Guardando..." : "Guardar Cambios"}
@@ -669,11 +875,13 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
                   </div>
 
-                  {/* Configuración de Visualización */}
+                  {/* SECCIÓN 2: CONFIGURACIÓN DE VISUALIZACIÓN (preferencias locales) */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Configuración de Visualización</h2>
                       <div className="space-y-4">
+                        
+                        {/* Toggle: Mostrar participantes */}
                         <div className="form-control">
                           <label className="cursor-pointer label flex-row items-center justify-between gap-3">
                             <div className="flex-1">
@@ -684,12 +892,14 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                             </div>
                             <input
                               type="checkbox"
-                              className="toggle toggle-primary flex-shrink-0 ml-7"
+                              className="toggle toggle-primary flex-shrink-0"
                               checked={showParticipants}
                               onChange={(e) => setShowParticipants(e.target.checked)}
                             />
                           </label>
                         </div>
+                        
+                        {/* Toggle: Permitir comentarios */}
                         <div className="form-control">
                           <label className="cursor-pointer label flex-row items-center justify-between gap-3">
                             <div className="flex-1">
@@ -700,12 +910,14 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                             </div>
                             <input
                               type="checkbox"
-                              className="toggle toggle-primary flex-shrink-0 ml-19"
+                              className="toggle toggle-primary flex-shrink-0"
                               checked={allowComments}
                               onChange={(e) => setAllowComments(e.target.checked)}
                             />
                           </label>
                         </div>
+                        
+                        {/* Toggle: Notificaciones por email */}
                         <div className="form-control">
                           <label className="cursor-pointer label flex-row items-center justify-between gap-3">
                             <div className="flex-1">
@@ -716,7 +928,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                             </div>
                             <input
                               type="checkbox"
-                              className="toggle toggle-primary flex-shrink-0 ml-13"
+                              className="toggle toggle-primary flex-shrink-0"
                               checked={emailNotifications}
                               onChange={(e) => setEmailNotifications(e.target.checked)}
                             />
@@ -726,11 +938,13 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
                   </div>
 
-                  {/* Gestión de Participantes */}
+                  {/* SECCIÓN 3: GESTIÓN DE PARTICIPANTES (invitaciones) */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Gestión de Participantes</h2>
                       <div className="space-y-6">
+                        
+                        {/* Invitar por email */}
                         <div className="form-control">
                           <label htmlFor="invite-email" className="label">
                             <span className="label-text font-medium mb-2">Invitar por email</span>
@@ -758,6 +972,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
                         <div className="divider">O</div>
 
+                        {/* Código de invitación */}
                         <div className="form-control">
                           <label htmlFor="invite-code" className="label">
                             <span className="label-text font-medium mb-2">Código de invitación</span>
@@ -799,7 +1014,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
                   </div>
 
-                  {/* Zona de Peligro */}
+                  {/* SECCIÓN 4: ZONA DE PELIGRO (acciones críticas) */}
                   <div className="border-2 border-red-200 dark:border-red-800/50 rounded-xl overflow-hidden shadow-sm">
                     <div className="bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-950/10 px-6 py-4 border-b-2 border-red-200 dark:border-red-800/30">
                       <div className="flex items-center gap-2">
@@ -812,7 +1027,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     </div>
 
                     <div className="divide-y divide-red-100 dark:divide-red-800/20">
-                      {/* Cambiar visibilidad */}
+                      
+                      {/* Acción 1: Cambiar visibilidad */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -840,7 +1056,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
                       </div>
 
-                      {/* Transferir propiedad */}
+                      {/* Acción 2: Transferir propiedad */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -866,7 +1082,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
                       </div>
 
-                      {/* Archivar curso */}
+                      {/* Acción 3: Archivar curso */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -893,7 +1109,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                         </div>
                       </div>
 
-                      {/* Eliminar curso */}
+                      {/* Acción 4: Eliminar curso (la más peligrosa) */}
                       <div className="px-6 py-5 hover:bg-red-50/50 dark:hover:bg-red-950/10 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                           <div className="flex-1">
@@ -927,6 +1143,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         </div>
       </main>
 
+      {/* BOTÓN FLOTANTE (FAB): solo visible en pestaña "content" y para profesores */}
       {isTeacher && activeTab === "content" && (
         <CourseFAB
           onAddTask={handleAddTask}
@@ -938,9 +1155,9 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
-      {/* ========== MODALES CON backdrop-blur-md ========== */}
+      {/* ========== MODALES DE CONFIRMACIÓN (con backdrop blur) ========== */}
 
-      {/* Modal de Visibilidad (confirmación) */}
+      {/* Modal: Confirmar cambio de visibilidad */}
       {showVisibilityModal && (
         <dialog className="modal modal-open">
           <div className="modal-box backdrop-blur-md">
@@ -968,7 +1185,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         </dialog>
       )}
 
-      {/* Modal de Transferencia */}
+      {/* Modal: Transferir propiedad (con input de email) */}
       {showTransferModal && (
         <dialog className="modal modal-open">
           <div className="modal-box backdrop-blur-md">
@@ -1001,7 +1218,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         </dialog>
       )}
 
-      {/* Modal de Archivar */}
+      {/* Modal: Confirmar archivado */}
       {showArchiveModal && (
         <dialog className="modal modal-open">
           <div className="modal-box backdrop-blur-md">
@@ -1027,7 +1244,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         </dialog>
       )}
 
-      {/* Modal de Eliminar */}
+      {/* Modal: Eliminar curso (con confirmación de texto + hold button) */}
       {showDeleteModal && (
         <dialog className="modal modal-open">
           <div className="modal-box backdrop-blur-md">
@@ -1054,6 +1271,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               >
                 Cancelar
               </button>
+              {/* Botón de hold que solo se habilita si el texto es exactamente "ELIMINAR" */}
               <HoldConfirmButton
                 className="btn btn-error text-white"
                 onConfirm={handleDeleteCourse}
@@ -1077,9 +1295,9 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         </dialog>
       )}
 
-      {/* ========== MODALES DE STUDIUM (reemplazan alerts) ========== */}
+      {/* ========== MODALES DE RESULTADO (reemplazan alerts nativos) ========== */}
 
-      {/* Modal de invitación (éxito/error) */}
+      {/* Modal: Resultado de invitación (éxito o error) */}
       {inviteModal.isOpen && (
         <ModalAdvise
           id="invite-modal"
@@ -1096,7 +1314,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
-      {/* Modal de regenerar código */}
+      {/* Modal: Confirmación para regenerar código */}
       {regenerateModal.isOpen && (
         <ModalAdvise
           id="regenerate-modal"
@@ -1116,7 +1334,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
-      {/* Modal de resultado de visibilidad */}
+      {/* Modal: Resultado de cambio de visibilidad */}
       {visibilityResultModal.isOpen && (
         <ModalAdvise
           id="visibility-result-modal"
@@ -1133,7 +1351,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
-      {/* Modal de resultado de archivado */}
+      {/* Modal: Resultado de archivado */}
       {archiveResultModal.isOpen && (
         <ModalAdvise
           id="archive-result-modal"
@@ -1150,7 +1368,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
-      {/* Modal de resultado de transferencia */}
+      {/* Modal: Resultado de transferencia */}
       {transferResultModal.isOpen && (
         <ModalAdvise
           id="transfer-result-modal"
