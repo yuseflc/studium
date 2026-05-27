@@ -339,7 +339,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
             <h3 className="font-bold text-lg text-error flex items-center gap-2 mb-2">
               <IconTrash size={22} /> Eliminar curso
             </h3>
-            
+
             {deleteError && (
               <div className="alert alert-error text-sm py-2 mb-4">
                 {deleteError}
@@ -352,7 +352,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
             <p className="py-2 font-medium text-warning text-sm">
               Para confirmar, mantén pulsado el botón rojo durante 3 segundos.
             </p>
-            
+
             <div className="modal-action mt-6 flex items-center justify-end gap-3">
               <button
                 className="btn btn-ghost"

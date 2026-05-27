@@ -11,6 +11,7 @@ import CourseView from "@/components/ui/CourseView";
 import { ICourse } from "@/models/Course";
 import { CourseStructureGeneric } from "@/lib/api/types";
 import { LOGGER } from "@/config/logger";
+import { validateCourseAccess } from "@/app/actions/courseActions";
 
 /**
  * Serializa datos de MongoDB para que sean compatibles con Client Components
@@ -25,6 +26,13 @@ export const dynamic = "force-dynamic"; // Forzar que esta página sea renderiza
 
 export default async function MyCoursePage({ params }: { params: Promise<{ courseid: string }> }) {
   const { courseid } = await params;
+  
+  // Validate user access early before fetching course data
+  const hasAccess = await validateCourseAccess(courseid);
+  if (!hasAccess) {
+    redirect("/mycourses");
+  }
+
   let curso: ICourse | null = null;
   let courseStructure: CourseStructureGeneric | null = null;
 

@@ -120,6 +120,10 @@ TaskSchema.pre(/^find/, function (this: mongoose.Query<ITask[], ITask>) {
 
 // Virtual: Está vencida
 TaskSchema.virtual('isOverdue').get(function () {
+  if (!this.dueDate) {
+    return false;
+  }
+
   return new Date() > this.dueDate && !this.allowLateSubmission; // True si fecha actual supera fecha de entrega y no permite entregas tardías
 });
 

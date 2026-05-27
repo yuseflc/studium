@@ -160,9 +160,34 @@ function serializeCourse(course: ICourse): SerializedCourse {
 export async function fetchCourses(): Promise<SerializedCourse[]> {
   try {
     await connectDB();
-    const dbCourses = await Course.find({}).lean() as ICourse[];
+    
+    // Sacamos la ID del usuario antes, 
+    const userId = await getCurrentUser();
+    if (!userId) {
+      return CURSOS.map(serializeCourse);
+    }
+
+    // En la query a mongo, buscamos los cursos donde el usuario es owner, teacher o enrolled student
+    const dbCourses = await Course.find({
+      $or: [
+        { ownerId: userId },
+        { teachers: { $in: [userId] } },
+        { enrolledStudents: { $in: [userId] } },
+      ],
+    }).lean() as ICourse[];
+
+    // Combinamos los cursos de la base de datos con los cursos del seed, evitando duplicados por ID
     const allCourses = [...dbCourses, ...CURSOS];
-    return allCourses.map(serializeCourse);
+    const courseMap = new Map<string, ICourse>();
+    
+    allCourses.forEach((course) => {
+      const courseId = course._id?.toString() || "";
+      if (courseId && !courseMap.has(courseId)) {
+        courseMap.set(courseId, course);
+      }
+    });
+
+    return Array.from(courseMap.values()).map(serializeCourse);
   } catch (error) {
     console.error("Error fetching courses:", error);
     return [];
@@ -368,6 +393,60 @@ export async function getCurrentUser(): Promise<string | null> {
   } catch (error) {
     console.error("Error fetching current user:", error);
     return null;
+  }
+}
+
+/**
+ * Valida si el usuario actual tiene acceso a un curso específico.
+ * El usuario tiene acceso si es propietario, profesor o estudiante inscrito.
+ */
+export async function validateCourseAccess(courseId: string): Promise<boolean> {
+  try {
+    await connectDB();
+    
+    // Obtener ID del usuario actual (operación barata primero)
+    const userId = await getCurrentUser();
+    if (!userId) {
+      return false;
+    }
+
+    // Buscar curso en BD o datos de seed
+    let course = await Course.findById(courseId).lean() as ICourse | null;
+    
+    if (!course) {
+      // Fallback a datos de seed
+      course = CURSOS.find(c => String(c._id) === courseId) || null;
+      if (!course) {
+        return false;
+      }
+    }
+
+    // Verificar si el usuario es propietario, profesor o estudiante inscrito
+    const userIdStr = userId.toString ? userId.toString() : userId;
+    const ownerIdStr = course.ownerId?.toString ? course.ownerId.toString() : course.ownerId;
+    
+    if (userIdStr === ownerIdStr) {
+      return true;
+    }
+
+    if (course.teachers?.some((teacherId: any) => {
+      const teacherIdStr = teacherId?.toString ? teacherId.toString() : teacherId;
+      return teacherIdStr === userIdStr;
+    })) {
+      return true;
+    }
+
+    if (course.enrolledStudents?.some((studentId: any) => {
+      const studentIdStr = studentId?.toString ? studentId.toString() : studentId;
+      return studentIdStr === userIdStr;
+    })) {
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error("Error validando acceso al curso:", error);
+    return false;
   }
 }
 
