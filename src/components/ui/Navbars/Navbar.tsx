@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconList } from "@tabler/icons-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import Logo from "./Logo";
 
 export default function Navbar() {
 
@@ -11,16 +12,7 @@ export default function Navbar() {
             {/* Logo */}
             <div className="navbar-start">
                 <Link href="/" className="inline-flex items-center justify-center p-0 leading-none">
-                    <img
-                        src="/img/logo_small_blur.svg"
-                        alt="Studium"
-                        className="hidden md:block h-4 w-auto"
-                    />
-                    <img
-                        src="/img/studium_blur.svg"
-                        alt="Studium"
-                        className="block md:hidden h-10 w-auto"
-                    />
+                    <Logo />
                 </Link>
             </div>
             

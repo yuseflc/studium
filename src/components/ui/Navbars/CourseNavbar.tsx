@@ -9,6 +9,7 @@ import { User } from "@/models/index";
 import LogoutButton from "./LogoutButton";
 import ProfileImage from "./ProfileImage";
 import { LOGGER } from "@/config/logger";
+import Logo from "./Logo";
 
 /**
  * server-hoist-static-io: Lista de cursos disponibles hoisted a nivel de módulo.
@@ -81,11 +82,7 @@ export default async function CourseNavbar() {
                 {/* Logo/Branding - Lado izquierdo del navbar */}
                 <div className="navbar-start">
                     <Link href="/" className="inline-flex items-center justify-center p-0 leading-none">
-                        <img
-                            src="/img/logo_small_blur.svg"
-                            alt="Studium"
-                            className="block h-4 w-auto"
-                        />
+                        <Logo />
                     </Link>
                 </div>
 
