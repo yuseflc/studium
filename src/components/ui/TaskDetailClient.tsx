@@ -12,6 +12,8 @@ interface TaskDetailClientProps {
     description: string;
     dueDate: Date;
     maxPoints?: number;
+    image?: string;
+    priority?: string;
   };
   courseid: string;
   existingSubmission?: {

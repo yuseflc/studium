@@ -65,6 +65,8 @@ export const GET = withErrorHandlingParams<{ id: string }>(
         dueDate: task.dueDate,
         allowLateSubmission: task.allowLateSubmission,
         active: task.active,
+        image: task.image,
+        priority: task.priority,
         criteria: task.criteria || [],
         createdBy: task.createdById,
         createdAt: task.createdAt,
@@ -93,6 +95,8 @@ export const GET = withErrorHandlingParams<{ id: string }>(
  *   dueDate?: string (ISO datetime)
  *   allowLateSubmission?: boolean
  *   active?: boolean
+ *   image?: string
+ *   priority?: "low" | "medium" | "high"
  * }
  * ```
  *
@@ -161,6 +165,8 @@ export const PATCH = withErrorHandlingParams<{ id: string }>(
     if (updateData.dueDate) task.dueDate = updateData.dueDate;
     if (updateData.allowLateSubmission !== undefined) task.allowLateSubmission = updateData.allowLateSubmission;
     if (updateData.active !== undefined) task.active = updateData.active;
+    if (updateData.image !== undefined) task.image = updateData.image;
+    if (updateData.priority !== undefined) task.priority = updateData.priority;
 
     task.updatedAt = new Date();
     await task.save();
@@ -185,6 +191,8 @@ export const PATCH = withErrorHandlingParams<{ id: string }>(
         dueDate: task.dueDate,
         allowLateSubmission: task.allowLateSubmission,
         active: task.active,
+        image: task.image,
+        priority: task.priority,
         updatedAt: task.updatedAt,
       },
       'Tarea actualizada exitosamente',

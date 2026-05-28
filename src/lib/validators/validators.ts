@@ -357,6 +357,13 @@ export const createTaskSchema = z.object({
   active: z
     .boolean()
     .default(true),
+  image: z
+    .string()
+    .url("La URL de la imagen debe ser válida")
+    .optional(),
+  priority: z
+    .enum(["low", "medium", "high"])
+    .default("medium"),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
@@ -399,6 +406,13 @@ export const updateTaskSchema = z.object({
     .optional(),
   active: z
     .boolean()
+    .optional(),
+  image: z
+    .string()
+    .url("La URL de la imagen debe ser válida")
+    .optional(),
+  priority: z
+    .enum(["low", "medium", "high"])
     .optional(),
 });
 

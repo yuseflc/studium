@@ -114,6 +114,8 @@ export const GET = withErrorHandling(
  *   dueDate: string (ISO datetime)
  *   allowLateSubmission?: boolean (default: false)
  *   active?: boolean (default: true)
+ *   image?: string
+ *   priority?: "low" | "medium" | "high"
  * }
  * ```
  *
@@ -148,6 +150,8 @@ export const POST = withErrorHandling(
       dueDate,
       allowLateSubmission,
       active,
+      image,
+      priority,
     } = validationResult.data;
 
     await dbPromise;
@@ -194,6 +198,8 @@ export const POST = withErrorHandling(
       dueDate,
       allowLateSubmission: allowLateSubmission || false,
       active: active !== false,
+      image,
+      priority: priority || 'medium',
       criteria: [],
     });
 
@@ -224,6 +230,8 @@ export const POST = withErrorHandling(
         dueDate: task.dueDate,
         allowLateSubmission: task.allowLateSubmission,
         active: task.active,
+        image: task.image,
+        priority: task.priority,
         createdAt: task.createdAt,
       },
       'Tarea creada exitosamente',

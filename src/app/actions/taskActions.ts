@@ -29,6 +29,8 @@ export interface CreateTaskActionInput {
   maxPoints?: number;
   allowLateSubmission?: boolean;
   active?: boolean;
+  image?: string;
+  priority?: "low" | "medium" | "high";
 }
 
 export interface TaskActionResult {
@@ -46,6 +48,8 @@ export interface TaskActionResult {
     dueDate?: string;
     allowLateSubmission: boolean;
     active: boolean;
+    image?: string;
+    priority: "low" | "medium" | "high";
     createdAt: string;
     updatedAt: string;
   };
@@ -64,6 +68,8 @@ function serializeTask(task: any): NonNullable<TaskActionResult["task"]> {
     dueDate: task.dueDate ? task.dueDate.toISOString() : undefined,
     allowLateSubmission: Boolean(task.allowLateSubmission),
     active: Boolean(task.active),
+    image: task.image,
+    priority: task.priority || "medium",
     createdAt: task.createdAt.toISOString(),
     updatedAt: task.updatedAt.toISOString(),
   };
@@ -96,7 +102,7 @@ export async function createTask(input: CreateTaskActionInput): Promise<TaskActi
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const { courseId, unitId, title, description, type, maxPoints, startDate, dueDate, allowLateSubmission, active } = validationResult.data;
+    const { courseId, unitId, title, description, type, maxPoints, startDate, dueDate, allowLateSubmission, active, image, priority } = validationResult.data;
 
     const [course, unit] = await Promise.all([
       Course.findById(courseId),
@@ -135,6 +141,8 @@ export async function createTask(input: CreateTaskActionInput): Promise<TaskActi
       dueDate: dueDate ?? undefined,
       allowLateSubmission: allowLateSubmission ?? false,
       active: active !== false,
+      image,
+      priority: priority || "medium",
       criteria: [],
     });
 
@@ -171,6 +179,8 @@ export async function updateTask(
     dueDate?: string;
     allowLateSubmission?: boolean;
     active?: boolean;
+    image?: string;
+    priority?: "low" | "medium" | "high";
   }
 ): Promise<TaskActionResult> {
   try {
@@ -226,6 +236,8 @@ export async function updateTask(
     if (data.dueDate !== undefined) task.dueDate = data.dueDate;
     if (data.allowLateSubmission !== undefined) task.allowLateSubmission = data.allowLateSubmission;
     if (data.active !== undefined) task.active = data.active;
+    if (data.image !== undefined) task.image = data.image;
+    if (data.priority !== undefined) task.priority = data.priority;
 
     task.updatedAt = new Date();
     await task.save();

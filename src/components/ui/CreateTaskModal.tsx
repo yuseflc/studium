@@ -16,6 +16,9 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
+    image: '',
+    dueDate: '',
+    priority: 'medium',
   });
 
   const openModal = () => {
@@ -31,6 +34,9 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
     setFormData({
       title: '',
       description: '',
+      image: '',
+      dueDate: '',
+      priority: 'medium',
     });
     setError('');
     setSuccess(false);
@@ -119,6 +125,52 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             required
             disabled={loading}
           />
+        </div>
+
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-bold text-warning/80">URL de la imagen</span>
+          </label>
+          <input
+            name="image"
+            type="url"
+            value={formData.image}
+            onChange={handleChange}
+            placeholder="https://ejemplo.com/imagen.jpg"
+            className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
+            disabled={loading}
+          />
+        </div>
+
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-bold text-warning/80">Fecha de entrega</span>
+          </label>
+          <input
+            name="dueDate"
+            type="datetime-local"
+            value={formData.dueDate}
+            onChange={handleChange}
+            className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
+            disabled={loading}
+          />
+        </div>
+
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text font-bold text-warning/80">Prioridad</span>
+          </label>
+          <select
+            name="priority"
+            value={formData.priority}
+            onChange={handleChange}
+            className="select w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
+            disabled={loading}
+          >
+            <option value="low">Baja</option>
+            <option value="medium">Media</option>
+            <option value="high">Alta</option>
+          </select>
         </div>
       </ModalForm>
     </>

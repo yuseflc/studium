@@ -21,6 +21,8 @@ export interface ITask {
   dueDate?: Date; // Fecha de entrega opcional
   allowLateSubmission: boolean; // Permite entregas tardías
   active: boolean; // Activa
+  image?: string; // URL o base64 de la imagen
+  priority?: "low" | "medium" | "high"; // Prioridad de la tarea
   createdAt: Date; // Fecha de creación
   updatedAt: Date; // Fecha de actualización
 }
@@ -101,6 +103,15 @@ const TaskSchema = new mongoose.Schema<ITask>(
     active: {
       type: Boolean,
       default: true, // Valor por defecto: true
+    },
+    image: {
+      type: String,
+      required: false,
+    },
+    priority: {
+      type: String,
+      enum: ["low", "medium", "high"],
+      default: "medium",
     },
   },
   {
