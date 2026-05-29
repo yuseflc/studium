@@ -37,7 +37,7 @@ const footerSections = [
         disabled: false,
         links: [
             { name: 'Darío MR', href: 'https://dmrstudio.dev/', disabled: false },
-            { name: 'Yusef', href: 'https://yuseflc.dev/', disabled: false },
+            { name: 'yuseflc', href: 'https://yuseflc.dev/', disabled: false },
             { name: 'David López', href: '#', disabled: false },
             { name: 'Eva Cantero', href: '#', disabled: false },
         ],
@@ -87,36 +87,12 @@ export const Footer = () => {
             <div className="my-3 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center md:items-center gap-4 text-sm text-neutral w-full max-w-5xl mx-auto">
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-8 items-center sm:items-center">
                     <p className="whitespace-nowrap">
-                        ©{currentYear} Studium. Todos los derechos reservados.
+                        ©{currentYear} Studium.
                     </p>
                     <div className="flex flex-row gap-4">
-                        <Link href="/legal/privacy-policy">Privacy Policy</Link>
-                        <Link href="/legal/tos">Terms &#38; Co</Link>
-                        <Link href="https://www.linkedin.com/in/radu-a-popescu/">
-                            Radu Popescu
-                        </Link>
+                        <Link href="/legal/privacy-policy">Política de Privacidad</Link>
+                        <Link href="/legal/tos">Términos &#38; Condiciones</Link>
                     </div>
-                </div>
-
-                <div className="flex gap-4 items-center">
-                    <a
-                        href="https://www.linkedin.com/in/radu-a-popescu/"
-                        target="_blank"
-                        rel="nofollow noopener"
-                        aria-label="Radu Popescu, Founder of ActivationLed Linkedin"
-                        className="hover:text-gray-900"
-                    >
-                        <IconBrandLinkedin className="w-5 h-5 fill-neutral" />
-                    </a>
-                    <a
-                        href="https://x.com/activation_guy"
-                        target="_blank"
-                        rel="nofollow noopener"
-                        aria-label="X (formerly Twitter)"
-                        className="hover:text-gray-900"
-                    >
-                        <IconBrandTwitter className="w-5 h-5 fill-neutral" />
-                    </a>
                 </div>
             </div>
         </footer>
