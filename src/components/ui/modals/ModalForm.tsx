@@ -40,7 +40,7 @@ export const ModalForm = ({
     className = "max-w-2xl"
 }: ModalFormProps) => {
     return (
-        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`bg-base-100 dark:bg-warning/5 border-base-200 dark:border-warning/30 p-6 backdrop-blur-md shadow-2xl ${className}`}>
+        <Modal id={id} dialogRef={dialogRef} onClose={onClose} className={`bg-base-100/60 dark:bg-warning/5 border-base-200 dark:border-warning/30 p-6 backdrop-blur-md shadow-2xl ${className}`}>
             <div className="flex justify-between items-center mb-6">
                 <h3 className="font-bold text-2xl text-base-content dark:text-warning">
                     {success ? "¡Completado!" : title}

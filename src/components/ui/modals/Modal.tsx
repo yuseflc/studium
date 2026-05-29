@@ -18,7 +18,7 @@ export interface ModalProps {
 export const Modal = ({ id, dialogRef, onClose, children, className = "max-w-2xl", showClose = false }: ModalProps) => {
     return (
         <dialog id={id} ref={dialogRef} className="modal">
-            <div className={`modal-box bg-base-100/80 text-base-content border border-base-200/60 shadow-2xl backdrop-blur-xl ${className}`}>
+            <div className={`modal-box bg-base-100/60 text-base-content border border-base-200/60 shadow-2xl backdrop-blur-xl ${className}`}>
                 {showClose && (
                     <button
                         onClick={onClose}
@@ -30,7 +30,7 @@ export const Modal = ({ id, dialogRef, onClose, children, className = "max-w-2xl
                 )}
                 {children}
             </div>
-            <form method="dialog" className="modal-backdrop backdrop-blur-sm">
+            <form method="dialog" className="modal-backdrop">
                 <button onClick={onClose}>cerrar</button>
             </form>
         </dialog>
