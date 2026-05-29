@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { ClipboardList, Calendar, ArrowLeft, Upload } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, Upload, Loader2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
+import { submitTask } from '@/app/actions/taskActions';
 
 interface TaskDetailClientProps {
   taskInfo: {
@@ -13,6 +14,11 @@ interface TaskDetailClientProps {
     maxPoints?: number;
   };
   courseid: string;
+  existingSubmission?: {
+    content: string;
+    files: string[];
+    submittedAt: Date;
+  };
 }
 
 /**
@@ -23,18 +29,41 @@ interface TaskDetailClientProps {
  * entrega a la derecha.
  *
 */
-export default function TaskDetailClient({ taskInfo, courseid }: TaskDetailClientProps) {
-  // Estado local del componente:
-  // - `status`: fijo en 'pending' por ahora; la lógica de envío se implementará en el futuro.
-  // - `submissionText`: texto escrito por el alumno como entrega.
-  // - `selectedFile`: archivo adjuntado por el alumno (si existe).
-  const status = 'pending' as const;
-  const [submissionText, setSubmissionText] = useState('');
+export default function TaskDetailClient({ taskInfo, courseid, existingSubmission }: TaskDetailClientProps) {
+  // Estado local del componente
+  const [submissionText, setSubmissionText] = useState(existingSubmission?.content || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(!!existingSubmission);
+  const [error, setError] = useState<string | null>(null);
 
-  // Nota: la lógica de envío y anulación se elimina temporalmente; se implementará
-  // en el futuro conectando con el backend. Por ahora el formulario es estático
-  // y el botón de envío está deshabilitado para evitar comportamientos inesperados.
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData(form);
+      
+      // Aseguramos que el taskId esté presente
+      formData.set('taskId', taskInfo._id || '');
+      // El content y file ya deberían estar por los nombres de los inputs 'name="content"' y 'name="file"'
+
+      const result = await submitTask(formData);
+
+      if (result.success) {
+        setIsSubmitted(true);
+      } else {
+        setError(result.error || 'Error al entregar la tarea');
+      }
+    } catch (err) {
+      setError('Ocurrió un error inesperado');
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="w-full min-h-[calc(100vh-64px)] bg-base-200/40 p-4 sm:p-6 lg:h-[calc(100vh-64px)] lg:overflow-hidden">
@@ -57,9 +86,15 @@ export default function TaskDetailClient({ taskInfo, courseid }: TaskDetailClien
                 (entregado / pendiente) no está implementada y se hará
                 en el futuro cuando se integre con el backend. */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                <Upload size={12} /> Pendiente
-              </span>
+              {isSubmitted ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 shadow-sm">
+                  <CheckCircle2 size={12} /> Entregado
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider bg-warning/10 text-warning border border-warning/20 shadow-sm">
+                  <Upload size={12} /> Pendiente
+                </span>
+              )}
             </div>
           </div>
 
@@ -108,67 +143,114 @@ export default function TaskDetailClient({ taskInfo, courseid }: TaskDetailClien
           <div className="lg:col-span-5 flex flex-col min-h-0 h-full">
             <div className="card bg-base-100 shadow-md border border-base-300 h-full flex flex-col overflow-hidden">
               <div className="card-body p-5 sm:p-6 flex flex-col justify-between h-full min-h-0">
-                {/* Formulario de entrega: textarea + input file. El envío aún no está implementado. */}
-                <form className="flex flex-col h-full justify-between min-h-0">
+                {/* Formulario de entrega: textarea + input file */}
+                <form onSubmit={handleSubmit} className="flex flex-col h-full justify-between min-h-0">
                   <div className="flex flex-col min-h-0">
                     <div className="flex items-center gap-3 mb-4">
                       <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                        <Upload size={24} />
+                        {isSubmitted ? <CheckCircle2 size={24} className="text-success" /> : <Upload size={24} />}
                       </div>
-                      <h2 className="card-title text-xl font-bold text-base-content">Tu Entrega</h2>
+                      <h2 className="card-title text-xl font-bold text-base-content">
+                        {isSubmitted ? "Tarea Entregada" : "Tu Entrega"}
+                      </h2>
                     </div>
 
                     <div className="divider my-0"></div>
 
                     {/* Contenido compacto con instrucciones y controles */}
                     <div className="mt-4 space-y-4">
-                      <p className="text-sm text-base-content/70">
-                        Escribe tu respuesta a continuación y adjunta cualquier documento necesario para completar la tarea.
-                      </p>
+                      {isSubmitted ? (
+                        <div className="bg-success/5 border border-success/20 rounded-xl p-4 space-y-3">
+                          <p className="text-sm text-success font-medium flex items-center gap-2">
+                            <CheckCircle2 size={16} /> ¡Tu tarea ha sido enviada con éxito!
+                          </p>
+                          <div className="text-sm text-base-content/70 italic">
+                            "{submissionText}"
+                          </div>
+                          {existingSubmission?.files && existingSubmission.files.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {existingSubmission.files.map((file, idx) => (
+                                <a 
+                                  key={idx} 
+                                  href={file} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="btn btn-xs btn-outline btn-success"
+                                >
+                                  Ver archivo {idx + 1}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <>
+                          <p className="text-sm text-base-content/70">
+                            Escribe tu respuesta a continuación y adjunta cualquier documento necesario para completar la tarea.
+                          </p>
 
-                      {/* Textarea para la respuesta escrita */}
-                      <div className="form-control w-full">
-                        <label className="label py-1">
-                          <span className="label-text font-semibold text-sm">Respuesta Escrita</span>
-                        </label>
-                        <textarea
-                          placeholder="Escribe aquí tu respuesta o comentarios para el profesor..."
-                          className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
-                          value={submissionText}
-                          onChange={(e) => setSubmissionText(e.target.value)}
-                        />
-                      </div>
+                          {/* Textarea para la respuesta escrita */}
+                          <div className="form-control w-full">
+                            <label className="label py-1">
+                              <span className="label-text font-semibold text-sm">Respuesta Escrita</span>
+                            </label>
+                            <textarea
+                              placeholder="Escribe aquí tu respuesta o comentarios para el profesor..."
+                              className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
+                              value={submissionText}
+                              onChange={(e) => setSubmissionText(e.target.value)}
+                              disabled={isSubmitting}
+                            />
+                          </div>
 
-                      {/* Input para adjuntar archivo; se muestra el nombre y tamaño si existe */}
-                      <div className="form-control w-full">
-                        <label className="label py-1">
-                          <span className="label-text font-semibold text-sm">Adjuntar Archivo de Trabajo</span>
-                        </label>
-                        <input
-                          type="file"
-                          className="file-input file-input-bordered file-input-primary w-full text-sm bg-base-100"
-                          onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                        />
-                        {selectedFile && (
-                          <span className="text-xs text-success font-medium mt-1.5 block truncate">
-                            Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                          </span>
-                        )}
-                      </div>
+                          {/* Input para adjuntar archivo; se muestra el nombre y tamaño si existe */}
+                          <div className="form-control w-full">
+                            <label className="label py-1">
+                              <span className="label-text font-semibold text-sm">Adjuntar Archivo de Trabajo</span>
+                            </label>
+                            <input
+                              type="file"
+                              name="file"
+                              className="file-input file-input-bordered file-input-primary w-full text-sm bg-base-100"
+                              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                              disabled={isSubmitting}
+                            />
+                            {selectedFile && (
+                              <span className="text-xs text-success font-medium mt-1.5 block truncate">
+                                Archivo: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )}
+
+                      {error && (
+                        <div className="alert alert-error text-xs p-2 rounded-lg">
+                          <span>{error}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
 
-                  {/* Pie del formulario con botón de envío; la acción de envío aún no está
-                          implementada en el backend, pero mantenemos el botón visible y activo.
-                          Se estiliza en amarillo (warning) según el requerimiento. */}
-                  <div className="pt-4 border-t border-base-300 mt-4 flex justify-end flex-shrink-0">
-                    <button
-                      type="button"
-                      className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200"
-                    >
-                      Entregar Tarea
-                    </button>
-                  </div>
+                  {/* Pie del formulario con botón de envío */}
+                  {!isSubmitted && (
+                    <div className="pt-4 border-t border-base-300 mt-4 flex justify-end flex-shrink-0">
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
+                        className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200"
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <Loader2 size={18} className="animate-spin mr-2" />
+                            Entregando...
+                          </>
+                        ) : (
+                          'Entregar Tarea'
+                        )}
+                      </button>
+                    </div>
+                  )}
                 </form>
               </div>
             </div>

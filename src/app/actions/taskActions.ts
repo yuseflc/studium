@@ -9,6 +9,8 @@ import Course from "@/models/Course";
 import Subject from "@/models/Subject";
 import Task from "@/models/Task";
 import User from "@/models/User";
+import Submission from "@/models/Submission";
+import { uploadToR2 } from "@/lib/r2";
 import {
   createTaskSchema,
   updateTaskSchema,
@@ -344,6 +346,106 @@ export async function deleteTask(taskId: string): Promise<TaskActionResult> {
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al eliminar la tarea";
     LOGGER.error({ error }, "Error deleting task from action");
+    return { success: false, error: message };
+  }
+}
+
+/**
+ * Entrega una tarea subiendo archivos a R2 si es necesario
+ */
+export async function submitTask(formData: FormData): Promise<{ success: boolean; error?: string; submissionId?: string }> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const taskId = formData.get("taskId") as string;
+    const content = formData.get("content") as string;
+    const file = formData.get("file") as File | null;
+
+    console.log("SubmitTask Action:", {
+      taskId,
+      hasContent: !!content,
+      fileName: file?.name,
+      fileSize: file?.size
+    });
+
+    if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+      return { success: false, error: "ID de tarea inválido" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return { success: false, error: "Tarea no encontrada" };
+    }
+
+    let fileUrls: string[] = [];
+
+    if (file && file.size > 0) {
+      try {
+        console.log("Iniciando subida a R2...", { name: file.name, type: file.type, size: file.size });
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const timestamp = Date.now();
+        const safeFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+        const key = `submissions/${taskId}/${currentUser._id}-${timestamp}-${safeFileName}`;
+        
+        const uploadedUrl = await uploadToR2(buffer, key, file.type);
+        console.log("Subida exitosa a R2:", uploadedUrl);
+        fileUrls.push(uploadedUrl);
+      } catch (uploadError: any) {
+        console.error("ERROR DETALLADO R2:", {
+          message: uploadError.message,
+          code: uploadError.code,
+          stack: uploadError.stack,
+          name: uploadError.name
+        });
+        LOGGER.error({ uploadError, taskId, userId: currentUser._id }, "Error uploading file to R2");
+        return { success: false, error: `Error de conexión con R2: ${uploadError.message}` };
+      }
+    }
+
+    // Guardar o actualizar la entrega
+    // El modelo Submission tiene un índice único por { taskId, studentId }
+    const updateData: any = {
+      content: content || "",
+      submissionStatus: "submitted",
+      submittedAt: new Date(),
+    };
+
+    if (fileUrls.length > 0) {
+      updateData.$push = { files: { $each: fileUrls } };
+    }
+
+    const submission = await Submission.findOneAndUpdate(
+      { taskId: new mongoose.Types.ObjectId(taskId), studentId: currentUser._id },
+      updateData,
+      { upsert: true, new: true }
+    );
+
+    LOGGER.info(
+      {
+        taskId,
+        studentId: currentUser._id.toString(),
+        submissionId: submission._id.toString(),
+      },
+      "Tarea entregada con éxito"
+    );
+
+    return { 
+      success: true, 
+      submissionId: submission._id.toString() 
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al entregar la tarea";
+    LOGGER.error({ error }, "Error submitting task from action");
     return { success: false, error: message };
   }
 }
