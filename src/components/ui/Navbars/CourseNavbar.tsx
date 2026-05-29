@@ -9,7 +9,7 @@ import { User } from "@/models/index";
 import LogoutButton from "./LogoutButton";
 import ProfileImage from "./ProfileImage";
 import { LOGGER } from "@/config/logger";
-import Logo from "./Logo";
+import Logo from "../Logo";
 
 /**
  * server-hoist-static-io: Lista de cursos disponibles hoisted a nivel de módulo.

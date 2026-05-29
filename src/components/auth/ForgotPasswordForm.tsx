@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { IconMail, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import Link from 'next/link';
-import Logo from '@/components/ui/Navbars/Logo';
+import Logo from '@/components/ui/Logo';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');

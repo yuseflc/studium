@@ -16,7 +16,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 import Link from 'next/link'; // Navegación interna sin recargar la página
-import Logo from '@/components/ui/Navbars/Logo';
+import Logo from '@/components/ui/Logo';
 
 
 export default function LoginForm() {

@@ -1,4 +1,4 @@
-import CourseNavbar from "@/components/ui/Navbars/CourseNavbar";
+import CourseNavbar from "@/components/ui/navbars/CourseNavbar";
 
 export default function DetailedCourseLayout({
   children,

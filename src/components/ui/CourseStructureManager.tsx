@@ -1,97 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useCallback, type Dispatch, type FormEvent, type SetStateAction } from "react";
+import HoldConfirmButton from "@/components/ui/HoldConfirmButton";
 
-/** Duración en ms que hay que sostener el botón para confirmar */
-const HOLD_DURATION_MS = 3000;
-
-function HoldConfirmButton({ 
-  onConfirm, 
-  disabled, 
-  children,
-  className = ""
-}: { 
-  onConfirm: () => void; 
-  disabled?: boolean; 
-  children: React.ReactNode;
-  className?: string;
-}) {
-  const [progress, setProgress] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-  const pressingRef = useRef(false);
-
-  const cancel = useCallback(() => {
-    if (!pressingRef.current) return;
-    pressingRef.current = false;
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    startRef.current = null;
-    setProgress(0);
-  }, []);
-
-  const tick = useCallback(() => {
-    if (!pressingRef.current || startRef.current === null) return;
-    const elapsed = Date.now() - startRef.current;
-    const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
-    setProgress(p);
-    if (p >= 1) {
-      pressingRef.current = false;
-      rafRef.current = null;
-      startRef.current = null;
-      setProgress(0); // Reiniciar al confirmar
-      onConfirm();
-      return;
-    }
-    rafRef.current = requestAnimationFrame(tick);
-  }, [onConfirm]);
-
-  const start = useCallback(() => {
-    if (pressingRef.current || disabled) return;
-    pressingRef.current = true;
-    startRef.current = Date.now();
-    rafRef.current = requestAnimationFrame(tick);
-  }, [tick, disabled]);
-
-  useEffect(() => () => {
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const isActive = progress > 0;
-
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      className={`relative overflow-hidden select-none touch-none transition-colors ${className}`}
-      style={{
-        userSelect: "none",
-        color: isActive ? "white" : undefined,
-      }}
-      onMouseDown={(e) => { if (e.button === 0) start(); }}
-      onMouseUp={cancel}
-      onMouseLeave={cancel}
-      onTouchStart={(e) => { e.preventDefault(); start(); }}
-      onTouchEnd={cancel}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      {/* Capa de relleno rojo */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 bg-red-700 origin-left"
-        style={{
-          transform: `scaleX(${progress})`,
-          transition: "none",
-        }}
-      />
-      <span className="relative z-10 flex items-center justify-center gap-2">
-        {isActive ? "Suelta para cancelar" : children}
-      </span>
-    </button>
-  );
-}
 import {
   ArrowDown,
   ArrowUp,
@@ -115,7 +26,8 @@ import {
   CourseUnitModal, 
   CourseResourceModal, 
   CourseTaskModal, 
-  ModalForm 
+  ModalForm,
+  CourseStructureDeleteModal
 } from "./modals";
 import {
   createSubject,
@@ -1199,38 +1111,17 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       )}
 
       {canEdit && deleteTarget && (
-        <dialog className="modal modal-open">
-          <div className="modal-box border border-error/20">
-            <h3 className="font-bold text-lg text-error">Eliminar {deleteTarget.kind === "subject" ? "materia" : deleteTarget.kind === "unit" ? "unidad" : deleteTarget.kind === "resource" ? "recurso" : "tarea"}</h3>
-            <p className="py-4">
-              Vas a eliminar <span className="font-semibold">{deleteTarget.title}</span>. Esta acción no se puede deshacer.
-            </p>
-            {errorMessage && <div className="alert alert-error mb-4 text-sm"><span>{errorMessage}</span></div>}
-            <div className="modal-action">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={() => {
-                  setDeleteTarget(null);
-                  setErrorMessage(null);
-                }}
-                disabled={isSubmitting}
-              >
-                Cancelar
-              </button>
-              <HoldConfirmButton
-                className="btn btn-error text-white"
-                onConfirm={confirmDelete}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Eliminando..." : "Eliminar"}
-              </HoldConfirmButton>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button type="button" onClick={() => setDeleteTarget(null)}>close</button>
-          </form>
-        </dialog>
+        <CourseStructureDeleteModal
+          title={deleteTarget.title}
+          kind={deleteTarget.kind}
+          onClose={() => {
+            setDeleteTarget(null);
+            setErrorMessage(null);
+          }}
+          onConfirm={confirmDelete}
+          isLoading={isSubmitting}
+          error={errorMessage}
+        />
       )}
     </div>
   );

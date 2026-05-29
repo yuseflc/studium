@@ -4,107 +4,9 @@ import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";
 import JoinCourseButton from "@/components/ui/JoinCourseButton";
-import { ModalAdvise } from "@/components/ui/modals";
+import { ModalAdvise, CourseMenuDeleteModal } from "@/components/ui/modals";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
-
-/** Duración en ms que hay que sostener el botón para eliminar el curso */
-const HOLD_DURATION_MS = 3000;
-
-/**
- * HoldDeleteButton
- *
- * Botón de eliminar que requiere mantener pulsado 3 segundos.
- * El fondo rojo avanza de izquierda a derecha (clip-path) como feedback visual.
- * Si se suelta antes, el progreso se reinicia a 0 sin ejecutar ninguna acción.
- */
-function HoldDeleteButton({ onDelete, isDeleting }: { onDelete: () => void; isDeleting: boolean }) {
-  const [progress, setProgress] = useState(0);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
-  const pressingRef = useRef(false);
-
-  const cancel = useCallback(() => {
-    if (!pressingRef.current) return;
-    pressingRef.current = false;
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    startRef.current = null;
-    setProgress(0);
-  }, []);
-
-  const tick = useCallback(() => {
-    if (!pressingRef.current || startRef.current === null) return;
-    const elapsed = Date.now() - startRef.current;
-    const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
-    setProgress(p);
-    if (p >= 1) {
-      pressingRef.current = false;
-      rafRef.current = null;
-      startRef.current = null;
-      onDelete();
-      return;
-    }
-    rafRef.current = requestAnimationFrame(tick);
-  }, [onDelete]);
-
-  const start = useCallback(() => {
-    if (pressingRef.current || isDeleting) return;
-    pressingRef.current = true;
-    startRef.current = Date.now();
-    rafRef.current = requestAnimationFrame(tick);
-  }, [tick, isDeleting]);
-
-  // Limpiar RAF al desmontar
-  useEffect(() => () => {
-    if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-  }, []);
-
-  const isActive = progress > 0;
-
-  return (
-    <button
-      type="button"
-      disabled={isDeleting}
-      aria-label="Mantén pulsado 3 segundos para eliminar el curso"
-      className="relative flex items-center justify-center gap-2 w-full h-12 px-4 rounded-lg text-sm font-bold select-none touch-none overflow-hidden transition-colors border border-error bg-base-100"
-      style={{
-        // Color de texto: blanco cuando hay progreso (sobre el fondo rojo), rojo cuando está en reposo
-        color: isActive || isDeleting ? "white" : "oklch(var(--er))",
-        cursor: isDeleting ? "wait" : "pointer",
-        userSelect: "none",
-      }}
-      onMouseDown={(e) => { if (e.button === 0) start(); }}
-      onMouseUp={cancel}
-      onMouseLeave={cancel}
-      onTouchStart={(e) => { e.preventDefault(); start(); }}
-      onTouchEnd={cancel}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      {/* Capa de relleno rojo que crece de izquierda a derecha */}
-      <span
-        aria-hidden="true"
-        className="absolute inset-0 bg-red-700 origin-left rounded-lg"
-        style={{
-          transform: `scaleX(${progress})`,
-          transition: "none",
-        }}
-      />
-
-      {/* Contenido encima del relleno */}
-      <span className="relative flex items-center gap-2">
-        {isDeleting ? (
-          <span className="loading loading-spinner loading-xs" />
-        ) : (
-          <IconTrash size={16} />
-        )}
-        {isDeleting ? "Eliminando..." : isActive ? "Suelta para cancelar" : "Mantén para eliminar"}
-      </span>
-    </button>
-  );
-}
 
 export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
   const [courses, setCourses] = useState<SerializedCourse[]>([]);
@@ -349,54 +251,15 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
 
       {/* Modal para confirmar eliminación con pulsación de 3s */}
       {courseToDelete && (
-        <dialog className="modal modal-open">
-          <div className="modal-box backdrop-blur-md border border-error/20 bg-base-100">
-            <h3 className="font-bold text-lg text-error flex items-center gap-2 mb-2">
-              <IconTrash size={22} /> Eliminar curso
-            </h3>
-
-            {deleteError && (
-              <div className="alert alert-error text-sm py-2 mb-4">
-                {deleteError}
-              </div>
-            )}
-
-            <p className="py-2">
-              ¿Estás seguro de que quieres eliminar este curso permanentemente? Se borrarán todos sus contenidos y tareas.
-            </p>
-            <p className="py-2 font-medium text-warning text-sm">
-              Para confirmar, mantén pulsado el botón rojo durante 3 segundos.
-            </p>
-
-            <div className="modal-action mt-6 flex items-center justify-end gap-3">
-              <button
-                className="btn btn-ghost"
-                onClick={() => setCourseToDelete(null)}
-                type="button"
-                disabled={deletingId !== null}
-              >
-                Cancelar
-              </button>
-              <div className="w-56">
-                <HoldDeleteButton
-                  onDelete={() => handleDeleteCourse(courseToDelete)}
-                  isDeleting={deletingId === courseToDelete}
-                />
-              </div>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button
-              onClick={() => {
-                if (deletingId === null) setCourseToDelete(null);
-              }}
-              type="button"
-              disabled={deletingId !== null}
-            >
-              cerrar
-            </button>
-          </form>
-        </dialog>
+        <CourseMenuDeleteModal
+          courseTitle={courses.find((c) => c._id === courseToDelete)?.title || ""}
+          isDeleting={deletingId === courseToDelete}
+          onClose={() => {
+            if (deletingId === null) setCourseToDelete(null);
+          }}
+          onConfirm={() => handleDeleteCourse(courseToDelete)}
+          error={deleteError}
+        />
       )}
     </main>
   );

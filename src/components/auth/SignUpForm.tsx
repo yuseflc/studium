@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import Logo from '@/components/ui/Navbars/Logo';
+import Logo from '@/components/ui/Logo';
 import { FormInput } from './FormInput';
 import { PasswordInput } from './PasswordInput';
 import { validators } from './validatorConfig';

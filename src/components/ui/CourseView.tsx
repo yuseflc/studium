@@ -4,145 +4,6 @@ import { useEffect, useMemo, useState, useRef, useCallback, type Dispatch, type 
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 
-/** Duración en ms que hay que sostener el botón para confirmar */
-const HOLD_DURATION_MS = 3000; 
-
-/**
- * COMPONENTE: Botón de confirmación con "hold to confirm"
- * 
- * Lo usamos para acciones peligrosas como eliminar un curso.
- * El usuario debe mantener presionado 3 segundos para ejecutar la acción.
- * Si suelta antes, se cancela. Muestra una barra de progreso roja.
- */
-function HoldConfirmButton({ 
-  onConfirm,   
-  disabled,    
-  children,    
-  className = ""
-}: { 
-  onConfirm: () => void; 
-  disabled?: boolean; 
-  children: React.ReactNode;
-  className?: string;
-}) {
-  // progress: 0 = sin presionar, 1 = completamente presionado (acción ejecutada)
-  const [progress, setProgress] = useState(0);
-  
-  // Referencias para no perder valores entre renders y no causar re-renders innecesarios
-  const rafRef = useRef<number | null>(null); 
-  const startRef = useRef<number | null>(null); 
-  const pressingRef = useRef(false); 
-
-  /**
-   * Cancela el progreso actual.
-   * Se llama cuando el usuario suelta el botón, sale del área o se cancela la acción.
-   */
-  const cancel = useCallback(() => {
-    if (!pressingRef.current) return; // si no está presionado, no hago nada
-    
-    pressingRef.current = false;
-    
-    // Detengo la animación si existe
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    
-    // Reseteo timestamps y progreso visual
-    startRef.current = null;
-    setProgress(0);
-  }, []);
-
-  /**
-   * Actualiza el progreso mientras se mantiene presionado.
-   * Se llama recursivamente con requestAnimationFrame para una animación suave.
-   */
-  const tick = useCallback(() => {
-    // Si ya no está presionado o no tengo timestamp de inicio, salgo
-    if (!pressingRef.current || startRef.current === null) return;
-    
-    // Calculo cuánto tiempo ha pasado desde que empezó a presionar
-    const elapsed = Date.now() - startRef.current;
-    // Calculo el progreso (0 a 1), no puede pasar de 1
-    const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
-    setProgress(p);
-    
-    // Si llegó a 1 (completó los 3 segundos)
-    if (p >= 1) {
-      // Reseteo el estado interno
-      pressingRef.current = false;
-      rafRef.current = null;
-      startRef.current = null;
-      setProgress(0); // reinicio visual antes de ejecutar la acción
-      onConfirm(); // EJECUTO LA ACCIÓN PELIGROSA
-      return;
-    }
-    
-    // Si no completó, sigo animando en el próximo frame
-    rafRef.current = requestAnimationFrame(tick);
-  }, [onConfirm]);
-
-  /**
-   * Inicia el contador de presión.
-   * Se llama cuando el usuario hace click/touch sobre el botón.
-   */
-  const start = useCallback(() => {
-    // Si ya está presionado o el botón está deshabilitado, ignoro
-    if (pressingRef.current || disabled) return;
-    
-    pressingRef.current = true;
-    startRef.current = Date.now(); // guardo el momento exacto en que empezó a presionar
-    rafRef.current = requestAnimationFrame(tick); // arranco la animación
-  }, [tick, disabled]);
-
-  /**
-   * Limpieza al desmontar el componente.
-   * Muy importante para evitar memory leaks con animaciones.
-   */
-  useEffect(() => {
-    return () => {
-      if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
-    };
-  }, []);
-
-  const isActive = progress > 0; // si hay progreso activo, cambio el texto del botón
-
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      className={`relative overflow-hidden select-none touch-none transition-colors ${className}`}
-      style={{
-        userSelect: "none", // evito que se seleccione texto accidentalmente
-        color: isActive ? "white" : undefined, // cuando está activo, texto blanco
-      }}
-      // Eventos para mouse
-      onMouseDown={(e) => { if (e.button === 0) start(); }} // solo botón izquierdo
-      onMouseUp={cancel}
-      onMouseLeave={cancel} // si el mouse sale del botón mientras presiona, cancelo
-      // Eventos para touch (móvil)
-      onTouchStart={(e) => { e.preventDefault(); start(); }} // evito scroll mientras presiona
-      onTouchEnd={cancel}
-      // Evito menú contextual al hacer click derecho
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      {/* Capa de relleno rojo que crece horizontalmente según el progreso */}
-      <span
-        aria-hidden="true" // solo decorativo, no lo leen lectores de pantalla
-        className="absolute inset-0 bg-red-700 origin-left"
-        style={{
-          transform: `scaleX(${progress})`, // escala de 0 a 1 en el eje X
-          transition: "none", // sin transición porque yo controlo la animación con RAF
-        }}
-      />
-      {/* Contenido real del botón, por encima de la capa roja */}
-      <span className="relative z-10 flex items-center justify-center gap-2">
-        {isActive ? "Suelta para cancelar" : children}
-      </span>
-    </button>
-  );
-}
-
 // Importación de íconos de lucide-react
 import {
   BookOpen,        
@@ -162,7 +23,7 @@ import {
 } from "lucide-react";
 
 // Componentes internos del curso
-import CourseSidebar from "./Navbars/CourseSidebar"; 
+import CourseSidebar from "./navbars/CourseSidebar"; 
 import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
 import CourseParticipants from "./CourseParticipants"; 
 import CourseInviteCodesManager from "./CourseInviteCodesManager";
@@ -182,7 +43,13 @@ import {
 } from "@/app/actions/courseActions";
 
 // Modales reutilizables con efecto blur
-import { ModalAdvise } from "@/components/ui/modals";
+import { 
+  ModalAdvise,
+  CourseVisibilityModal,
+  CourseTransferModal,
+  CourseArchiveModal,
+  CourseDeleteModal 
+} from "@/components/ui/modals";
 
 /**
  * PROPS DEL COMPONENTE PRINCIPAL
@@ -1183,144 +1050,46 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         />
       )}
 
-      {/* ========== MODALES DE CONFIRMACIÓN (con backdrop blur) ========== */}
+      {/* ========== MODALES DE CONFIRMACIÓN (utilizando componentes centralizados) ========== */}
 
       {/* Modal: Confirmar cambio de visibilidad */}
       {showVisibilityModal && (
-        <dialog className="modal modal-open">
-          <div className="modal-box backdrop-blur-md">
-            <h3 className="font-bold text-lg">Cambiar visibilidad del curso</h3>
-            <p className="py-4">
-              ¿Estás seguro de que quieres {status === "active" ? "cambiar el curso a borrador" : "publicar el curso"}?
-              {status === "active"
-                ? " Los estudiantes ya no podrán acceder al curso."
-                : " Los estudiantes podrán ver y acceder al contenido."}
-            </p>
-            <div className="modal-action">
-              <button className="btn" onClick={() => setShowVisibilityModal(false)} type="button">
-                Cancelar
-              </button>
-              <button className="btn btn-primary" onClick={handleChangeVisibility} type="button">
-                {status === "active" ? "Cambiar a Borrador" : "Publicar curso"}
-              </button>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowVisibilityModal(false)} type="button">
-              cerrar
-            </button>
-          </form>
-        </dialog>
+        <CourseVisibilityModal
+          status={status}
+          onClose={() => setShowVisibilityModal(false)}
+          onConfirm={handleChangeVisibility}
+        />
       )}
 
-      {/* Modal: Transferir propiedad (con input de email) */}
+      {/* Modal: Transferir propiedad */}
       {showTransferModal && (
-        <dialog className="modal modal-open">
-          <div className="modal-box backdrop-blur-md">
-            <h3 className="font-bold text-lg">Transferir propiedad</h3>
-            <p className="py-2">Ingresa el email del nuevo propietario:</p>
-            <input
-              type="email"
-              placeholder="email@ejemplo.com"
-              value={transferEmail}
-              onChange={(e) => setTransferEmail(e.target.value)}
-              className="input input-bordered w-full mt-2"
-            />
-            <p className="text-sm text-base-content/60 mt-2">
-              Esta acción es irreversible. El nuevo propietario recibirá una notificación.
-            </p>
-            <div className="modal-action">
-              <button className="btn" onClick={() => setShowTransferModal(false)} type="button">
-                Cancelar
-              </button>
-              <button className="btn btn-primary" onClick={handleTransferOwnership} disabled={!transferEmail} type="button">
-                Transferir
-              </button>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowTransferModal(false)} type="button">
-              cerrar
-            </button>
-          </form>
-        </dialog>
+        <CourseTransferModal
+          transferEmail={transferEmail}
+          setTransferEmail={setTransferEmail}
+          onClose={() => setShowTransferModal(false)}
+          onConfirm={handleTransferOwnership}
+        />
       )}
 
       {/* Modal: Confirmar archivado */}
       {showArchiveModal && (
-        <dialog className="modal modal-open">
-          <div className="modal-box backdrop-blur-md">
-            <h3 className="font-bold text-lg">Archivar curso</h3>
-            <p className="py-4">
-              ¿Estás seguro de que quieres archivar este curso? Los estudiantes ya no podrán acceder al contenido,
-              pero podrás restaurarlo más tarde.
-            </p>
-            <div className="modal-action">
-              <button className="btn" onClick={() => setShowArchiveModal(false)} type="button">
-                Cancelar
-              </button>
-              <button className="btn btn-warning" onClick={handleArchiveCourse} type="button">
-                Archivar curso
-              </button>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowArchiveModal(false)} type="button">
-              cerrar
-            </button>
-          </form>
-        </dialog>
+        <CourseArchiveModal
+          onClose={() => setShowArchiveModal(false)}
+          onConfirm={handleArchiveCourse}
+        />
       )}
 
-      {/* Modal: Eliminar curso (con confirmación de texto + hold button) */}
+      {/* Modal: Eliminar curso */}
       {showDeleteModal && (
-        <dialog className="modal modal-open">
-          <div className="modal-box backdrop-blur-md">
-            <h3 className="font-bold text-lg text-error">Eliminar curso</h3>
-            <p className="py-4">
-              Esta acción es irreversible. ¿Estás absolutamente seguro?
-              Se perderá todo el contenido, tareas, calificaciones y datos de participantes.
-            </p>
-            <p className="text-sm font-semibold">Escribe "ELIMINAR" para confirmar:</p>
-            <input
-              type="text"
-              className="input input-bordered w-full mt-2"
-              value={deleteConfirmationText}
-              onChange={(e) => setDeleteConfirmationText(e.target.value)}
-            />
-            <div className="modal-action">
-              <button
-                className="btn"
-                onClick={() => {
-                  setShowDeleteModal(false);
-                  setDeleteConfirmationText("");
-                }}
-                type="button"
-              >
-                Cancelar
-              </button>
-              {/* Botón de hold que solo se habilita si el texto es exactamente "ELIMINAR" */}
-              <HoldConfirmButton
-                className="btn btn-error text-white"
-                onConfirm={handleDeleteCourse}
-                disabled={deleteConfirmationText !== "ELIMINAR"}
-              >
-                Eliminar permanentemente
-              </HoldConfirmButton>
-            </div>
-          </div>
-          <form method="dialog" className="modal-backdrop">
-            <button
-              onClick={() => {
-                setShowDeleteModal(false);
-                setDeleteConfirmationText("");
-              }}
-              type="button"
-            >
-              cerrar
-            </button>
-          </form>
-        </dialog>
+        <CourseDeleteModal
+          deleteConfirmationText={deleteConfirmationText}
+          setDeleteConfirmationText={setDeleteConfirmationText}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setDeleteConfirmationText("");
+          }}
+          onConfirm={handleDeleteCourse}
+        />
       )}
 
       {/* ========== MODALES DE RESULTADO (reemplazan alerts nativos) ========== */}

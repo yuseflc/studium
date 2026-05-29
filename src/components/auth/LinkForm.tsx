@@ -7,7 +7,7 @@ import { IconEye, IconEyeOff } from '@tabler/icons-react';
 // Componente SVG de Google optimizado para accesibilidad y bundle
 
 import Link from 'next/link'; // Navegación interna sin recargar la página
-import Logo from '@/components/ui/Navbars/Logo';
+import Logo from '@/components/ui/Logo';
 
 
 export default function LinkForm() {

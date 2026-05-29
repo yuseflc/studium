@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { IconList } from "@tabler/icons-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import Logo from "./Logo";
+import Logo from "../Logo";
 
 export default function Navbar() {
 

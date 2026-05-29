@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Logo from '@/components/ui/Navbars/Logo'
+import Logo from '@/components/ui/Logo'
 
 import { IconBrandLinkedin, IconBrandTwitter } from "@tabler/icons-react";
 
