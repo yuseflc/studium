@@ -3,9 +3,6 @@ export default function Pricing() {
         <section id="pricing" className="bg-base-100 py-24">
             <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
                 <div className="max-w-3xl text-center mx-auto">
-                    <span className="inline-flex rounded-full bg-secondary/10 px-4 py-1 text-sm font-semibold uppercase tracking-[0.32em] text-secondary">
-                        Planes y precios
-                    </span>
                     <h2 className="mt-6 text-4xl md:text-5xl font-bold text-base-content tracking-tight">
                         Elige el plan que se adapte a tu ritmo de aprendizaje
                     </h2>
@@ -141,11 +138,6 @@ export default function Pricing() {
                     </div>
                 </div>
 
-                <div className="mx-auto mt-10 max-w-3xl rounded-[2rem] border border-base-200 bg-base-200 p-8 text-center">
-                    <p className="text-base-content/70">
-                        ¿No estás seguro cuál plan elegir? Prueba gratis y escala cuando necesites más funciones. Todos los planes incluyen acceso continuo a tus cursos y tareas.
-                    </p>
-                </div>
             </div>
         </section>
     );

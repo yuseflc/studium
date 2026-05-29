@@ -1,45 +1,98 @@
 
-# Studium — Plataforma educativa moderna
+# Studium. | Plataforma Educativa Moderna
 
-**Descripción general:**
-- **Proyecto:** Aplicación web frontend para una plataforma educativa moderna llamada Studium.
-- **Objetivo:** Proveer una experiencia de aprendizaje en línea modular, accesible y responsiva, con soporte para cursos, lecciones y rutas de navegación por contenido.
+**Studium** es una solución integral para la gestión del aprendizaje (LMS) diseñada para ser modular, escalable y visualmente atractiva. Permite a educadores gestionar cursos, unidades y tareas, mientras proporciona a los estudiantes una experiencia de usuario fluida y reactiva.
 
-**Características principales:**
-- Interfaz basada en Next.js con enrutado por carpetas.
-- Componentes modulares reutilizables y diseño responsivo.
-- Soporte para secciones de curso, navegación y proveedores de tema.
+---
 
-**Tecnologías:**
-- **Framework:** `Next.js` (React) — renderizado híbrido y rutas basadas en archivos.
-- **Lenguaje:** `TypeScript` — tipado estático para mayor robustez.
-- **Estilos:** `CSS`/`PostCSS` — arquitectura de estilos modular.
-- **Bundler / Configuración:** configuración estándar de Next.js y `package.json` para scripts.
+## Equipo del Proyecto
 
-**Estructura relevante del proyecto:**
-- `src/app/` — entradas de la aplicación y rutas (páginas).
-- `src/components/` — componentes UI reutilizables (navbars, secciones, etc.).
-- `src/config/` — configuración y utilidades (por ejemplo, fuentes).
-- `src/seed/` — datos de ejemplo y semilla (`data.tsx`).
+Este proyecto es desarrollado y mantenido por:
 
-**Cómo ejecutar (PowerShell):**
-```powershell
-# Instalar dependencias
-npm install
+*   *Yusef Laroussi de la Calle*
+*   *Eva Cantero Abad* 
+*   *Darío Muñoz Rodríguez* 
+*   *David López Ferreras* 
 
-# Levantar servidor de desarrollo
-npm run dev
+---
+
+## Estructura del Proyecto
+
+La organización del código sigue las mejores prácticas de Next.js (App Router) y segmentación de responsabilidades:
+
+```text
+studium/
+├── public/                 # Recursos estáticos (imágenes, ilustraciones)
+└── src/
+    ├── app/                # Rutas, Layouts y Server Actions
+    ├── components/         # Componentes UI reutilizables
+    ├── config/             # Configuraciones globales y constantes
+    ├── lib/                # Utilidades, ayuda de API y base de datos
+    ├── models/             # Modelos de datos (Mongoose/MongoDB)
+    ├── providers/          # Proveedores de contexto de React
+    ├── scripts/            # Scripts de mantenimiento y migraciones
+    └── seed/               # Datos de prueba para desarrollo
 ```
 
-**Requisitos recomendados:**
-- Node.js (versión compatible con la configuración de `package.json`).
-- npm o Yarn según preferencia.
+### Detalle de Carpetas
 
-**Contribuir:**
-- Fork y PR con cambios pequeños y descriptivos.
-- Mantener consistencia en TypeScript y estilos.
+| Carpeta | Descripción |
+| :--- | :--- |
+| `src/app` | Contiene la lógica de enrutamiento, páginas y acciones del servidor (Next.js). |
+| `src/components` | Biblioteca de componentes visuales (UI, secciones, formularios) usando Tailwind y Framer Motion. |
+| `src/lib` | Lógica de negocio core: conexión a Mongoose, helpers de autenticación y clientes R2. |
+| `src/models` | Definición de esquemas de MongoDB para Cursos, Tareas, Usuarios y Entregas. |
+| `src/config` | Configuración de fuentes, logger, temas y rutas protegidas. |
+| `src/seed` | Scripts y datos JSON para inicializar la base de datos local rápidamente. |
 
-**Licencia:**
-- Añadir la licencia apropiada en la raíz del repositorio (p. ej., `LICENSE`).
+---
 
-Esta documentación es una descripción general y punto de partida para el desarrollo de Studium, una plataforma educativa moderna.
+## Arquitectura de Backend
+
+### Gestión de Archivos con Cloudflare R2
+
+El proyecto utiliza Cloudflare R2 para el almacenamiento de archivos (entregas de tareas, recursos del curso) debido a su compatibilidad con la API de S3 y coste eficiente.
+
+```mermaid
+sequenceDiagram
+    participant U as Estudiante
+    participant S as Server Action (Next.js)
+    participant R2 as Cloudflare R2 Bucket
+    participant DB as MongoDB (Metadata)
+
+    U->>S: Sube archivo (Form Data)
+    S->>S: Valida archivo y sesión
+    S->>R2: uploadToR2 (AWS SDK S3)
+    R2-->>S: OK / URL del objeto
+    S->>DB: Guarda referencia/URL en Submission
+    DB-->>S: Confirmación
+    S-->>U: Respuesta éxito
+```
+
+### Jerarquía de Contenido
+
+La estructura de datos está optimizada para la navegación jerárquica de contenidos educativos:
+
+```mermaid
+graph TD
+    User((Usuario/Profe)) -->|Crea| Course[Curso]
+    Course -->|Tiene| IC[Códigos de Invitación]
+    Course -->|Contiene| Unit[Unidades]
+    Unit -->|Agrupa| Task[Tareas]
+    Unit -->|Agrupa| Resource[Recursos/Materiales]
+    Task -->|Recibe| Submission[Entregas de Alumnos]
+```
+
+---
+
+## Tecnologías Principales
+
+*   **Frontend:** [Next.js](https://nextjs.org/) (React 19), [Tailwind CSS](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/).
+*   **Backend:** [Next.js Server Actions](https://nextjs.org/docs/app/building-your-application/data-fetching/server-actions-and-mutations), [Mongoose](https://mongoosejs.com/).
+*   **Base de Datos:** [MongoDB](https://www.mongodb.com/).
+*   **Almacenamiento:** [Cloudflare R2](https://www.cloudflare.com/developer-platform/r2/).
+
+---
+
+*Desarrollado para transformar la educación digital.*
+
