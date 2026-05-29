@@ -85,7 +85,7 @@ export default function JoinCourseButton({ onCourseJoined }: { onCourseJoined?: 
     <>
       {/* Botón que abre el modal (Desktop) */}
       <button 
-        className="btn btn-secondary shadow-lg gap-2 hidden sm:inline-flex"
+        className="btn btn-outline btn-secondary gap-2 hidden sm:inline-flex"
         onClick={openModal}
         type="button"
       >
@@ -97,7 +97,7 @@ export default function JoinCourseButton({ onCourseJoined }: { onCourseJoined?: 
       <div className="fab sm:hidden">
         <button
           type="button"
-          className="btn btn-lg btn-circle btn-secondary shadow-lg"
+          className="btn btn-lg btn-circle btn-outline btn-secondary shadow-lg"
           onClick={openModal}
           title="Unirse a curso"
         >

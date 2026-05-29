@@ -77,7 +77,7 @@ export default function JoinCourseModal({ isOpen, onClose }: JoinCourseModalProp
   return (
     <>
       <button 
-        className="btn btn-secondary shadow-lg gap-2 hidden sm:inline-flex"
+        className="btn btn-outline btn-secondary gap-2 hidden sm:inline-flex"
         onClick={openModal}
       >
         <IconPlus size={20} />
@@ -87,7 +87,7 @@ export default function JoinCourseModal({ isOpen, onClose }: JoinCourseModalProp
       <div className="fab sm:hidden fixed bottom-6 right-6 z-40">
         <button
           type="button"
-          className="btn btn-lg btn-circle btn-secondary shadow-lg"
+          className="btn btn-lg btn-circle btn-outline btn-secondary shadow-lg"
           onClick={openModal}
           title="Unirse a curso"
         >
