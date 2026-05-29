@@ -9,6 +9,10 @@ import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import Task from "@/models/Task";
 import Course from "@/models/Course";
+import Submission from "@/models/Submission";
+import User from "@/models/User";
+import { authOptions } from "@/config/auth.config";
+import { getServerSession } from "next-auth/next";
 import { LOGGER } from "@/config/logger";
 
 function normalizeResource(resource: any) {
@@ -41,6 +45,30 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
     // Validar que courseId es válido
     if (!courseId || !mongoose.Types.ObjectId.isValid(String(courseId))) {
       throw new Error(`Invalid courseId: ${courseId}`);
+    }
+
+    // Obtener sesión del usuario para saber cuáles tareas ha entregado
+    const session = await getServerSession(authOptions);
+    let currentUserSubmissionTaskIds: string[] = [];
+
+    if (session?.user?.id) {
+      try {
+        const userId = typeof session.user.id === 'string' ? new mongoose.Types.ObjectId(session.user.id) : session.user.id;
+        const submissions = await Submission.find({ studentId: userId })
+          .select("taskId")
+          .lean();
+        currentUserSubmissionTaskIds = submissions.map((s: any) => s.taskId.toString());
+      } catch (err) {
+        LOGGER.error({ userId: session.user.id, err }, "Error fetching submissions for user");
+      }
+    } else if (session?.user?.email) {
+      const user = await User.findOne({ email: session.user.email }).select("_id").lean();
+      if (user) {
+        const submissions = await Submission.find({ studentId: user._id })
+          .select("taskId")
+          .lean();
+        currentUserSubmissionTaskIds = submissions.map((s: any) => s.taskId.toString());
+      }
     }
 
     // Obtener curso básico sin populate (más confiable)
@@ -98,9 +126,18 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
             .lean();
 
           // Fetch tasks associated with this subject
-          const tasks = await Task.find({ subjectId: subject._id })
+          const rawTasks = await Task.find({ subjectId: subject._id })
             .sort({ createdAt: -1 })
             .lean();
+
+          // Inyectar el estado de entrega en cada tarea
+          const tasks = rawTasks.map((task: any) => {
+            const taskId = task._id.toString();
+            return {
+              ...task,
+              isSubmitted: currentUserSubmissionTaskIds.includes(taskId)
+            };
+          });
 
           return {
             ...subject,

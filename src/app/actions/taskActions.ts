@@ -3,6 +3,7 @@
 import { getServerSession } from "next-auth/next";
 import mongoose from "mongoose";
 import { authOptions } from "@/config/auth.config";
+import { revalidatePath } from "next/cache";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
@@ -439,6 +440,12 @@ export async function submitTask(formData: FormData): Promise<{ success: boolean
       "Tarea entregada con éxito"
     );
 
+    // Revalidar el curso para actualizar el tic verde en la vista general
+    const courseId = task.courseId.toString();
+    if (courseId) {
+      revalidatePath(`/mycourses/${courseId}`);
+    }
+
     return { 
       success: true, 
       submissionId: submission._id.toString() 
@@ -485,6 +492,12 @@ export async function deleteSubmission(taskId: string): Promise<{ success: boole
       },
       "Entrega eliminada con éxito"
     );
+
+    // Revalidar el curso para actualizar el tic verde en la vista general
+    const task = await Task.findById(taskId).select("courseId");
+    if (task?.courseId) {
+      revalidatePath(`/mycourses/${task.courseId.toString()}`);
+    }
 
     return { success: true };
   } catch (error) {

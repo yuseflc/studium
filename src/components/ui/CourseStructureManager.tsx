@@ -96,6 +96,7 @@ import {
   ArrowDown,
   ArrowUp,
   Calendar,
+  CheckCircle2,
   ClipboardList,
   BookOpen,
   Download,
@@ -171,6 +172,7 @@ export interface CourseTaskItem {
   dueDate?: string;
   allowLateSubmission?: boolean;
   active?: boolean;
+  isSubmitted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -1058,9 +1060,9 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                   <ClipboardList size={18} aria-hidden="true" />
                                 </div>
 
-                                <div className="flex min-w-0 flex-1 flex-col">
-                                  <div className="flex items-center gap-2 flex-wrap">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                <div className="flex min-w-0 flex-1 flex-col justify-center">
+                                  <div className="flex items-center gap-2">
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm flex-shrink-0">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
                                     <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                   </div>
                                   <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
@@ -1068,8 +1070,14 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                               </Link>
 
                               {canEdit && (
-                                <div className="flex items-center gap-1 pr-2 self-center">
-                                  {task.dueDate && (
+                                <div className="flex items-center gap-2 pr-2 self-center">
+                                  {task.isSubmitted && (
+                                    <div className="flex items-center justify-center mr-1">
+                                      <CheckCircle2 size={18} className="text-success flex-shrink-0" />
+                                    </div>
+                                  )}
+
+                                  {task.dueDate && !task.isSubmitted && (
                                     <div className="flex items-center gap-1.5 text-xs text-base-content/60 mr-1 whitespace-nowrap">
                                       <Calendar size={14} className="text-primary" aria-hidden="true" />
                                       <span>{new Date(task.dueDate).toLocaleDateString()}</span>

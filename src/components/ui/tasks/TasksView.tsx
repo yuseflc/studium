@@ -1,4 +1,4 @@
-import { Calendar, ClipboardList, Trash2 } from 'lucide-react';
+import { Calendar, ClipboardList, Trash2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { CALIFICACIONES } from '@/seed/data';
 import { useParams } from 'next/navigation';
@@ -120,6 +120,7 @@ const TasksView = ({
         const taskId = task._id?.toString();
         const taskTitle = task.title;
         const taskDescription = task.description || "Nueva tarea publicada";
+        const isSubmitted = !!task.isSubmitted;
         const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "";
         
         const isCurrentHolding = holdingTaskId === taskId;
@@ -160,27 +161,33 @@ const TasksView = ({
               <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                 <TaskStatusIcon />
               </div>
-              <div className="flex flex-col min-w-0 flex-1">
+              <div className="flex flex-col min-w-0 flex-1 justify-center">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm flex-shrink-0">Tarea</span>
                   <span className="font-bold text-base text-base-content/90 group-hover:text-primary transition-colors truncate">
                     {taskTitle}
                   </span>
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2">
                   <span className="text-xs text-base-content/50 truncate">
                     {taskDescription}
                   </span>
                 </div>
               </div>
 
-              {dueDate && (
-                <div className="text-right flex-shrink-0 ml-2 flex items-center gap-1.5 text-xs text-base-content/60">
-                  <Calendar size={14} className="text-primary" aria-hidden="true" />
-                  <p>{dueDate}</p>
+              {isSubmitted && (
+                <div className="flex items-center justify-center flex-shrink-0 ml-2">
+                  <CheckCircle2 size={18} className="text-success" />
                 </div>
               )}
-              
+
+              {dueDate && !isSubmitted && (
+                  <div className="text-right flex-shrink-0 ml-2 flex items-center gap-1.5 text-xs text-base-content/60">
+                    <Calendar size={14} className="text-primary" aria-hidden="true" />
+                    <p>{dueDate}</p>
+                  </div>
+                )}
+
               {/* Indicador de ayuda táctil de pulsación */}
               {isTeacher && (
                 <div className="text-xs text-base-content/40 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0 flex items-center gap-1 font-medium bg-base-200/50 px-2 py-1 rounded-lg">
