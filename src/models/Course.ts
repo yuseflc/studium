@@ -14,8 +14,11 @@ export interface ICourse {
   ownerId: mongoose.Types.ObjectId; // Profesor / admin que lo haya creado
   teachers: mongoose.Types.ObjectId[]; // IDs de otros profesores asociados al curso
   status: "draft" | "active" | "archived";
-  subjectIds: mongoose.Types.ObjectId[]; // Referencias a las materias del curso
-  subjects?: any[]; // Campo virtual o poblado para la UI
+  unitIds: mongoose.Types.ObjectId[]; // Referencias a las unidades del curso
+  units?: any[]; // Campo virtual o poblado para la UI
+  // Compatibility: previous model used `Subject` as top-level grouping
+  subjectIds?: mongoose.Types.ObjectId[];
+  subjects?: any[];
   enrolledStudents: mongoose.Types.ObjectId[];
   invitationCodes: IInviteCode[]; // Array máx 10 códigos (FIFO rotation)
   createdAt: Date;
@@ -50,10 +53,10 @@ const CourseSchema = new mongoose.Schema<ICourse>(
       enum: ["draft", "active", "archived"],
       default: "draft",
     },
-    subjectIds: [
+    unitIds: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Subject",
+        ref: "Unit",
       },
     ],
     enrolledStudents: [

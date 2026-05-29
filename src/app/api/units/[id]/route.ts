@@ -55,7 +55,6 @@ export const GET = withErrorHandlingParams<{ id: string }>(
     return successResponse(
       {
         id: unit._id.toString(),
-        subjectId: unit.subjectId.toString(),
         courseId: unit.courseId.toString(),
         title: unit.title,
         content: unit.content,
@@ -158,7 +157,6 @@ export const PATCH = withErrorHandlingParams<{ id: string }>(
     return successResponse(
       {
         id: unit._id.toString(),
-        subjectId: unit.subjectId.toString(),
         courseId: unit.courseId.toString(),
         title: unit.title,
         content: unit.content,
@@ -226,16 +224,15 @@ export const DELETE = withErrorHandlingParams<{ id: string }>(
     // Eliminar unidad
     await Unit.findByIdAndDelete(id);
 
-    // Actualizar subject: remover unidad de unitIds
-    await Subject.findByIdAndUpdate(
-      unit.subjectId,
-      { $pull: { unitIds: new mongoose.Types.ObjectId(id) } }
-    );
+    // Actualizar curso: remover unidad de unitIds
+    await Course.findByIdAndUpdate(unit.courseId, { $pull: { unitIds: new mongoose.Types.ObjectId(id) } });
+
+    // Actualizar subjects legacy: remover la unidad de cualquier subject.unitIds que la referencie
+    await Subject.updateMany({ unitIds: new mongoose.Types.ObjectId(id) }, { $pull: { unitIds: new mongoose.Types.ObjectId(id) } });
 
     logInfo('Unidad eliminada', {
       unitId: id,
       courseId: unit.courseId.toString(),
-      subjectId: unit.subjectId.toString(),
       deletedBy: userId,
       requestId,
     });

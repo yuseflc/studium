@@ -7,6 +7,7 @@ import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
 import Subject from "@/models/Subject";
+// Subject model kept for compatibility: units may be linked via Subject.unitIds
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import User from "@/models/User";
@@ -18,7 +19,7 @@ import {
 
 export interface CreateUnitActionInput {
   courseId: string;
-  subjectId: string;
+  subjectId?: string;
   title: string;
   content: string;
   order?: number;
@@ -29,7 +30,6 @@ export interface UnitActionResult {
   error?: string;
   unit?: {
     _id: string;
-    subjectId: string;
     courseId: string;
     title: string;
     content: string;
@@ -42,7 +42,6 @@ export interface UnitActionResult {
 
 function serializeUnit(unit: {
   _id: mongoose.Types.ObjectId;
-  subjectId: mongoose.Types.ObjectId;
   courseId: mongoose.Types.ObjectId;
   title: string;
   content: string;
@@ -55,7 +54,6 @@ function serializeUnit(unit: {
   // reciba solo valores serializables y no dependa del modelo de base de datos.
   return {
     _id: unit._id.toString(),
-    subjectId: unit.subjectId.toString(),
     courseId: unit.courseId.toString(),
     title: unit.title,
     content: unit.content,
@@ -74,7 +72,6 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
     }
 
     const validationResult = createUnitSchema.safeParse({
-      subjectId: input.subjectId,
       courseId: input.courseId,
       title: input.title,
       content: input.content,
@@ -95,23 +92,12 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const { subjectId, courseId, title, content, order } = validationResult.data;
+    const { courseId, subjectId, title, content, order } = validationResult.data as CreateUnitActionInput;
 
-    const [course, subject] = await Promise.all([
-      Course.findById(courseId),
-      Subject.findById(subjectId),
-    ]);
+    const course = await Course.findById(courseId);
 
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
-    }
-
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
-    }
-
-    if (subject.courseId.toString() !== course._id.toString()) {
-      return { success: false, error: "La materia no pertenece al curso" };
     }
 
     const currentUserId = currentUser._id.toString();
@@ -122,10 +108,9 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
       return { success: false, error: "No tienes permiso para crear unidades en este curso" };
     }
 
-    // El orden se calcula a partir de la cantidad actual de unidades del tema.
-    const nextOrder = typeof order === "number" ? order : (subject.unitIds?.length || 0);
+    // El orden se calcula a partir de la cantidad actual de unidades del curso.
+    const nextOrder = typeof order === "number" ? order : (course.unitIds?.length ?? (await Unit.countDocuments({ courseId })));
     const unit = await Unit.create({
-      subjectId: new mongoose.Types.ObjectId(subjectId),
       courseId: new mongoose.Types.ObjectId(courseId),
       title,
       content,
@@ -133,7 +118,16 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
       resourceIds: [],
     });
 
-    await Subject.findByIdAndUpdate(subjectId, { $push: { unitIds: unit._id } });
+    // Añadir referencia de unidad en el curso
+    await Course.findByIdAndUpdate(courseId, { $push: { unitIds: unit._id } });
+
+    // Compatibilidad: si nos pasan subjectId (cliente legado), añadir referencia en Subject.unitIds
+    if (subjectId) {
+      const subject = await Subject.findById(subjectId);
+      if (subject && subject.courseId.toString() === courseId) {
+        await Subject.findByIdAndUpdate(subjectId, { $push: { unitIds: unit._id } });
+      }
+    }
 
     return { success: true, unit: serializeUnit(unit) };
   } catch (error) {
@@ -253,7 +247,7 @@ export async function deleteUnit(unitId: string): Promise<{ success: boolean; er
     await Promise.all([
       Resource.deleteMany({ unitId: unit._id }),
       Unit.findByIdAndDelete(unitId),
-      Subject.findByIdAndUpdate(unit.subjectId, { $pull: { unitIds: unit._id } }),
+      Course.findByIdAndUpdate(unit.courseId, { $pull: { unitIds: unit._id } }),
     ]);
 
     return { success: true };
@@ -265,7 +259,7 @@ export async function deleteUnit(unitId: string): Promise<{ success: boolean; er
 }
 
 export async function reorderUnits(
-  subjectId: string,
+  courseId: string,
   unitIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -274,7 +268,7 @@ export async function reorderUnits(
       return { success: false, error: "No autorizado" };
     }
 
-    const validationResult = reorderUnitsSchema.safeParse({ subjectId, unitIds });
+    const validationResult = reorderUnitsSchema.safeParse({ courseId, unitIds });
     if (!validationResult.success) {
       return {
         success: false,
@@ -289,12 +283,7 @@ export async function reorderUnits(
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
-    }
-
-    const course = await Course.findById(subject.courseId);
+    const course = await Course.findById(courseId);
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
     }
@@ -307,22 +296,21 @@ export async function reorderUnits(
       return { success: false, error: "No tienes permiso para reordenar las unidades" };
     }
 
-    // Verificamos que todos los IDs pertenezcan a la misma materia antes de persistir
-    // el nuevo orden para evitar incoherencias entre Subject y Unit.
-    const units = await Unit.find({ _id: { $in: unitIds }, subjectId }).select("_id").lean();
+    // Verificamos que todos los IDs pertenezcan al curso antes de persistir el nuevo orden.
+    const units = await Unit.find({ _id: { $in: unitIds }, courseId }).select("_id").lean();
     if (units.length !== unitIds.length) {
-      return { success: false, error: "Una o más unidades no pertenecen a la materia" };
+      return { success: false, error: "Una o más unidades no pertenecen al curso" };
     }
 
     await Promise.all([
-      Subject.findByIdAndUpdate(subjectId, { unitIds }),
+      Course.findByIdAndUpdate(courseId, { unitIds }),
       ...unitIds.map((unitId, index) => Unit.findByIdAndUpdate(unitId, { order: index })),
     ]);
 
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al reordenar las unidades";
-    LOGGER.error({ error, subjectId }, "Error reordering units from action");
+    LOGGER.error({ error, courseId }, "Error reordering units from action");
     return { success: false, error: message };
   }
 }

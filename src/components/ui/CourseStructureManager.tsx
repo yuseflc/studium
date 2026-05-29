@@ -170,6 +170,7 @@ export interface CourseUnitItem {
 
 export interface CourseTaskItem {
   _id: string;
+  unitId?: string;
   title: string;
   description: string;
   type: "assignment" | "quiz" | "forum" | "project";
@@ -224,6 +225,7 @@ type EditorState =
       kind: "task";
       mode: EditorMode;
       subjectId: string;
+      unitId?: string;
       taskId?: string;
       taskType: TaskDraftType;
     };
@@ -374,11 +376,11 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     setEditor({ kind: "resource", mode: "edit", subjectId, unitId, resourceId: resource._id });
   };
 
-  const openCreateTask = (subject: CourseSubjectItem, taskType: TaskDraftType) => {
+  const openCreateTask = (subject: CourseSubjectItem, taskType: TaskDraftType, unitId?: string) => {
     if (!canEdit) return;
     resetForm();
     setResourceType("file");
-    setEditor({ kind: "task", mode: "create", subjectId: subject._id, taskType });
+    setEditor({ kind: "task", mode: "create", subjectId: subject._id, taskType, unitId });
   };
 
   const openEditTask = (subjectId: string, task: CourseTaskItem) => {
@@ -393,6 +395,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       kind: "task",
       mode: "edit",
       subjectId,
+      unitId: (task as any).unitId,
       taskId: task._id,
       taskType: task.type === "quiz" ? "quiz" : "assignment",
     });
@@ -506,7 +509,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     }
 
     const nextUnits = refreshUnitOrder(swapItems(units, currentIndex, nextIndex));
-    const result = await reorderUnits(subjectId, nextUnits.map((unit) => unit._id));
+    const result = await reorderUnits(courseId, nextUnits.map((unit) => unit._id));
 
     if (!result.success) {
       setErrorMessage(result.error || "No se pudo reordenar la unidad");
@@ -557,7 +560,13 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     }
 
     const nextTasks = swapItems(tasks, currentIndex, nextIndex);
-    const result = await reorderSubjectTasks(subjectId, nextTasks.map((task) => task._id));
+    // Resolve unitId for compatibility: prefer explicit unitIds, then first unit, then subject id
+    const unitId = subject?.unitIds?.[0] ?? subject?.units?.[0]?._id ?? subject?._id;
+    if (!unitId) {
+      setErrorMessage("Unidad no encontrada para reordenar tareas");
+      return;
+    }
+    const result = await reorderSubjectTasks(unitId, nextTasks.map((task) => task._id));
 
     if (!result.success) {
       setErrorMessage(result.error || "No se pudo reordenar la tarea");
@@ -593,8 +602,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
               {
                 _id: createdSubject._id,
                 title: createdSubject.title,
-                description: createdSubject.description,
-                order: createdSubject.order,
+                order: createdSubject.order ?? previous.length,
                 units: [],
                 tasks: [],
                 unitIds: [],
@@ -619,7 +627,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       }
 
       if (editor.kind === "unit") {
-        if (editor.mode === "create") {
+          if (editor.mode === "create") {
           const result = await createUnit({
             courseId,
             subjectId: editor.subjectId,
@@ -639,7 +647,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
               ...(currentSubject.units || []),
               {
                 _id: createdUnit._id,
-                subjectId: createdUnit.subjectId,
+                subjectId: editor.subjectId,
                 courseId: createdUnit.courseId,
                 title: createdUnit.title,
                 content: createdUnit.content,
@@ -728,19 +736,21 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
         const selectedType = editor.taskType === "quiz" ? "quiz" : "assignment";
         const parsedMaxPoints = Number(maxPoints);
         const normalizedMaxPoints = Number.isFinite(parsedMaxPoints) ? parsedMaxPoints : 100;
-        if (editor.mode === "create") {
-          const result = await createTask({
-            courseId,
-            subjectId: editor.subjectId,
-            title,
-            description,
-            type: selectedType,
-            dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
-            startDate: new Date().toISOString(),
-            maxPoints: normalizedMaxPoints,
-            allowLateSubmission: false,
-            active,
-          });
+          if (editor.mode === "create") {
+            const subject = subjects.find((s) => s._id === editor.subjectId);
+            const fallbackUnitId = editor.unitId || (subject?.unitIds?.[0] ?? subject?.units?.[0]?._id);
+            const result = await createTask({
+              courseId,
+              unitId: fallbackUnitId || "",
+              title,
+              description,
+              type: selectedType,
+              dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString(),
+              startDate: new Date().toISOString(),
+              maxPoints: normalizedMaxPoints,
+              allowLateSubmission: false,
+              active,
+            });
 
           if (!result.success || !result.task) {
             throw new Error(result.error || "No se pudo crear la tarea");
@@ -754,6 +764,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
               ...(currentSubject.tasks || []),
               {
                 _id: createdTask._id,
+                unitId: createdTask.unitId,
                 title: createdTask.title,
                 description: createdTask.description,
                 type: createdTask.type,
@@ -892,6 +903,10 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
           {sortedSubjects.map((subject) => {
             const sortedUnits = [...(subject.units || [])].sort((left, right) => left.order - right.order);
             const sortedTasks = [...(subject.tasks || [])];
+            const isMappedUnitSubject =
+              subject.units &&
+              subject.units.length === 1 &&
+              String(subject._id) === String(subject.units[0]._id);
 
             return (
               <div key={subject._id} id={`subject-${subject._id}`} className="card scroll-mt-24 bg-base-100 border border-base-300 shadow-sm">
@@ -927,186 +942,175 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                   </div>
 
                   <div className="space-y-5">
-                    <div>
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/50">
-                          <FolderOpen size={16} />
-                          Unidades
-                        </div>
-                      </div>
+                    {/* Detectar si este `subject` proviene de un mapeo de `unit` (compatibilidad)
+                        En ese caso `subject.units` contendrá exactamente la misma unidad con el mismo _id.
+                        Queremos renderizar directamente la unidad mostrando Recursos - Tareas - Exámenes
+                        en lugar de una sección separada "Unidades" que provoca duplicado visual. */}
+                    {subject.units && subject.units.length === 1 && String(subject._id) === String(subject.units[0]._id) ? (
+                      (() => {
+                        const unit = subject.units[0];
+                        const resources = [...(unit.resources || [])];
 
-                      {sortedUnits.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-base-300 p-4 text-sm text-base-content/50">Todavía no hay unidades en esta materia.</div>
-                      ) : (
-                        <div className="space-y-3">
-                          {sortedUnits.map((unit, unitIndex) => {
-                            const resources = [...(unit.resources || [])];
-
-                            return (
-                              <div key={unit._id} id={`unit-${unit._id}`} className="scroll-mt-24 rounded-2xl border border-base-200 bg-base-100/60 p-4">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="space-y-1">
-                                    <div className="flex items-center gap-2">
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">Unidad {unitIndex + 1}</span>
-                                      <h4 className="text-lg font-semibold">{unit.title}</h4>
-                                    </div>
-                                    <p className="text-sm text-base-content/60 whitespace-pre-wrap">{unit.content}</p>
-                                  </div>
-
-                                  {canEdit && (
-                                    <div className="dropdown dropdown-end">
-                                      {renderMenuButton()}
-                                      <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
-                                        <li><button type="button" onClick={() => openEditUnit(subject._id, unit)}><Pencil size={14} />Editar unidad</button></li>
-                                        <li><button type="button" onClick={() => openCreateResource(subject._id, unit)}><Plus size={14} />Añadir recurso</button></li>
-                                        <li className="menu-title"><span>Reordenar</span></li>
-                                        <li><button type="button" disabled={unitIndex === 0} onClick={() => handleMoveUnit(subject._id, unit._id, -1)}><ArrowUp size={14} />Subir</button></li>
-                                        <li><button type="button" disabled={unitIndex === sortedUnits.length - 1} onClick={() => handleMoveUnit(subject._id, unit._id, 1)}><ArrowDown size={14} />Bajar</button></li>
-                                        <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "unit", id: unit._id, title: unit.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar unidad</button></li>
-                                      </ul>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="mt-4 space-y-2">
-                                  <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/40">
-                                    <FileText size={14} />
-                                    Recursos
-                                  </div>
-
-                                  {resources.length === 0 ? (
-                                    <div className="rounded-xl border border-dashed border-base-200 px-3 py-2 text-sm text-base-content/45">Sin recursos en esta unidad.</div>
-                                  ) : (
-                                    <div className="space-y-2">
-                                      {resources.map((resource, resourceIndex) => (
-                                        <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
-                                          <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
-                                            <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                                              {getResourceTypeIcon(resource.type)}
-                                            </div>
-
-                                            <div className="min-w-0 flex-1">
-                                              <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{getResourceTypeLabel(resource.type)}</span>
-                                                <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
-                                              </div>
-                                              {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
-                                            </div>
-                                          </div>
-
-                                          {canEdit && (
-                                            <div className="flex items-center gap-1 pr-2 self-center">
-                                              {isResourceDownloadable(resource) && (
-                                                resource.url ? (
-                                                  <a
-                                                    href={resource.url}
-                                                    download
-                                                    className="btn btn-ghost btn-xs btn-circle"
-                                                    aria-label={`Descargar ${resource.title}`}
-                                                    title="Descargar recurso"
-                                                  >
-                                                    <Download size={16} aria-hidden="true" />
-                                                  </a>
-                                                ) : (
-                                                  <button
-                                                    type="button"
-                                                    className="btn btn-ghost btn-xs btn-circle"
-                                                    disabled
-                                                    aria-label={`Descargar ${resource.title}`}
-                                                    title="Este recurso no tiene archivo asociado"
-                                                  >
-                                                    <Download size={16} aria-hidden="true" />
-                                                  </button>
-                                                )
-                                              )}
-                                              <div className="dropdown dropdown-end">
-                                                {renderMenuButton()}
-                                                <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
-                                                  <li><button type="button" onClick={() => openEditResource(subject._id, unit._id, resource)}><Pencil size={14} />Editar recurso</button></li>
-                                                  <li className="menu-title"><span>Reordenar</span></li>
-                                                  <li><button type="button" disabled={resourceIndex === 0} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, -1)}><ArrowUp size={14} />Subir</button></li>
-                                                  <li><button type="button" disabled={resourceIndex === resources.length - 1} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, 1)}><ArrowDown size={14} />Bajar</button></li>
-                                                  <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "resource", id: resource._id, title: resource.title, subjectId: subject._id, unitId: unit._id })}><Trash2 size={14} />Eliminar recurso</button></li>
-                                                </ul>
-                                              </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-
-                    <div>
-                      <div className="flex items-center justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/50">
-                          <GraduationCap size={16} />
-                          Tareas y exámenes
-                        </div>
-                      </div>
-
-                      {sortedTasks.length === 0 ? (
-                        <div className="rounded-2xl border border-dashed border-base-300 p-4 text-sm text-base-content/50">Todavía no hay tareas en esta materia.</div>
-                      ) : (
-                        <div className="space-y-2">
-                          {sortedTasks.map((task, taskIndex) => (
-                            <div key={task._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
-                              <Link
-                                href={`/mycourses/${courseId}/tasks/${task._id}`}
-                                className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
-                                aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
-                              >
-                                <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                                  <ClipboardList size={18} aria-hidden="true" />
-                                </div>
-
-                                <div className="flex min-w-0 flex-1 flex-col justify-center">
+                        return (
+                          <div className="space-y-3">
+                            <div key={unit._id} id={`unit-${unit._id}`} className="scroll-mt-24 rounded-2xl border border-base-200 bg-base-100/60 p-4">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="space-y-1">
                                   <div className="flex items-center gap-2">
-                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm flex-shrink-0">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
-                                    <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">Unidad {unit.order ?? 1}</span>
+                                    <h4 className="text-lg font-semibold">{unit.title}</h4>
                                   </div>
-                                  <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
+                                  <p className="text-sm text-base-content/60 whitespace-pre-wrap">{unit.content}</p>
                                 </div>
-                              </Link>
 
-                              {canEdit && (
-                                <div className="flex items-center gap-2 pr-2 self-center">
-                                  {task.isSubmitted && (
-                                    <div className="flex items-center justify-center mr-1">
-                                      <CheckCircle2 size={18} className="text-success flex-shrink-0" />
-                                    </div>
-                                  )}
-
-                                  {task.dueDate && !task.isSubmitted && (
-                                    <div className="flex items-center gap-1.5 text-xs text-base-content/60 mr-1 whitespace-nowrap">
-                                      <Calendar size={14} className="text-primary" aria-hidden="true" />
-                                      <span>{new Date(task.dueDate).toLocaleDateString()}</span>
-                                    </div>
-                                  )}
-
+                                {canEdit && (
                                   <div className="dropdown dropdown-end">
                                     {renderMenuButton()}
                                     <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
-                                      <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                      <li><button type="button" onClick={() => openEditUnit(subject._id, unit)}><Pencil size={14} />Editar unidad</button></li>
+                                      <li><button type="button" onClick={() => openCreateResource(subject._id, unit)}><Plus size={14} />Añadir recurso</button></li>
                                       <li className="menu-title"><span>Reordenar</span></li>
-                                      <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
-                                      <li><button type="button" disabled={taskIndex === sortedTasks.length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
-                                      <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                      <li><button type="button" disabled={unit.order === 0} onClick={() => handleMoveUnit(subject._id, unit._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                      <li><button type="button" disabled={unit.order >= sortedUnits.length - 1} onClick={() => handleMoveUnit(subject._id, unit._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                      <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "unit", id: unit._id, title: unit.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar unidad</button></li>
                                     </ul>
                                   </div>
+                                )}
+                              </div>
+
+                              <div className="mt-4 space-y-2">
+                                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/40">
+                                  <FileText size={14} />
+                                  Recursos
                                 </div>
-                              )}
+
+                                {resources.length === 0 ? (
+                                  <div className="rounded-xl border border-dashed border-base-200 px-3 py-2 text-sm text-base-content/45">Sin recursos en esta unidad.</div>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {resources.map((resource, resourceIndex) => (
+                                      <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
+                                        <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
+                                          <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                                            {getResourceTypeIcon(resource.type)}
+                                          </div>
+
+                                          <div className="min-w-0 flex-1">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{getResourceTypeLabel(resource.type)}</span>
+                                              <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
+                                            </div>
+                                            {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
+                                          </div>
+                                        </div>
+
+                                        {canEdit && (
+                                          <div className="flex items-center gap-1 pr-2 self-center">
+                                            {isResourceDownloadable(resource) && (
+                                              resource.url ? (
+                                                <a
+                                                  href={resource.url}
+                                                  download
+                                                  className="btn btn-ghost btn-xs btn-circle"
+                                                  aria-label={`Descargar ${resource.title}`}
+                                                  title="Descargar recurso"
+                                                >
+                                                  <Download size={16} aria-hidden="true" />
+                                                </a>
+                                              ) : (
+                                                <button
+                                                  type="button"
+                                                  className="btn btn-ghost btn-xs btn-circle"
+                                                  disabled
+                                                  aria-label={`Descargar ${resource.title}`}
+                                                  title="Este recurso no tiene archivo asociado"
+                                                >
+                                                  <Download size={16} aria-hidden="true" />
+                                                </button>
+                                              )
+                                            )}
+                                            <div className="dropdown dropdown-end">
+                                              {renderMenuButton()}
+                                              <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
+                                                <li><button type="button" onClick={() => openEditResource(subject._id, unit._id, resource)}><Pencil size={14} />Editar recurso</button></li>
+                                                <li className="menu-title"><span>Reordenar</span></li>
+                                                <li><button type="button" disabled={resourceIndex === 0} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                                <li><button type="button" disabled={resourceIndex === resources.length - 1} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                                <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "resource", id: resource._id, title: resource.title, subjectId: subject._id, unitId: unit._id })}><Trash2 size={14} />Eliminar recurso</button></li>
+                                              </ul>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
+
+                            {/* Renderizar aquí las tareas/exámenes asociadas a la materia/unidad en una sola sección */}
+                            {((subject.tasks || []).length > 0) ? (
+                              <div>
+                                <div className="flex items-center justify-between gap-3 mb-3">
+                                  <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/50">
+                                    <GraduationCap size={16} />
+                                    Tareas y exámenes
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  {(subject.tasks || []).map((task, taskIndex) => (
+                                    <div key={task._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
+                                      <Link
+                                        href={`/mycourses/${courseId}/tasks/${task._id}`}
+                                        className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
+                                        aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
+                                      >
+                                        <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                                          <ClipboardList size={18} aria-hidden="true" />
+                                        </div>
+
+                                        <div className="flex min-w-0 flex-1 flex-col">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                            <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
+                                          </div>
+                                          <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
+                                        </div>
+                                      </Link>
+
+                                      {canEdit && (
+                                        <div className="flex items-center gap-1 pr-2 self-center">
+                                          {task.dueDate && (
+                                            <div className="flex items-center gap-1.5 text-xs text-base-content/60 mr-1 whitespace-nowrap">
+                                              <Calendar size={14} className="text-primary" aria-hidden="true" />
+                                              <span>{new Date(task.dueDate).toLocaleDateString()}</span>
+                                            </div>
+                                          )}
+
+                                          <div className="dropdown dropdown-end">
+                                            {renderMenuButton()}
+                                            <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
+                                              <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                              <li className="menu-title"><span>Reordenar</span></li>
+                                              <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                              <li><button type="button" disabled={taskIndex === (subject.tasks || []).length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                              <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                            </ul>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="rounded-2xl border border-dashed border-base-300 p-4 text-sm text-base-content/50">Todavía no hay tareas en esta materia.</div>
+                            )}
+                          </div>
+                        );
+                      })()
+                    ) : null}
                   </div>
                 </div>
               </div>

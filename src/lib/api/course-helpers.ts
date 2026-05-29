@@ -4,7 +4,6 @@
  */
 
 import mongoose from "mongoose";
-import Subject from "@/models/Subject";
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import Task from "@/models/Task";
@@ -13,6 +12,7 @@ import Submission from "@/models/Submission";
 import User from "@/models/User";
 import { authOptions } from "@/config/auth.config";
 import { getServerSession } from "next-auth/next";
+import Subject from "@/models/Subject";
 import { LOGGER } from "@/config/logger";
 
 function normalizeResource(resource: any) {
@@ -33,6 +33,7 @@ function normalizeUnit(unit: any) {
   return {
     ...unit,
     resources: Array.isArray(unit.resourceIds) ? unit.resourceIds.map((resource: any) => normalizeResource(resource)) : [],
+    tasks: Array.isArray(unit.tasks) ? unit.tasks : [],
   };
 }
 
@@ -79,82 +80,42 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
       return null;
     }
 
-    // Obtener subjectIds de forma segura
-    const subjectIds = Array.isArray(course.subjectIds) ? course.subjectIds : [];
-
-    if (subjectIds.length === 0) {
-      LOGGER.info({ courseId }, "Course has no subjects");
-      return {
-        _id: course._id,
-        title: course.title,
-        description: course.description,
-        ownerId: course.ownerId,
-        status: course.status,
-        subjects: [],
-        enrollmentCount: (course.enrolledStudents as any[])?.length || 0,
-        createdAt: course.createdAt,
-        updatedAt: course.updatedAt,
-      };
-    }
-
-    // Obtener todas las materias directamente
-    const allSubjects = await Subject.find({ _id: { $in: subjectIds } })
-      .select("_id courseId title description order unitIds taskIds")
+    // Obtener todas las unidades del curso
+    const units = await Unit.find({ courseId: course._id })
+      .populate({
+        path: "resourceIds",
+        select: "_id unitId title type url description createdAt updatedAt",
+      })
+      .sort({ order: 1 })
       .lean();
 
-    // Para cada materia, obtener sus unidades pobladas con recursos
-    const subjects = await Promise.all(
-      allSubjects.map(async (subject: any) => {
-        try {
-          // Validar que subject.unitIds existe y es un array
-          const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds : [];
+    const unitIds = Array.isArray(units) ? units.map((u: any) => u._id) : [];
 
-          if (unitIds.length === 0) {
-            return {
-              ...subject,
-              units: [],
-              unitIds: [],
-            };
-          }
+    // Obtener todas las tareas asociadas a estas unidades (nuevo modelo usa unitId)
+    const rawTasks = await Task.find({ unitId: { $in: unitIds } })
+      .sort({ createdAt: -1 })
+      .lean();
 
-          const units = await Unit.find({ _id: { $in: unitIds } })
-            .populate({
-              path: "resourceIds",
-              select: "_id unitId title type url description createdAt updatedAt",
-            })
-            .sort({ order: 1 })
-            .lean();
+    // Inyectar el estado de entrega en cada tarea
+    const tasks = (rawTasks || []).map((task: any) => {
+      const taskId = String(task._id);
+      return {
+        ...task,
+        isSubmitted: currentUserSubmissionTaskIds.includes(taskId),
+      };
+    });
+    const tasksByUnit: Record<string, any[]> = {};
+    (tasks || []).forEach((t: any) => {
+      const key = String(t.unitId || "");
+      tasksByUnit[key] = tasksByUnit[key] || [];
+      tasksByUnit[key].push(t);
+    });
 
-          // Fetch tasks associated with this subject
-          const rawTasks = await Task.find({ subjectId: subject._id })
-            .sort({ createdAt: -1 })
-            .lean();
-
-          // Inyectar el estado de entrega en cada tarea
-          const tasks = rawTasks.map((task: any) => {
-            const taskId = task._id.toString();
-            return {
-              ...task,
-              isSubmitted: currentUserSubmissionTaskIds.includes(taskId)
-            };
-          });
-
-          return {
-            ...subject,
-            units: (units || []).map((unit: any) => normalizeUnit(unit)), // Retornar units con resources normalizados
-            unitIds: unitIds, // Mantener también los IDs
-            tasks: tasks || [], // Incluir tareas
-          };
-        } catch (subjectError) {
-          LOGGER.error({ courseId, subjectId: subject._id, error: subjectError }, "Error processing subject");
-          return {
-            ...subject,
-            units: [],
-            unitIds: subject.unitIds || [],
-          };
-        }
-      })
-    );
+    const normalizedUnits = (units || []).map((unit: any) => {
+      const u = { ...unit };
+      u.tasks = tasksByUnit[String(unit._id)] || [];
+      return normalizeUnit(u);
+    });
 
     return {
       _id: course._id,
@@ -162,7 +123,8 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
       description: course.description,
       ownerId: course.ownerId,
       status: course.status,
-      subjects: subjects,
+      units: normalizedUnits,
+      unitIds,
       enrollmentCount: (course.enrolledStudents as any[])?.length || 0,
       createdAt: course.createdAt,
       updatedAt: course.updatedAt,
@@ -182,36 +144,7 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
  * Obtiene una materia con todas sus unidades y recursos
  * Estructura completa de una materia específica
  */
-export async function getSubjectWithUnits(subjectId: string | mongoose.Types.ObjectId) {
-  try {
-    const subject = await Subject.findById(subjectId).populate({
-      path: "unitIds",
-      select: "_id title content order resourceIds",
-    });
-
-    if (!subject) return null;
-
-    // Luego, poblar los recursos de cada unidad
-    const units = subject.unitIds as any[];
-    const unitsWithResources = await Promise.all(
-      units.map(async (unit) => {
-        const unitDoc = await Unit.findById(unit._id).populate({
-          path: "resourceIds",
-          select: "_id title type url description createdAt",
-        });
-        return unitDoc ? normalizeUnit(unitDoc.toObject()) : unitDoc;
-      })
-    );
-
-    return {
-      ...subject.toObject(),
-      unitIds: unitsWithResources,
-    };
-  } catch (error) {
-    LOGGER.error({ subjectId, error }, "Error fetching subject with units");
-    throw error;
-  }
-}
+// getSubjectWithUnits removed: use getCourseFullStructure and filter by unit if necessary
 
 /**
  * Obtiene una unidad con todos sus recursos
@@ -235,11 +168,8 @@ export async function getUnitWithResources(unitId: string | mongoose.Types.Objec
  */
 export async function getCourseSubjects(courseId: string | mongoose.Types.ObjectId) {
   try {
-    const subjects = await Subject.find({ courseId })
-      .sort({ order: 1 })
-      .lean();
-
-    return subjects;
+    const units = await Unit.find({ courseId }).sort({ order: 1 }).lean();
+    return units;
   } catch (error) {
     LOGGER.error({ courseId, error }, "Error fetching course subjects");
     throw error;
@@ -251,10 +181,8 @@ export async function getCourseSubjects(courseId: string | mongoose.Types.Object
  */
 export async function getSubjectUnits(subjectId: string | mongoose.Types.ObjectId) {
   try {
-    const units = await Unit.find({ subjectId })
-      .sort({ order: 1 })
-      .lean();
-
+    // Deprecated: units are queried by course now. Keep compatibility by returning empty array.
+    const units: any[] = [];
     return units;
   } catch (error) {
     LOGGER.error({ subjectId, error }, "Error fetching subject units");
@@ -303,28 +231,22 @@ export async function createSubject(
  * Crea una nueva unidad en una materia
  */
 export async function createUnit(
-  subjectId: string | mongoose.Types.ObjectId,
   courseId: string | mongoose.Types.ObjectId,
   data: { title: string; content: string; order?: number }
 ) {
   try {
     const unit = await Unit.create({
-      subjectId,
       courseId,
       ...data,
       order: data.order ?? 0,
     });
 
-    // Agregar la unidad a la materia
-    await Subject.findByIdAndUpdate(
-      subjectId,
-      { $push: { unitIds: unit._id } },
-      { new: true }
-    );
+    // Agregar la unidad al curso (orden lógico mantenido en course.unitIds)
+    await Course.findByIdAndUpdate(courseId, { $push: { unitIds: unit._id } }, { new: true });
 
     return unit;
   } catch (error) {
-    LOGGER.error({ subjectId, courseId, error }, "Error creating unit");
+    LOGGER.error({ courseId, error }, "Error creating unit");
     throw error;
   }
 }
@@ -365,26 +287,25 @@ export async function deleteSubject(subjectId: string | mongoose.Types.ObjectId)
   try {
     const subject = await Subject.findById(subjectId);
     if (!subject) throw new Error("Subject not found");
+    // Obtener las unitIds desde el documento de subject (compatibilidad)
+    const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds.map((u: any) => u) : [];
 
-    // Obtener todas las unidades de la materia
-    const units = await Unit.find({ subjectId });
-    const unitIds = units.map((u) => u._id);
+    if (unitIds.length > 0) {
+      // Eliminar todos los recursos de esas unidades
+      await Resource.deleteMany({ unitId: { $in: unitIds } });
 
-    // Eliminar todos los recursos de esas unidades
-    await Resource.deleteMany({ unitId: { $in: unitIds } });
+      // Eliminar todas las unidades
+      await Unit.deleteMany({ _id: { $in: unitIds } });
 
-    // Eliminar todas las unidades
-    await Unit.deleteMany({ subjectId });
+      // Remover las unitIds del curso canonical
+      await Course.findByIdAndUpdate(subject.courseId, { $pull: { unitIds: { $in: unitIds } } }, { new: true });
+    }
 
-    // Eliminar la materia
+    // Finalmente eliminar la materia (legacy)
     await Subject.findByIdAndDelete(subjectId);
 
-    // Eliminar la materia del curso
-    await Course.findByIdAndUpdate(
-      subject.courseId,
-      { $pull: { subjectIds: subjectId } },
-      { new: true }
-    );
+    // Eliminar la materia del curso.subjectIds legacy
+    await Course.findByIdAndUpdate(subject.courseId, { $pull: { subjectIds: subjectId } }, { new: true });
 
     return { success: true };
   } catch (error) {
@@ -406,13 +327,8 @@ export async function deleteUnit(unitId: string | mongoose.Types.ObjectId) {
 
     // Eliminar la unidad
     await Unit.findByIdAndDelete(unitId);
-
-    // Eliminar la unidad de la materia
-    await Subject.findByIdAndUpdate(
-      unit.subjectId,
-      { $pull: { unitIds: unitId } },
-      { new: true }
-    );
+    // Eliminar la unidad del curso
+    await Course.findByIdAndUpdate(unit.courseId, { $pull: { unitIds: unitId } }, { new: true });
 
     return { success: true };
   } catch (error) {

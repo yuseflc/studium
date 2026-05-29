@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Task from '@/models/Task';
-import Subject from '@/models/Subject';
+import Unit from '@/models/Unit';
 import Course from '@/models/Course';
 import User from '@/models/User';
 import { logInfo } from '@/config/logger';
@@ -27,7 +27,7 @@ import mongoose from 'mongoose';
  * Obtiene la lista de tareas
  *
  * Query parameters:
- * - subjectId?: string - Filtrar por materia (requerido)
+ * - courseId?: string - Filtrar por curso (requerido)
  * - limit?: number - Límite de resultados (default: 50, max: 100)
  * - page?: number - Número de página (default: 1)
  *
@@ -44,25 +44,25 @@ export const GET = withErrorHandling(
     await dbPromise;
 
     const { searchParams } = new URL(request.url);
-    const subjectId = searchParams.get('subjectId');
+    const unitId = searchParams.get('unitId');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const page = Math.max(parseInt(searchParams.get('page') || '1'), 1);
     const skip = (page - 1) * limit;
 
-    // subjectId es requerido
-    if (!subjectId) {
-      return validationErrorResponse({ subjectId: ['subjectId es requerido'] }, requestId);
+    // unitId es requerido
+    if (!unitId) {
+      return validationErrorResponse({ unitId: ['unitId es requerido'] }, requestId);
     }
 
-    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
-      return validationErrorResponse({ subjectId: ['ID de materia inválido'] }, requestId);
+    if (!mongoose.Types.ObjectId.isValid(unitId)) {
+      return validationErrorResponse({ unitId: ['ID de unidad inválido'] }, requestId);
     }
 
     // Paralelizar count y data query
     const [total, tasks] = await Promise.all([
-      Task.countDocuments({ subjectId }),
-      Task.find({ subjectId })
-        .select('_id subjectId courseId title type maxPoints startDate dueDate active createdAt updatedAt')
+      Task.countDocuments({ unitId }),
+      Task.find({ unitId })
+        .select('_id unitId courseId title type maxPoints startDate dueDate active createdAt updatedAt')
         .populate('createdById', 'email firstName')
         .sort({ dueDate: 1 })
         .limit(limit)
@@ -71,7 +71,7 @@ export const GET = withErrorHandling(
     ]);
 
     logInfo('Tareas obtenidas', {
-      subjectId,
+      unitId,
       total,
       page,
       limit,
@@ -139,7 +139,7 @@ export const POST = withErrorHandling(
 
     const {
       courseId,
-      subjectId,
+      unitId,
       title,
       description,
       type,
@@ -153,9 +153,9 @@ export const POST = withErrorHandling(
     await dbPromise;
 
     // Verificar que el curso existe y el usuario tiene permisos
-    const [course, subject, creator] = await Promise.all([
+    const [course, unit, creator] = await Promise.all([
       Course.findById(courseId),
-      Subject.findById(subjectId),
+      Unit.findById(unitId),
       User.findById(userId).lean(),
     ]);
 
@@ -163,8 +163,8 @@ export const POST = withErrorHandling(
       return notFoundResponse('Curso', requestId);
     }
 
-    if (!subject) {
-      return notFoundResponse('Materia', requestId);
+    if (!unit) {
+      return notFoundResponse('Unidad', requestId);
     }
 
     if (!creator) {
@@ -184,7 +184,7 @@ export const POST = withErrorHandling(
     // Crear tarea
     const task = await Task.create({
       courseId: new mongoose.Types.ObjectId(courseId),
-      subjectId: new mongoose.Types.ObjectId(subjectId),
+      unitId: new mongoose.Types.ObjectId(unitId),
       createdById: new mongoose.Types.ObjectId(userId),
       title,
       description,
@@ -198,14 +198,14 @@ export const POST = withErrorHandling(
     });
 
     // Actualizar subject: agregar tarea a taskIds
-    await Subject.findByIdAndUpdate(
-      subjectId,
+    await Unit.findByIdAndUpdate(
+      unitId,
       { $push: { taskIds: task._id } }
     );
 
     logInfo('Tarea creada', {
       taskId: task._id.toString(),
-      subjectId,
+      unitId,
       courseId,
       createdBy: userId,
       requestId,
@@ -215,7 +215,7 @@ export const POST = withErrorHandling(
       {
         id: task._id.toString(),
         courseId: task.courseId.toString(),
-        subjectId: task.subjectId.toString(),
+        unitId: task.unitId ? task.unitId.toString() : undefined,
         title: task.title,
         description: task.description,
         type: task.type,

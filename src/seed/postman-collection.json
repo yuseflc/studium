@@ -370,7 +370,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"subjectId\": \"id_de_la_materia\", \"title\": \"Unidad 1: Fundamentos\", \"content\": \"Contenido detallado aquí\", \"order\": 1}"
+              "raw": "{\"courseId\": \"id_del_curso\", \"title\": \"Unidad 1: Fundamentos\", \"content\": \"Contenido detallado aquí\", \"order\": 1, \"subjectId\": \"id_de_la_materia (opcional)\"}"
             }
           }
         },
@@ -550,7 +550,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"subjectId\": \"id_de_la_materia\", \"title\": \"Ejercicio 1\", \"description\": \"Completa el ejercicio\", \"order\": 1}"
+              "raw": "{\"courseId\": \"id_del_curso\", \"unitId\": \"id_de_la_unidad\", \"title\": \"Ejercicio 1\", \"description\": \"Completa el ejercicio\", \"order\": 1, \"subjectId\": \"id_de_la_materia (opcional)\"}"
             }
           }
         },

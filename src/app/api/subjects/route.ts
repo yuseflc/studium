@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Subject from '@/models/Subject';
+import Unit from '@/models/Unit';
 import Course from '@/models/Course';
 import { logInfo } from '@/config/logger';
 import { validateRequest } from '@/lib/validators/api-validation';
@@ -56,29 +57,54 @@ export const GET = withErrorHandling(
       return validationErrorResponse({ courseId: ['ID de curso inválido'] }, requestId);
     }
 
-    // Paralelizar count y data query
-    const [total, subjects] = await Promise.all([
-      Subject.countDocuments({ courseId }),
-      Subject.find({ courseId })
+    // For compatibility: prefer Subjects if they exist, otherwise return Units as subject-shaped items
+    const subjectCount = await Subject.countDocuments({ courseId });
+    let total = 0;
+    let items: any[] = [];
+
+    if (subjectCount > 0) {
+      total = subjectCount;
+      items = await Subject.find({ courseId })
         .select('_id courseId title description order unitIds taskIds createdAt updatedAt')
         .sort({ order: 1 })
         .limit(limit)
         .skip(skip)
-        .lean(),
-    ]);
+        .lean();
+    } else {
+      // No subjects: return units as compatibility "subjects"
+      total = await Unit.countDocuments({ courseId });
+      const units = await Unit.find({ courseId })
+        .select('_id courseId title content order taskIds resourceIds createdAt updatedAt')
+        .sort({ order: 1 })
+        .limit(limit)
+        .skip(skip)
+        .lean();
+
+      items = units.map((u: any) => ({
+        _id: u._id,
+        courseId: u.courseId,
+        title: u.title,
+        description: u.content || '',
+        order: u.order,
+        unitIds: [u._id],
+        taskIds: u.taskIds || [],
+        createdAt: u.createdAt,
+        updatedAt: u.updatedAt,
+      }));
+    }
 
     logInfo('Materias obtenidas', {
       courseId,
       total,
       page,
       limit,
-      count: subjects.length,
+      count: items.length,
       requestId,
     });
 
     return successResponse(
       {
-        items: subjects,
+        items,
         pagination: {
           total,
           page,
@@ -149,18 +175,21 @@ export const POST = withErrorHandling(
       return forbiddenResponse(requestId);
     }
 
-    // Crear materia
-    const subject = await Subject.create({
+    // Compatibility: create a Unit (preferred) and return shape compatible with Subject
+    const unit = await Unit.create({
       courseId: new mongoose.Types.ObjectId(courseId),
       title,
-      description,
+      content: description || '',
       order: order || 0,
-      unitIds: [],
+      resourceIds: [],
       taskIds: [],
     });
 
-    logInfo('Materia creada', {
-      subjectId: subject._id.toString(),
+    // Ensure course.unitIds includes this unit
+    await Course.findByIdAndUpdate(courseId, { $addToSet: { unitIds: unit._id } });
+
+    logInfo('Unidad creada (compat subject)', {
+      unitId: unit._id.toString(),
       courseId,
       createdBy: userId,
       requestId,
@@ -168,16 +197,16 @@ export const POST = withErrorHandling(
 
     return createdResponse(
       {
-        id: subject._id.toString(),
-        courseId: subject.courseId.toString(),
-        title: subject.title,
-        description: subject.description,
-        order: subject.order,
-        unitIds: subject.unitIds,
-        taskIds: subject.taskIds,
-        createdAt: subject.createdAt,
+        id: unit._id.toString(),
+        courseId: unit.courseId.toString(),
+        title: unit.title,
+        description: unit.content,
+        order: unit.order,
+        unitIds: [unit._id],
+        taskIds: unit.taskIds,
+        createdAt: unit.createdAt,
       },
-      'Materia creada exitosamente',
+      'Materia (unidad) creada exitosamente',
       requestId
     );
   },

@@ -13,7 +13,7 @@ export interface ITask {
   description: string; // Descripción de la tarea
   type: "assignment" | "quiz" | "forum" | "project"; // Tipo: tarea, cuestionario, foro, proyecto
   courseId: mongoose.Types.ObjectId; // ID del curso
-  subjectId: mongoose.Types.ObjectId; // ID de la materia
+  unitId?: mongoose.Types.ObjectId; // ID de la unidad (opcional durante migración)
   createdById: mongoose.Types.ObjectId; // ID del profesor o administrador que creó la tarea
   maxPoints: number; // Puntuación máxima
   criteria?: ICriteria[]; // Criterios de evaluación
@@ -67,9 +67,11 @@ const TaskSchema = new mongoose.Schema<ITask>(
       ref: "Course", // Referencia al modelo Course
       required: [true, "El ID del curso es requerido"], // ID de curso requerido
     },
-    subjectId: {
+    unitId: {
       type: mongoose.Schema.Types.ObjectId,
-      required: [true, "El ID de la materia es requerido"], // ID de materia requerido
+      ref: "Unit",
+      required: false, // durante la migración puede ser opcional; acciones validarán presencia
+      index: true,
     },
     createdById: {
       type: mongoose.Schema.Types.ObjectId,
@@ -132,9 +134,9 @@ TaskSchema.set('toJSON', { virtuals: true });
 
 // Índices para optimizar consultas
 TaskSchema.index({ courseId: 1 }); // Índice por ID de curso
-TaskSchema.index({ subjectId: 1 }); // Índice por ID de materia
 TaskSchema.index({ createdById: 1 }); // Índice por creador
-TaskSchema.index({ courseId: 1, subjectId: 1 }); // Índice compuesto por curso y materia
+TaskSchema.index({ unitId: 1 }); // Índice por unidad
+TaskSchema.index({ courseId: 1, unitId: 1 }); // Índice compuesto por curso y unidad
 TaskSchema.index({ active: 1 }); // Índice por estado activo
 TaskSchema.index({ dueDate: 1 }); // Índice por fecha de entrega
 TaskSchema.index({ courseId: 1, dueDate: 1 }); // Índice compuesto por curso y fecha de entrega

@@ -28,7 +28,10 @@ export interface ISubjectWithContent extends Omit<ISubject, 'unitIds' | 'taskIds
  * Flexible para soportar ambas fuentes de datos
  */
 export interface CourseStructureGeneric {
-  subjects?: any[];
+    subjects?: any[];
+    // Nueva estructura: unidades normalizadas
+    units?: any[];
+    unitIds?: any[];
   _id?: string | mongoose.Types.ObjectId;
   title?: string;
   description?: string;

@@ -135,7 +135,7 @@ export async function seedDatabase() {
             description: 'Crea una calculadora simple con HTML, CSS y JavaScript',
             type: 'project',
             courseId: course._id,
-            subjectId: subject._id,
+            unitId: unit._id,
             createdById: teacher._id,
             maxPoints: 100,
             criteria: [
@@ -160,6 +160,9 @@ export async function seedDatabase() {
             { $push: { taskIds: task._id } },
             { new: true }
         );
+
+        // Add task to unit
+        await Unit.findByIdAndUpdate(unit._id, { $push: { taskIds: task._id } }, { new: true });
 
         // Create sample submissions
         await Submission.create({

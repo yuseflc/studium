@@ -12,12 +12,14 @@ interface CourseFABProps {
   onAddResource?: (resource: any) => void;
   courseId?: string;
   defaultSubjectId?: string;
+  defaultUnitId?: string;
+  units?: any[];
   subjects?: any[];
 }
 
 type CreationType = 'task' | 'exam' | 'resource' | 'subject' | null;
 
-export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, courseId, defaultSubjectId, subjects = [] }: CourseFABProps) {
+export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, courseId, defaultSubjectId, defaultUnitId, subjects = [], units = [] }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
   const courseid = params?.courseid || 'course-1';
@@ -35,7 +37,8 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const [selectedSubjectId, setSelectedSubjectId] = useState(defaultSubjectId || '');
+  const initialUnitId = defaultUnitId || (units && units.length > 0 ? String(units[0]._id) : undefined) || defaultSubjectId || '';
+  const [selectedUnitId, setSelectedUnitId] = useState(initialUnitId);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isOpenSubjectDropdown, setIsOpenSubjectDropdown] = useState(false);
   
@@ -45,7 +48,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
     setTitle('');
     setDescription('');
     setDueDate('');
-    setSelectedSubjectId(defaultSubjectId || '');
+    setSelectedUnitId(initialUnitId);
     setSelectedFile(null);
     setIsOpenSubjectDropdown(false);
     setIsSubmitting(false);
@@ -61,7 +64,16 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    if (creationType !== 'subject' && !selectedSubjectId) return;
+    // Ensure we have a unitId for non-subject creations; prefer selectedUnitId, else first unit from props
+    let targetUnitId: string | undefined = selectedUnitId || undefined;
+    if (!targetUnitId) {
+      targetUnitId = units && units.length > 0 ? String(units[0]._id) : undefined;
+      if (!targetUnitId) {
+        // Last fallback: allow legacy defaultSubjectId (keeps compatibility with older clients)
+        targetUnitId = defaultSubjectId || '';
+      }
+    }
+    if (creationType !== 'subject' && !targetUnitId) return;
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -71,11 +83,11 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
       const isExamCreation = creationType === 'exam';
 
       if (isTaskCreation || isExamCreation) {
-        const result = await createTask({
+          const result = await createTask({
           title,
           description,
           courseId: courseId || '',
-          subjectId: selectedSubjectId,
+            unitId: targetUnitId,
           dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
           startDate: new Date().toISOString(),
           type: isExamCreation ? 'quiz' : 'assignment',
@@ -129,7 +141,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           title,
           description,
           courseId: courseId || '',
-          subjectId: selectedSubjectId,
+          unitId: targetUnitId,
           fileName: selectedFile.name,
         });
 
@@ -366,13 +378,13 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
                 <div className="relative">
                   <button
                     type="button"
-                    onClick={() => setIsOpenSubjectDropdown(!isOpenSubjectDropdown)}
+                      onClick={() => setIsOpenSubjectDropdown(!isOpenSubjectDropdown)}
                     className="input w-full flex items-center justify-between border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium cursor-pointer rounded-xl shadow-sm dark:shadow-none"
                     disabled={isSubmitting}
                   >
-                    <span>
-                      {subjects.find(s => (s._id?.toString() || s.id) === selectedSubjectId)?.title || "Selecciona un tema..."}
-                    </span>
+                      <span>
+                        { (units.length ? units : subjects).find(s => (s._id?.toString() || s.id) === selectedUnitId)?.title || "Selecciona una unidad..." }
+                      </span>
                     <span className="pointer-events-none flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isOpenSubjectDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
                     </span>
@@ -385,15 +397,15 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
                         <li className="px-3 py-2 text-xs font-semibold text-base-content/40 uppercase tracking-wider border-b border-base-200/50 mb-1">
                           Selecciona un tema
                         </li>
-                        {subjects.map((subject: any) => {
+                        {(units.length ? units : subjects).map((subject: any) => {
                           const id = subject._id?.toString() || subject.id;
-                          const isSelected = id === selectedSubjectId;
+                          const isSelected = id === selectedUnitId;
                           return (
                             <li key={id}>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setSelectedSubjectId(id);
+                                  setSelectedUnitId(id);
                                   setIsOpenSubjectDropdown(false);
                                 }}
                                 className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors text-left cursor-pointer ${

@@ -73,7 +73,6 @@ const SEED_SUBJECTS: ISubject[] = [
 const SEED_UNITS: IUnit[] = [
   {
     _id: "unidad-1" as any,
-    subjectId: "general" as any,
     courseId: "course-1" as any,
     title: "Introducción a UX",
     content: "Conceptos básicos de experiencia de usuario, diseño centrado en el usuario y principios de usabilidad.",
@@ -84,7 +83,6 @@ const SEED_UNITS: IUnit[] = [
   },
   {
     _id: "unidad-2" as any,
-    subjectId: "general" as any,
     courseId: "course-1" as any,
     title: "Investigación de Usuarios",
     content: "Técnicas para entender a los usuarios: entrevistas, encuestas, análisis de competencia y creación de personas.",
@@ -95,7 +93,6 @@ const SEED_UNITS: IUnit[] = [
   },
   {
     _id: "unidad-3" as any,
-    subjectId: "info-gen-2" as any,
     courseId: "course-2" as any,
     title: "Checklist de despliegue",
     content: "Lista base para validar un despliegue antes de publicar una aplicación.",
@@ -106,7 +103,6 @@ const SEED_UNITS: IUnit[] = [
   },
   {
     _id: "unidad-4" as any,
-    subjectId: "tema-1-c2" as any,
     courseId: "course-2" as any,
     title: "Flujo Git para CI/CD",
     content: "Buenas prácticas para ramas, PRs y automatización de despliegues.",
@@ -181,6 +177,7 @@ const CURSOS: ICourse[] = [
     teachers: [],
     status: "active",
     subjectIds: ["general" as any, "tema-1" as any, "tema-2" as any],
+    unitIds: ["unidad-1" as any, "unidad-2" as any, "info-1" as any, "info-2" as any, "u1t1" as any, "u1t2" as any],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -267,6 +264,7 @@ const CURSOS: ICourse[] = [
     teachers: [],
     status: "active",
     subjectIds: ["info-gen-2" as any, "tema-1-c2" as any],
+    unitIds: ["unidad-3" as any, "unidad-4" as any],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -280,6 +278,7 @@ const CURSOS: ICourse[] = [
     teachers: [],
     status: "active",
     subjectIds: [],
+    unitIds: [],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -293,6 +292,7 @@ const CURSOS: ICourse[] = [
     teachers: [],
     status: "active",
     subjectIds: [],
+    unitIds: [],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -306,6 +306,7 @@ const CURSOS: ICourse[] = [
     teachers: [],
     status: "active",
     subjectIds: [],
+    unitIds: [],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -319,6 +320,7 @@ const CURSOS: ICourse[] = [
     teachers: [],
     status: "active",
     subjectIds: [],
+    unitIds: [],
     enrolledStudents: [],
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -331,7 +333,7 @@ const buildSeedSubjects = (courseId: string): SeedSubject[] => {
     .sort((left, right) => left.order - right.order)
     .map((subject) => ({
       ...subject,
-      units: SEED_UNITS.filter((unit) => sameId(unit.subjectId, subject._id) && sameId(unit.courseId, courseId))
+      units: SEED_UNITS.filter((unit) => (subject.unitIds || []).some((id) => sameId(id, unit._id)) && sameId(unit.courseId, courseId))
         .sort((left, right) => left.order - right.order)
         .map((unit) => ({
           ...unit,

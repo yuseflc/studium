@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Unit from '@/models/Unit';
-import Subject from '@/models/Subject';
+// Subject removed; units are associated directly to Course
 import Course from '@/models/Course';
 import { logInfo } from '@/config/logger';
 import { validateRequest } from '@/lib/validators/api-validation';
@@ -26,7 +26,7 @@ import mongoose from 'mongoose';
  * Obtiene la lista de unidades
  *
  * Query parameters:
- * - subjectId?: string - Filtrar por materia (requerido)
+ * - courseId?: string - Filtrar por curso (requerido)
  * - limit?: number - Límite de resultados (default: 50, max: 100)
  * - page?: number - Número de página (default: 1)
  *
@@ -43,25 +43,25 @@ export const GET = withErrorHandling(
     await dbPromise;
 
     const { searchParams } = new URL(request.url);
-    const subjectId = searchParams.get('subjectId');
+    const courseId = searchParams.get('courseId');
     const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const page = Math.max(parseInt(searchParams.get('page') || '1'), 1);
     const skip = (page - 1) * limit;
 
-    // subjectId es requerido
-    if (!subjectId) {
-      return validationErrorResponse({ subjectId: ['subjectId es requerido'] }, requestId);
+    // courseId es requerido
+    if (!courseId) {
+      return validationErrorResponse({ courseId: ['courseId es requerido'] }, requestId);
     }
 
-    if (!mongoose.Types.ObjectId.isValid(subjectId)) {
-      return validationErrorResponse({ subjectId: ['ID de materia inválido'] }, requestId);
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return validationErrorResponse({ courseId: ['ID de curso inválido'] }, requestId);
     }
 
     // Paralelizar count y data query
     const [total, units] = await Promise.all([
-      Unit.countDocuments({ subjectId }),
-      Unit.find({ subjectId })
-        .select('_id subjectId courseId title content order resourceIds createdAt updatedAt')
+      Unit.countDocuments({ courseId }),
+      Unit.find({ courseId })
+        .select('_id courseId title content order resourceIds createdAt updatedAt')
         .sort({ order: 1 })
         .limit(limit)
         .skip(skip)
@@ -69,7 +69,7 @@ export const GET = withErrorHandling(
     ]);
 
     logInfo('Unidades obtenidas', {
-      subjectId,
+      courseId,
       total,
       page,
       limit,
@@ -130,23 +130,18 @@ export const POST = withErrorHandling(
       return validationErrorResponse(validationResult.errors, requestId);
     }
 
-    const { subjectId, courseId, title, content, order } = validationResult.data;
+    const { courseId, title, content, order } = validationResult.data;
 
     await dbPromise;
 
     // Verificar que el curso existe y el usuario tiene permisos
-    const [course, subject] = await Promise.all([
-      Course.findById(courseId),
-      Subject.findById(subjectId),
-    ]);
+    const course = await Course.findById(courseId);
 
     if (!course) {
       return notFoundResponse('Curso', requestId);
     }
 
-    if (!subject) {
-      return notFoundResponse('Materia', requestId);
-    }
+    // No Subject check: units are directly under course
 
     // Solo el propietario o profesores pueden crear unidades
     const isOwner = course.ownerId.toString() === userId;
@@ -160,23 +155,19 @@ export const POST = withErrorHandling(
 
     // Crear unidad
     const unit = await Unit.create({
-      subjectId: new mongoose.Types.ObjectId(subjectId),
       courseId: new mongoose.Types.ObjectId(courseId),
       title,
       content,
       order: order || 0,
       resourceIds: [],
+      taskIds: [],
     });
 
-    // Actualizar subject: agregar unidad a unitIds
-    await Subject.findByIdAndUpdate(
-      subjectId,
-      { $push: { unitIds: unit._id } }
-    );
+    // Añadir unidad al curso
+    await Course.findByIdAndUpdate(courseId, { $push: { unitIds: unit._id } });
 
     logInfo('Unidad creada', {
       unitId: unit._id.toString(),
-      subjectId,
       courseId,
       createdBy: userId,
       requestId,
@@ -185,7 +176,6 @@ export const POST = withErrorHandling(
     return createdResponse(
       {
         id: unit._id.toString(),
-        subjectId: unit.subjectId.toString(),
         courseId: unit.courseId.toString(),
         title: unit.title,
         content: unit.content,

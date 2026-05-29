@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
-import Subject from "@/models/Subject";
+import Unit from "@/models/Unit";
 import Task from "@/models/Task";
 import User from "@/models/User";
 import Submission from "@/models/Submission";
@@ -20,7 +20,7 @@ import {
 
 export interface CreateTaskActionInput {
   courseId: string;
-  subjectId: string;
+  unitId: string;
   title: string;
   description: string;
   dueDate?: string;
@@ -37,7 +37,7 @@ export interface TaskActionResult {
   task?: {
     _id: string;
     courseId: string;
-    subjectId: string;
+    unitId?: string;
     title: string;
     description: string;
     type: "assignment" | "quiz" | "forum" | "project";
@@ -55,7 +55,7 @@ function serializeTask(task: any): NonNullable<TaskActionResult["task"]> {
   return {
     _id: task._id.toString(),
     courseId: task.courseId.toString(),
-    subjectId: task.subjectId.toString(),
+    unitId: task.unitId ? task.unitId.toString() : undefined,
     title: task.title,
     description: task.description,
     type: task.type,
@@ -96,23 +96,23 @@ export async function createTask(input: CreateTaskActionInput): Promise<TaskActi
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const { courseId, subjectId, title, description, type, maxPoints, startDate, dueDate, allowLateSubmission, active } = validationResult.data;
+    const { courseId, unitId, title, description, type, maxPoints, startDate, dueDate, allowLateSubmission, active } = validationResult.data;
 
-    const [course, subject] = await Promise.all([
+    const [course, unit] = await Promise.all([
       Course.findById(courseId),
-      Subject.findById(subjectId),
+      Unit.findById(unitId),
     ]);
 
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
     }
 
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
+    if (!unit) {
+      return { success: false, error: "Unidad no encontrada" };
     }
 
-    if (subject.courseId.toString() !== course._id.toString()) {
-      return { success: false, error: "La materia no pertenece al curso" };
+    if (unit.courseId.toString() !== course._id.toString()) {
+      return { success: false, error: "La unidad no pertenece al curso" };
     }
 
     const currentUserId = currentUser._id.toString();
@@ -125,7 +125,7 @@ export async function createTask(input: CreateTaskActionInput): Promise<TaskActi
 
     const task = await Task.create({
       courseId: new mongoose.Types.ObjectId(courseId),
-      subjectId: new mongoose.Types.ObjectId(subjectId),
+      unitId: unitId ? new mongoose.Types.ObjectId(unitId) : undefined,
       createdById: new mongoose.Types.ObjectId(currentUser._id),
       title,
       description,
@@ -138,13 +138,15 @@ export async function createTask(input: CreateTaskActionInput): Promise<TaskActi
       criteria: [],
     });
 
-    await Subject.findByIdAndUpdate(subjectId, { $push: { taskIds: task._id } });
+    if (unitId) {
+      await Unit.findByIdAndUpdate(unitId, { $push: { taskIds: task._id } });
+    }
 
     LOGGER.info(
       {
         taskId: task._id.toString(),
         courseId,
-        subjectId,
+        unitId,
         createdBy: currentUserId,
       },
       "Task creada"
@@ -236,8 +238,8 @@ export async function updateTask(
   }
 }
 
-export async function reorderSubjectTasks(
-  subjectId: string,
+export async function reorderUnitTasks(
+  unitId: string,
   taskIds: string[]
 ): Promise<{ success: boolean; error?: string }> {
   try {
@@ -246,7 +248,7 @@ export async function reorderSubjectTasks(
       return { success: false, error: "No autorizado" };
     }
 
-    const validationResult = reorderSubjectTasksSchema.safeParse({ subjectId, taskIds });
+    const validationResult = reorderSubjectTasksSchema.safeParse({ unitId, taskIds });
     if (!validationResult.success) {
       return {
         success: false,
@@ -256,17 +258,19 @@ export async function reorderSubjectTasks(
 
     await connectDB();
 
+    // (function continues)
+
     const currentUser = await User.findOne({ email: session.user.email }).lean();
     if (!currentUser) {
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
+    const unit = await Unit.findById(unitId);
+    if (!unit) {
+      return { success: false, error: "Unidad no encontrada" };
     }
 
-    const course = await Course.findById(subject.courseId);
+    const course = await Course.findById(unit.courseId);
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
     }
@@ -279,20 +283,23 @@ export async function reorderSubjectTasks(
       return { success: false, error: "No tienes permiso para reordenar las tareas" };
     }
 
-    const tasks = await Task.find({ _id: { $in: taskIds }, subjectId }).select("_id").lean();
+    const tasks = await Task.find({ _id: { $in: taskIds }, unitId }).select("_id").lean();
     if (tasks.length !== taskIds.length) {
-      return { success: false, error: "Una o más tareas no pertenecen a la materia" };
+      return { success: false, error: "Una o más tareas no pertenecen a la unidad" };
     }
 
-    await Subject.findByIdAndUpdate(subjectId, { taskIds });
+    await Unit.findByIdAndUpdate(unitId, { taskIds });
 
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al reordenar las tareas";
-    LOGGER.error({ error, subjectId }, "Error reordering tasks from action");
+    LOGGER.error({ error, unitId }, "Error reordering tasks from action");
     return { success: false, error: message };
   }
 }
+
+// Backwards compatibility alias
+export const reorderSubjectTasks = reorderUnitTasks;
 
 export async function deleteTask(taskId: string): Promise<TaskActionResult> {
   try {
@@ -332,7 +339,9 @@ export async function deleteTask(taskId: string): Promise<TaskActionResult> {
     }
 
     await Task.findByIdAndDelete(taskId);
-    await Subject.findByIdAndUpdate(task.subjectId, { $pull: { taskIds: new mongoose.Types.ObjectId(taskId) } });
+    if (task.unitId) {
+      await Unit.findByIdAndUpdate(task.unitId, { $pull: { taskIds: new mongoose.Types.ObjectId(taskId) } });
+    }
 
     LOGGER.info(
       {

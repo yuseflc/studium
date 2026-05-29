@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Task from '@/models/Task';
-import Subject from '@/models/Subject';
+import Unit from '@/models/Unit';
 import Course from '@/models/Course';
 import { logInfo } from '@/config/logger';
 import { validateRequest } from '@/lib/validators/api-validation';
@@ -56,7 +56,7 @@ export const GET = withErrorHandlingParams<{ id: string }>(
       {
         id: task._id.toString(),
         courseId: task.courseId.toString(),
-        subjectId: task.subjectId.toString(),
+        unitId: task.unitId ? task.unitId.toString() : undefined,
         title: task.title,
         description: task.description,
         type: task.type,
@@ -176,7 +176,7 @@ export const PATCH = withErrorHandlingParams<{ id: string }>(
       {
         id: task._id.toString(),
         courseId: task.courseId.toString(),
-        subjectId: task.subjectId.toString(),
+        unitId: task.unitId ? task.unitId.toString() : undefined,
         title: task.title,
         description: task.description,
         type: task.type,
@@ -249,16 +249,15 @@ export const DELETE = withErrorHandlingParams<{ id: string }>(
     // Eliminar tarea
     await Task.findByIdAndDelete(id);
 
-    // Actualizar subject: remover tarea de taskIds
-    await Subject.findByIdAndUpdate(
-      task.subjectId,
-      { $pull: { taskIds: new mongoose.Types.ObjectId(id) } }
-    );
+    // Actualizar unidad: remover tarea de taskIds
+    if (task.unitId) {
+      await Unit.findByIdAndUpdate(task.unitId, { $pull: { taskIds: new mongoose.Types.ObjectId(id) } });
+    }
 
     logInfo('Tarea eliminada', {
       taskId: id,
       courseId: task.courseId.toString(),
-      subjectId: task.subjectId.toString(),
+      unitId: task.unitId ? task.unitId.toString() : undefined,
       deletedBy: userId,
       requestId,
     });

@@ -57,7 +57,9 @@ export interface SerializedCourse {
   teachers: string[];
   status: "draft" | "active" | "archived";
   subjectIds: string[];
+  unitIds?: string[];
   subjects?: SerializedSubject[];
+  units?: SerializedUnit[];
   enrolledStudents: string[];
   createdAt: string;
   updatedAt: string;
@@ -179,7 +181,9 @@ function serializeCourse(course: ICourse): SerializedCourse {
     teachers: course.teachers?.map(t => t.toString()) || [],
     status: course.status,
     subjectIds: course.subjectIds?.map(s => s.toString()) || [],
+    unitIds: course.unitIds?.map(u => u.toString()) || [],
     subjects: course.subjects?.map(serializeSubject) || [],
+    units: course.units?.map(serializeUnit) || [],
     enrolledStudents: course.enrolledStudents?.map(e => e.toString()) || [],
     createdAt: course.createdAt?.toISOString() || new Date().toISOString(),
     updatedAt: course.updatedAt?.toISOString() || new Date().toISOString(),
@@ -734,13 +738,18 @@ export async function deleteSubject(subjectId: string): Promise<{ success: boole
       return { success: false, error: "No tienes permiso para eliminar esta materia" };
     }
 
-    const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds : [];
+    const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds.map((id: any) => id.toString()) : [];
 
     await Promise.all([
-      Task.deleteMany({ subjectId: subject._id }),
+      // Eliminar tareas asociadas a las unidades de la materia
+      Task.deleteMany({ unitId: { $in: unitIds } }),
+      // Eliminar recursos de esas unidades
       Resource.deleteMany({ unitId: { $in: unitIds } }),
-      Unit.deleteMany({ subjectId: subject._id }),
+      // Eliminar las unidades por ID
+      Unit.deleteMany({ _id: { $in: unitIds } }),
+      // Eliminar la materia
       Subject.findByIdAndDelete(subjectId),
+      // Quitar referencia en el curso
       Course.findByIdAndUpdate(course._id, { $pull: { subjectIds: subject._id } }),
     ]);
 

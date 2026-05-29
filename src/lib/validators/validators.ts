@@ -180,67 +180,7 @@ export const enrollStudentSchema = z.object({
 export type EnrollStudentInput = z.infer<typeof enrollStudentSchema>;
 
 // ============ ESQUEMAS DE MATERIAS ============
-
-/**
- * Validación para crear una materia
- */
-export const createSubjectSchema = z.object({
-  courseId: z
-    .string()
-    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
-  title: z
-    .string()
-    .min(3, "El título de la materia debe tener al menos 3 caracteres")
-    .max(200, "El título no puede exceder 200 caracteres")
-    .transform((val) => val.trim()),
-  description: z
-    .string()
-    .max(1000, "La descripción no puede exceder 1000 caracteres")
-    .optional()
-    .transform((val) => val?.trim()),
-  order: z
-    .number()
-    .int("El orden debe ser un número entero")
-    .min(0, "El orden no puede ser negativo")
-    .default(0),
-});
-
-export type CreateSubjectInput = z.infer<typeof createSubjectSchema>;
-
-/**
- * Validación para actualizar una materia
- */
-export const updateSubjectSchema = z.object({
-  title: z
-    .string()
-    .min(3, "El título de la materia debe tener al menos 3 caracteres")
-    .max(200, "El título no puede exceder 200 caracteres")
-    .transform((val) => val.trim())
-    .optional(),
-  description: z
-    .string()
-    .max(1000, "La descripción no puede exceder 1000 caracteres")
-    .optional()
-    .transform((val) => val?.trim()),
-  order: z
-    .number()
-    .int("El orden debe ser un número entero")
-    .min(0, "El orden no puede ser negativo")
-    .optional(),
-});
-
-export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
-
-export const reorderSubjectsSchema = z.object({
-  courseId: z
-    .string()
-    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
-  subjectIds: z
-    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"))
-    .min(1, "Debe existir al menos una materia"),
-});
-
-export type ReorderSubjectsInput = z.infer<typeof reorderSubjectsSchema>;
+// Subjects removed: use Units as top-level grouping inside a Course
 
 // ============ ESQUEMAS DE UNIDADES ============
 
@@ -248,9 +188,6 @@ export type ReorderSubjectsInput = z.infer<typeof reorderSubjectsSchema>;
  * Validación para crear una unidad
  */
 export const createUnitSchema = z.object({
-  subjectId: z
-    .string()
-    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
   courseId: z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
@@ -297,9 +234,9 @@ export const updateUnitSchema = z.object({
 export type UpdateUnitInput = z.infer<typeof updateUnitSchema>;
 
 export const reorderUnitsSchema = z.object({
-  subjectId: z
+  courseId: z
     .string()
-    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
   unitIds: z
     .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido"))
     .min(1, "Debe existir al menos una unidad"),
@@ -385,9 +322,9 @@ export const createTaskSchema = z.object({
   courseId: z
     .string()
     .regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
-  subjectId: z
+  unitId: z
     .string()
-    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido"),
   title: z
     .string()
     .min(3, "El título de la tarea debe tener al menos 3 caracteres")
@@ -467,13 +404,47 @@ export const updateTaskSchema = z.object({
 
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
-export const reorderSubjectTasksSchema = z.object({
-  subjectId: z
+export const reorderUnitTasksSchema = z.object({
+  unitId: z
     .string()
-    .regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido"),
+    .regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido"),
   taskIds: z
     .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de tarea inválido"))
     .min(1, "Debe existir al menos una tarea"),
 });
 
-export type ReorderSubjectTasksInput = z.infer<typeof reorderSubjectTasksSchema>;
+export type ReorderUnitTasksInput = z.infer<typeof reorderUnitTasksSchema>;
+
+// Backwards-compatibility shims for Subject-based APIs (deprecated)
+export const createSubjectSchema = z.object({
+  courseId: z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  title: z.string().min(3).max(200).transform((v) => v.trim()),
+  description: z.string().max(1000).optional().transform((v) => v?.trim()),
+  order: z.number().int().min(0).optional().default(0),
+});
+
+export type CreateSubjectInput = z.infer<typeof createSubjectSchema>;
+
+export const updateSubjectSchema = z.object({
+  title: z.string().min(3).max(200).transform((v) => v.trim()).optional(),
+  description: z.string().max(1000).optional().transform((v) => v?.trim()),
+  order: z.number().int().min(0).optional(),
+});
+
+export type UpdateSubjectInput = z.infer<typeof updateSubjectSchema>;
+
+export const reorderSubjectsSchema = z.object({
+  courseId: z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
+  subjectIds: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de materia inválido")).min(1),
+});
+
+export type ReorderSubjectsInput = z.infer<typeof reorderSubjectsSchema>;
+
+// Map old subject-task reorder to unit-task reorder for compatibility
+export const reorderSubjectTasksSchema = reorderUnitTasksSchema;
+export type ReorderSubjectTasksInput = ReorderUnitTasksInput;
+
+// Nuevo esquema: `unitIds` — se añade para soportar operaciones 'unit-first'.
+// Mantener `subjectIds` es compatible, pero las nuevas APIs deberían preferir `unitIds`.
+export const unitIdsSchema = z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de unidad inválido")).min(1);
+export type UnitIdsInput = z.infer<typeof unitIdsSchema>;

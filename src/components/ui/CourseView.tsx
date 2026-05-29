@@ -218,10 +218,22 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
   // ========== ESTADOS DE CONTENIDO ==========
   // Inicializo las materias desde courseStructure o courseData (priorizo structure)
-  const initialSubjects = useMemo(
-    () => courseStructure?.subjects || courseData?.subjects || [],
-    [courseStructure?.subjects, courseData?.subjects]
-  );
+  // Compatibilidad: si la estructura tiene `units` (nuevo modelo), la mapeo
+  // a la forma legacy de `subjects` donde cada unit actúa como un "subject" contenedor.
+  const initialSubjects = useMemo(() => {
+    if (courseStructure?.subjects && Array.isArray(courseStructure.subjects)) return courseStructure.subjects;
+    if (courseStructure?.units && Array.isArray(courseStructure.units)) {
+      return courseStructure.units.map((u: any) => ({
+        _id: u._id,
+        title: u.title,
+        description: u.content || '',
+        order: u.order,
+        units: [u],
+        tasks: u.tasks || [],
+      }));
+    }
+    return courseData?.subjects || [];
+  }, [courseStructure?.subjects, courseStructure?.units, courseData?.subjects]);
   const [subjects, setSubjects] = useState<any[]>(initialSubjects as any[]);
 
   // ========== ESTADOS DEL FORMULARIO DE INFORMACIÓN GENERAL ==========
@@ -327,20 +339,41 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
    * luego el servidor confirmará (o no) pero asumo éxito porque es creación.
    */
   const handleAddTask = (task: any) => {
-    if (!task?.subjectId) return; // necesito saber a qué subject pertenece
+    // Prefer task.unitId (new model), fallback to task.subjectId (legacy)
+    const unitId = task?.unitId;
+    const subjectIdFallback = task?.subjectId;
 
-    setSubjects((prev) =>
-      prev.map((subject: any) => {
-        const subjectId = String(subject?._id || subject?.id || "");
-        if (subjectId !== String(task.subjectId)) return subject;
+    if (unitId) {
+      setSubjects((prev) =>
+        prev.map((subject: any) => {
+          const units = Array.isArray(subject.units) ? subject.units : [];
+          const found = units.some((u: any) => String(u?._id || u?.id || "") === String(unitId));
+          if (!found) return subject;
 
-        const existingTasks = Array.isArray(subject.tasks) ? subject.tasks : [];
-        return {
-          ...subject,
-          tasks: [task, ...existingTasks], // agrego la nueva tarea al principio
-        };
-      })
-    );
+          const existingTasks = Array.isArray(subject.tasks) ? subject.tasks : [];
+          return {
+            ...subject,
+            tasks: [task, ...existingTasks],
+          };
+        })
+      );
+      return;
+    }
+
+    if (subjectIdFallback) {
+      setSubjects((prev) =>
+        prev.map((subject: any) => {
+          const subjectId = String(subject?._id || subject?.id || "");
+          if (subjectId !== String(subjectIdFallback)) return subject;
+
+          const existingTasks = Array.isArray(subject.tasks) ? subject.tasks : [];
+          return {
+            ...subject,
+            tasks: [task, ...existingTasks],
+          };
+        })
+      );
+    }
   };
 
   /**
@@ -1138,7 +1171,14 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
           onAddSubject={handleAddSubject}
           onAddResource={handleAddResource}
           courseId={courseId}
-          defaultSubjectId={subjects[0] ? String(subjects[0]._id) : undefined}
+          defaultUnitId={
+            courseStructure?.units && courseStructure.units.length > 0
+              ? String(courseStructure.units[0]._id)
+              : subjects[0]
+                ? String((subjects[0].units && subjects[0].units[0]?._id) || subjects[0]._id)
+                : undefined
+          }
+          units={courseStructure?.units || subjects.flatMap((s: any) => s.units || [])}
           subjects={subjects}
         />
       )}

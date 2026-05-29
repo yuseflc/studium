@@ -18,7 +18,7 @@ import {
 
 export interface CreateResourceActionInput {
   courseId: string;
-  subjectId: string;
+  subjectId?: string;
   unitId?: string;
   title: string;
   description?: string;
@@ -100,21 +100,46 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const [course, subject] = await Promise.all([
-      Course.findById(input.courseId),
-      Subject.findById(input.subjectId),
-    ]);
+    const course = await Course.findById(input.courseId);
 
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
     }
 
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
-    }
+    // Resolve unit: prefer explicit unitId, fall back to subject -> first unit
+    let unit: any = null;
+    if (input.unitId) {
+      unit = await Unit.findById(input.unitId);
+      if (!unit) {
+        return { success: false, error: "La unidad no existe" };
+      }
+      if (unit.courseId.toString() !== course._id.toString()) {
+        return { success: false, error: "La unidad no pertenece al curso" };
+      }
+    } else if (input.subjectId) {
+      const subject = await Subject.findById(input.subjectId);
+      if (!subject) {
+        return { success: false, error: "Materia no encontrada" };
+      }
+      if (subject.courseId.toString() !== course._id.toString()) {
+        return { success: false, error: "La materia no pertenece al curso" };
+      }
 
-    if (subject.courseId.toString() !== course._id.toString()) {
-      return { success: false, error: "La materia no pertenece al curso" };
+      const candidateUnitId = subject.unitIds?.[0]?.toString();
+      if (!candidateUnitId) {
+        return { success: false, error: "La materia no tiene unidades disponibles" };
+      }
+
+      // Encontrar la unidad por su id (Unit ya no referencia subjectId)
+      unit = await Unit.findById(candidateUnitId);
+      if (!unit) {
+        return { success: false, error: "La unidad no existe" };
+      }
+      if (unit.courseId.toString() !== course._id.toString()) {
+        return { success: false, error: "La unidad no pertenece al curso" };
+      }
+    } else {
+      return { success: false, error: "Se requiere unitId o subjectId" };
     }
 
     const currentUserId = currentUser._id.toString();
@@ -125,15 +150,6 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       return { success: false, error: "No tienes permiso para crear recursos en este curso" };
     }
 
-    const candidateUnitId = input.unitId ?? subject.unitIds?.[0]?.toString();
-    if (!candidateUnitId) {
-      return { success: false, error: "La materia no tiene unidades disponibles" };
-    }
-
-    const unit = await Unit.findOne({ _id: candidateUnitId, subjectId: subject._id });
-    if (!unit) {
-      return { success: false, error: "La unidad no existe o no pertenece a la materia" };
-    }
 
     const resourceType = input.type ?? (input.url ? "link" : "file");
     const validationResult = createResourceSchema.safeParse({

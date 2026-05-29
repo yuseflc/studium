@@ -2,24 +2,19 @@ import mongoose from "mongoose";
 
 export interface IUnit {
   _id?: mongoose.Types.ObjectId;
-  subjectId: mongoose.Types.ObjectId; // Referencia a la materia
   courseId: mongoose.Types.ObjectId; // Referencia al curso (desnormalización para queries rápidas)
   title: string;
   content: string;
   order: number;
   resourceIds: mongoose.Types.ObjectId[]; // Referencias a los recursos
+  taskIds?: mongoose.Types.ObjectId[]; // Referencias a las tareas asociadas a la unidad
   createdAt: Date;
   updatedAt: Date;
 }
 
 const UnitSchema = new mongoose.Schema<IUnit>(
   {
-    subjectId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Subject",
-      required: [true, "El ID de la materia es requerido"],
-      index: true,
-    },
+    // `subjectId` removed: units are now directly associated to a course via `courseId`
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
@@ -47,6 +42,12 @@ const UnitSchema = new mongoose.Schema<IUnit>(
         ref: "Resource",
       },
     ],
+    taskIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Task",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -54,9 +55,8 @@ const UnitSchema = new mongoose.Schema<IUnit>(
 );
 
 // Índices para optimizar consultas comunes
-UnitSchema.index({ subjectId: 1, order: 1 });
+UnitSchema.index({ courseId: 1, order: 1 });
 UnitSchema.index({ courseId: 1 });
-UnitSchema.index({ subjectId: 1 });
 
 // Prevenir que se sobrescriba el modelo si ya existe
 export default mongoose.models.Unit ||

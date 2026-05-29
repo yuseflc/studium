@@ -2,7 +2,6 @@
 
 export { default as User } from './User';
 export { default as Course } from './Course';
-export { default as Subject } from './Subject';
 export { default as Unit } from './Unit';
 export { default as Resource } from './Resource';
 export { default as Session } from './Session';
