@@ -48,6 +48,7 @@ import {
   updateResource,
 } from "@/app/actions/resourceActions";
 import Link from "next/link";
+import { truncateText } from '@/lib/utils';
 import {
   createTask,
   deleteTask,
@@ -889,7 +890,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                           <BookOpen size={20} className="text-primary" />
                           <h3 className="text-2xl font-bold">{unit.title}</h3>
                         </div>
-                        {unit.content && <p className="text-sm text-base-content/60 max-w-3xl whitespace-pre-wrap">{unit.content}</p>}
+                        {unit.content && <p className="text-sm text-base-content/60 max-w-3xl whitespace-pre-wrap">{truncateText(unit.content, 240)}</p>}
                       </div>
 
                       {canEdit && (
@@ -932,7 +933,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{getResourceTypeLabel(resource.type)}</span>
                                       <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
                                     </div>
-                                    {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
+                                    {resource.description && <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(resource.description, 140)}</p>}
                                   </div>
                                 </div>
 
@@ -1003,7 +1004,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
                                       <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                     </div>
-                                    {task.description && <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>}
+                                    {task.description && <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(task.description, 140)}</p>}
                                   </div>
                                 </Link>
 
@@ -1043,7 +1044,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                         <BookOpen size={20} className="text-primary" />
                         <h3 className="text-2xl font-bold">{subject.title}</h3>
                       </div>
-                      {subject.description && <p className="text-sm text-base-content/60 max-w-3xl">{subject.description}</p>}
+                      {subject.description && <p className="text-sm text-base-content/60 max-w-3xl break-words">{truncateText(subject.description, 200)}</p>}
                     </div>
 
                     <div className="dropdown dropdown-end">
@@ -1086,7 +1087,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 shadow-sm">Unidad {unit.order ?? 1}</span>
                                     <h4 className="text-lg font-semibold">{unit.title}</h4>
                                   </div>
-                                  <p className="text-sm text-base-content/60 whitespace-pre-wrap">{unit.content}</p>
+                                  <p className="text-sm text-base-content/60 whitespace-pre-wrap">{truncateText(unit.content, 240)}</p>
                                 </div>
 
                                 {canEdit && (
@@ -1126,7 +1127,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{getResourceTypeLabel(resource.type)}</span>
                                               <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
                                             </div>
-                                            {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
+                                            {resource.description && <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(resource.description, 140)}</p>}
                                           </div>
                                         </div>
 
@@ -1201,7 +1202,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
                                             <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                           </div>
-                                          <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>
+                                          <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(task.description, 140)}</p>
                                         </div>
                                       </Link>
 

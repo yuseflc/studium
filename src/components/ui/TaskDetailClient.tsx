@@ -153,7 +153,7 @@ export default function TaskDetailClient({ taskInfo, courseid, existingSubmissio
                   <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/50">Instrucciones de la tarea</h3>
                   <div className="prose prose-base-content max-w-none">
                     {taskInfo.description.split('\n').map((line, i) => (
-                      <p key={i} className="text-base leading-relaxed text-base-content/85 whitespace-pre-wrap">
+                      <p key={i} className="text-base leading-relaxed text-base-content/85 whitespace-pre-wrap break-words break-all max-w-full">
                         {line}
                       </p>
                     ))}

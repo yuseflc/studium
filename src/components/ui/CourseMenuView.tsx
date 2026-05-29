@@ -7,6 +7,7 @@ import JoinCourseButton from "@/components/ui/JoinCourseButton";
 import { ModalAdvise, CourseMenuDeleteModal } from "@/components/ui/modals";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
+import { truncateText } from "@/lib/utils";
 
 export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
   const [courses, setCourses] = useState<SerializedCourse[]>([]);
@@ -173,7 +174,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
 
                 <div className="card-body p-4 pt-10 flex flex-col relative">
                   <h2 className="card-title text-lg leading-tight flex-grow">{c.title}</h2>
-                  <p className="text-sm text-base-content/70">{c.description}</p>
+                  <p className="text-sm text-base-content/70">{truncateText(c.description, 140)}</p>
                   <div className="card-actions justify-end mt-auto" onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();

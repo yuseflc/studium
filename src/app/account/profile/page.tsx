@@ -20,6 +20,7 @@ import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
 import User from "@/models/User";
 import Link from "next/link";
+import { truncateText } from "@/lib/utils";
 import {
   IconUser,
   IconMail,
@@ -329,7 +330,7 @@ export default async function ProfilePage({
                         <div className="flex-1">
                           <h2 className="card-title text-lg">{course.title}</h2>
                           {course.description && (
-                            <p className="text-sm text-base-content/70">{course.description}</p>
+                            <p className="text-sm text-base-content/70">{truncateText(course.description, 140)}</p>
                           )}
                         </div>
                         <Link href={`/mycourses/${cId}`} className="btn btn-warning btn-sm">
@@ -369,7 +370,7 @@ export default async function ProfilePage({
                         <div className="flex-1">
                           <h2 className="card-title text-lg">{course.title}</h2>
                           {course.description && (
-                            <p className="text-sm text-base-content/70">{course.description}</p>
+                            <p className="text-sm text-base-content/70">{truncateText(course.description, 140)}</p>
                           )}
                         </div>
                         <Link href={`/mycourses/${cId}`} className="btn btn-info btn-sm">
