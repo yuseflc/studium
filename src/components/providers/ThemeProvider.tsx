@@ -20,13 +20,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         
         if (savedTheme && savedTheme !== 'default') {
             setThemeState(savedTheme);
-            document.documentElement.setAttribute('data-theme', savedTheme);
         } else {
-            // Usa la preferencia del sistema
             const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             const systemTheme = prefersDark ? 'dark' : 'bumblebee';
             setThemeState('default');
-            document.documentElement.setAttribute('data-theme', systemTheme);
         }
     }, []);
 
