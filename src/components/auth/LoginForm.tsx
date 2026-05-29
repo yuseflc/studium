@@ -16,6 +16,7 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 import Link from 'next/link'; // Navegación interna sin recargar la página
+import Logo from '@/components/ui/Navbars/Logo';
 
 
 export default function LoginForm() {
@@ -81,11 +82,9 @@ export default function LoginForm() {
       <div className="card w-full max-w-sm bg-base-100 shadow-2xl border border-base-300 rounded-2xl">
         <div className="card-body p-5 space-y-2">
           {/* Cabecera centrada */}
-          <div className="text-center space-y-1">
-            <h2 className="text-3xl font-bold italic text-base-content tracking-tighter leading-tight">
-              STUDIUM<span className="text-primary">.</span>
-            </h2>
-            <p className="text-base-content/50 font-semibold uppercase text-[10px] tracking-widest">Iniciar sesión</p>
+          <div className="flex flex-col items-center text-center space-y-1">
+            <Logo className="h-10 w-auto mb-2" />
+            <p className="text-sm font-semibold text-base-content/60">Iniciar sesión</p>
           </div>
 
           {/* Formulario de login */}

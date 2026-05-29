@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Logo from '@/components/ui/Navbars/Logo'
 
 import { IconBrandLinkedin, IconBrandTwitter } from "@tabler/icons-react";
 
@@ -54,8 +55,7 @@ export const Footer = () => {
                             href="/"
                             className="flex flex-row gap-1 items-center justify-start text-2xl font-display font-extrabold text-base-content"
                         >
-
-                            Studium
+                            <Logo className="h-8 w-auto" />
                         </Link>
                         <p className='font-medium w-full md:w-4/5 text-base-content'>Organizador eficiente de clases y asignaturas online</p>
                     </div>

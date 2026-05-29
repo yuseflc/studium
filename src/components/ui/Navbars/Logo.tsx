@@ -4,7 +4,7 @@ import { useTheme } from "@/components/providers/ThemeProvider";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-export default function Logo() {
+export default function Logo({ className = "h-5 w-auto" }: { className?: string }) {
     const { theme } = useTheme();
     const [mounted, setMounted] = useState(false);
 
@@ -15,7 +15,7 @@ export default function Logo() {
 
     if (!mounted) {
         // Placeholder con dimensiones similares para evitar layout shift
-        return <div className="h-5 w-32" />;
+        return <div className={className} />;
     }
 
     // El logo "dark" (letras oscuras) se usa en el tema claro (bumblebee)
@@ -29,7 +29,7 @@ export default function Logo() {
                 alt="Studium"
                 width={112}
                 height={20}
-                className="h-5 w-auto"
+                className={className}
                 priority
             />
         </div>

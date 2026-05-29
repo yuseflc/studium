@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import Logo from '@/components/ui/Navbars/Logo';
 import { FormInput } from './FormInput';
 import { PasswordInput } from './PasswordInput';
 import { validators } from './validatorConfig';
@@ -213,11 +214,9 @@ export default function SignUpForm() {
   return (
     <div className="mt-25 card w-full max-w-sm bg-base-100 shadow-xl border border-base-300 rounded-2xl">
       <div className="card-body p-6 space-y-3">
-        <div className="text-center space-y-1">
-          <h2 className="text-3xl font-black italic text-base-content tracking-tighter leading-tight">
-            STUDIUM<span className="text-primary">.</span>
-          </h2>
-          <p className="text-base-content/50 font-bold uppercase text-[10px] tracking-[0.2em]">Crea tu cuenta</p>
+        <div className="flex flex-col items-center text-center space-y-1">
+          <Logo className="h-10 w-auto mb-2" />
+          <p className="text-sm font-semibold text-base-content/60">Crea tu cuenta</p>
         </div>
 
         <form className="space-y-1" onSubmit={handleSubmit}>
