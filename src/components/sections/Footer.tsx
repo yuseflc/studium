@@ -1,9 +1,6 @@
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
 
-import { IconBrandLinkedin, IconBrandTwitter } from "@tabler/icons-react";
-
-
 interface FooterLink {
     name: string;
     href: string;
@@ -19,27 +16,29 @@ const footerSections = [
         title: 'Recursos',
         disabled: false,
         links: [
-            { name: 'Utilidades', href: '/resources/freebies' },
-            { name: 'Precios', href: '/resources/tools' },
-            { name: 'Guias', href: '/resources/behavior-principles', disabled: true },
+            { name: 'Mis Cursos', href: '/mycourses' },
+            { name: 'Explorar', href: '/mycourses' },
+            { name: 'Perfil', href: '/account/profile' },
+            { name: 'Tareas', href: '/mycourses' },
         ],
     },
     {
         title: 'Proyecto',
-        disabled: true,
         links: [
-            { name: 'Misión', href: '/company/mission', disabled: true },
-            { name: 'Roadmap', href: '/company/ecosystem', disabled: true },
+            { name: 'Inicio', href: '/' },
+            { name: 'Características', href: '/#features' },
+            { name: 'Precios', href: '/#pricing' },
+            { name: 'Contacto', href: 'mailto:hola@studium.com' },
         ],
     },
     {
         title: 'Integrantes',
         disabled: false,
         links: [
-            { name: 'Darío MR', href: 'https://dmrstudio.dev/', disabled: false },
-            { name: 'yuseflc', href: 'https://yuseflc.dev/', disabled: false },
-            { name: 'David López', href: '#', disabled: false },
-            { name: 'Eva Cantero', href: '#', disabled: false },
+            { name: 'Darío Muñoz', href: 'https://dmrstudio.dev/' },
+            { name: 'Yusef Laroussi', href: 'https://yuxey.pages.dev/' },
+            { name: 'David López', href: 'https://github.com/dalofe23' },
+            { name: 'Eva Cantero', href: 'https://github.com/ecanteroa02' },
         ],
     },
 ]
@@ -47,9 +46,9 @@ export const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer id="about" className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm lg:max-w-7xl mx-4 lg:mx-auto">
-            <div className="relative bg-base-100 rounded-3xl mx-auto py-10 flex flex-col md:flex-row justify-between items-center gap-6 px-4 md:px-0">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-10 md:px-8 flex-1 w-full">
+        <footer id="about" className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm lg:max-w-7xl mx-4 lg:mx-auto shadow-2xl shadow-neutral/10">
+            <div className="relative bg-base-100 rounded-3xl mx-auto py-10 flex flex-col md:flex-row justify-between items-start gap-6 px-4 md:px-0">
+                <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-10 md:px-8 flex-1 w-full">
                     <div className='flex flex-col items-start gap-2'>
                         <Link
                             href="/"
@@ -57,7 +56,7 @@ export const Footer = () => {
                         >
                             <Logo className="h-8 w-auto" />
                         </Link>
-                        <p className='font-medium w-full md:w-4/5 text-base-content'>Organizador eficiente de clases y asignaturas online</p>
+                        <p className='font-medium w-full md:w-4/5 text-base-content'>Tu estudio organizado en una misma plataforma.</p>
                     </div>
 
                     <div className='flex flex-col md:mx-4 md:flex-row gap-2 md:gap-20 items-start md:items-start'>
@@ -65,16 +64,16 @@ export const Footer = () => {
                         {footerSections.map((section: FooterSection) => (
                             <div key={section.title} className='flex flex-col gap-1 md:gap-4'>
                                 <h4 className={`uppercase font-display text-md font-semibold ${section.disabled ? 'text-neutral/50' : 'text-base-content'}`}>
-                                    {section.title} {(section.disabled) && <span className='inline-flex  ml-1 py-0.5 px-3 bg-base-300 text-xs rounded-xl rotate-3'>proximamente</span>}
+                                    {section.title}
                                 </h4>
                                 <div className="flex flex-wrap md:flex-col gap-2 text-sm text-neutral items-start ">
                                     {section.links.map(link => (
                                         <Link
                                             key={link.name}
                                             href={link.href}
-                                            className={`whitespace-nowrap font-medium ${link.disabled ? 'pointer-events-none text-neutral/50' : 'text-base-content/80'}`}
+                                            className={`whitespace-nowrap font-medium transition-all duration-200 hover: hover:text-primary ${link.disabled ? 'pointer-events-none text-neutral/50' : 'text-base-content/70 hover:text-primary'}`}
                                         >
-                                            {link.name} {link.disabled && <span className='inline-flex ml-1 py-0.5 px-3 bg-base-300 text-xs rounded-xl -rotate-3'>soon</span>}
+                                            {link.name}
                                         </Link>
                                     ))}
                                 </div>
@@ -84,14 +83,14 @@ export const Footer = () => {
 
                 </div>
             </div>
-            <div className="my-3 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center md:items-center gap-4 text-sm text-neutral w-full max-w-5xl mx-auto">
+            <div className="my-3 px-4 md:px-8 flex flex-col md:flex-row justify-between items-center md:items-center gap-4 text-sm w-full max-w-5xl mx-auto">
                 <div className="flex flex-col sm:flex-row gap-2 sm:gap-8 items-center sm:items-center">
-                    <p className="whitespace-nowrap">
+                    <p className="whitespace-nowrap font-medium text-base-content/70">
                         ©{currentYear} Studium.
                     </p>
                     <div className="flex flex-row gap-4">
-                        <Link href="/legal/privacy-policy">Política de Privacidad</Link>
-                        <Link href="/legal/tos">Términos &#38; Condiciones</Link>
+                        <Link href="/legal/privacy-policy" className="font-medium text-base-content/70 hover:text-primary transition-all duration-200">Política de Privacidad</Link>
+                        <Link href="/legal/tos" className="font-medium text-base-content/70 hover:text-primary transition-all duration-200">Términos &#38; Condiciones</Link>
                     </div>
                 </div>
             </div>
