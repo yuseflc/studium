@@ -992,8 +992,14 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                       </Link>
 
                                       {canEdit && (
-                                        <div className="flex items-center gap-1 pr-2 self-center">
-                                          {task.dueDate && (
+                                        <div className="flex items-center gap-2 pr-2 self-center">
+                                          {task.isSubmitted && (
+                                            <div className="flex items-center justify-center mr-1">
+                                              <CheckCircle2 size={18} className="text-success flex-shrink-0" />
+                                            </div>
+                                          )}
+
+                                          {task.dueDate && !task.isSubmitted && (
                                             <div className="flex items-center gap-1.5 text-xs text-base-content/60 mr-1 whitespace-nowrap">
                                               <Calendar size={14} className="text-primary" aria-hidden="true" />
                                               <span>{new Date(task.dueDate).toLocaleDateString()}</span>
