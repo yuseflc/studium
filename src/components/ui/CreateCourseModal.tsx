@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { IconPlus, IconBook } from '@tabler/icons-react';
-import { ModalForm } from './modals';
+import { CreateCourseModalUI } from './modals';
 
 export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated?: () => void | Promise<void> }) {
   const router = useRouter();
@@ -37,18 +37,6 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
     setCourseId("");
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
   const handleNavigateToCourse = () => {
     if (courseId) {
       closeModal();
@@ -56,8 +44,8 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    if (e) e.preventDefault();
     setError("");
     setLoading(true);
 
@@ -127,12 +115,15 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
         </button>
       </div>
 
-      {/* Modal */}
-      <ModalForm
+      <CreateCourseModalUI
+        id="create-course-modal"
         dialogRef={dialogRef}
-        title="Crear clase"
         onClose={closeModal}
-        onConfirm={() => handleSubmit({ preventDefault: () => {} } as any)}
+        titleValue={formData.title}
+        setTitleValue={(val) => setFormData(prev => ({ ...prev, title: val }))}
+        descriptionValue={formData.description}
+        setDescriptionValue={(val) => setFormData(prev => ({ ...prev, description: val }))}
+        onConfirm={handleSubmit}
         isLoading={loading}
         error={error}
         success={success}
@@ -146,39 +137,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
               }
             : undefined
         }
-      >
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text font-bold text-warning/80">Nombre de la clase<span className="text-error"> *</span></span>
-          </label>
-          <input
-            name="title"
-            type="text"
-            value={formData.title}
-            onChange={handleChange}
-            placeholder="Nombre de la clase"
-            className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
-            required
-            disabled={loading}
-          />
-        </div>
-
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text font-bold text-warning/80">Descripción<span className="text-error"> *</span></span>
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Descripción del curso"
-            className="textarea w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
-            rows={3}
-            required
-            disabled={loading}
-          />
-        </div>
-      </ModalForm>
+      />
     </>
   );
 }

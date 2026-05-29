@@ -110,7 +110,13 @@ import {
   Type,
   Trash2,
 } from "lucide-react";
-import { ModalForm } from "./modals";
+import { 
+  CourseSubjectModal, 
+  CourseUnitModal, 
+  CourseResourceModal, 
+  CourseTaskModal, 
+  ModalForm 
+} from "./modals";
 import {
   createSubject,
   deleteSubject,
@@ -1110,128 +1116,82 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       )}
 
       {canEdit && editor && (
-        <ModalForm
-          id="course-structure-editor"
-          dialogRef={editorDialogRef}
-          title={
-            editor.kind === "subject"
-              ? editor.mode === "create"
-                ? "Crear materia"
-                : "Editar materia"
-              : editor.kind === "unit"
-                ? editor.mode === "create"
-                  ? "Crear unidad"
-                  : "Editar unidad"
-                : editor.kind === "resource"
-                  ? editor.mode === "create"
-                    ? "Crear recurso"
-                    : "Editar recurso"
-                  : editor.mode === "create"
-                    ? editor.taskType === "quiz"
-                      ? "Crear examen"
-                      : "Crear tarea"
-                    : editor.taskType === "quiz"
-                      ? "Editar examen"
-                      : "Editar tarea"
-          }
-          onClose={closeEditor}
-          onConfirm={handleEditorSubmit}
-          confirmLabel={editor.kind === "subject" ? "Guardar materia" : editor.kind === "unit" ? "Guardar unidad" : editor.kind === "resource" ? "Guardar recurso" : "Guardar"}
-          isLoading={isSubmitting}
-          error={errorMessage}
-          className="max-w-3xl"
-        >
+        <>
           {editor.kind === "subject" && (
-            <>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Título</span>
-                <input className="input input-bordered w-full" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej: Matemáticas" required />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Descripción</span>
-                <textarea className="textarea textarea-bordered h-28 w-full" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Describe la materia" />
-              </label>
-            </>
+            <CourseSubjectModal
+              id="course-structure-editor"
+              dialogRef={editorDialogRef}
+              mode={editor.mode}
+              titleValue={title}
+              setTitleValue={setTitle}
+              descriptionValue={description}
+              setDescriptionValue={setDescription}
+              onClose={closeEditor}
+              onConfirm={handleEditorSubmit}
+              isLoading={isSubmitting}
+              error={errorMessage}
+            />
           )}
 
           {editor.kind === "unit" && (
-            <>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Título</span>
-                <input className="input input-bordered w-full" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej: Unidad 1" required />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Contenido</span>
-                <textarea className="textarea textarea-bordered h-32 w-full" value={content} onChange={(event) => setContent(event.target.value)} placeholder="Contenido de la unidad" required />
-              </label>
-            </>
+            <CourseUnitModal
+              id="course-structure-editor"
+              dialogRef={editorDialogRef}
+              mode={editor.mode}
+              titleValue={title}
+              setTitleValue={setTitle}
+              contentValue={content}
+              setContentValue={setContent}
+              onClose={closeEditor}
+              onConfirm={handleEditorSubmit}
+              isLoading={isSubmitting}
+              error={errorMessage}
+            />
           )}
 
           {editor.kind === "resource" && (
-            <>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Título</span>
-                <input className="input input-bordered w-full" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej: PDF del tema" required />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Tipo</span>
-                <select className="select select-bordered w-full" value={resourceType} onChange={(event) => setResourceType(event.target.value as "link" | "file" | "text") }>
-                  <option value="file">Archivo</option>
-                  <option value="link">Enlace</option>
-                  <option value="text">Texto</option>
-                </select>
-              </label>
-              {resourceType === "link" && (
-                <label className="form-control w-full">
-                  <span className="label-text font-medium mb-2">URL</span>
-                  <input className="input input-bordered w-full" value={resourceUrl} onChange={(event) => setResourceUrl(event.target.value)} placeholder="https://..." required />
-                </label>
-              )}
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Descripción</span>
-                <textarea className="textarea textarea-bordered h-24 w-full" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Descripción opcional" />
-              </label>
-            </>
+            <CourseResourceModal
+              id="course-structure-editor"
+              dialogRef={editorDialogRef}
+              mode={editor.mode}
+              titleValue={title}
+              setTitleValue={setTitle}
+              resourceType={resourceType as 'link' | 'file' | 'text'}
+              setResourceType={setResourceType}
+              resourceUrl={resourceUrl}
+              setResourceUrl={setResourceUrl}
+              descriptionValue={description}
+              setDescriptionValue={setDescription}
+              onClose={closeEditor}
+              onConfirm={handleEditorSubmit}
+              isLoading={isSubmitting}
+              error={errorMessage}
+            />
           )}
 
           {editor.kind === "task" && (
-            <>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Título</span>
-                <input className="input input-bordered w-full" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ej: Entrega tema 1" required />
-              </label>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Descripción</span>
-                <textarea className="textarea textarea-bordered h-28 w-full" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Explica la actividad" required />
-              </label>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <label className="form-control w-full">
-                  <span className="label-text font-medium mb-2">Tipo</span>
-                  <select
-                    className="select select-bordered w-full"
-                    value={editor.taskType}
-                    onChange={(event) => setEditor({ ...editor, taskType: event.target.value as TaskDraftType })}
-                  >
-                    <option value="assignment">Tarea</option>
-                    <option value="quiz">Examen</option>
-                  </select>
-                </label>
-                <label className="form-control w-full">
-                  <span className="label-text font-medium mb-2">Puntos máximos</span>
-                  <input className="input input-bordered w-full" type="number" min="0" value={maxPoints} onChange={(event) => setMaxPoints(event.target.value)} />
-                </label>
-              </div>
-              <label className="form-control w-full">
-                <span className="label-text font-medium mb-2">Fecha de entrega</span>
-                <input className="input input-bordered w-full" type="datetime-local" value={dueDate} onChange={(event) => setDueDate(event.target.value)} required />
-              </label>
-              <label className="label cursor-pointer justify-start gap-3">
-                <input type="checkbox" className="toggle toggle-primary" checked={active} onChange={(event) => setActive(event.target.checked)} />
-                <span className="label-text font-medium">Activa</span>
-              </label>
-            </>
+            <CourseTaskModal
+              id="course-structure-editor"
+              dialogRef={editorDialogRef}
+              mode={editor.mode}
+              taskType={editor.taskType || 'assignment'}
+              titleValue={title}
+              setTitleValue={setTitle}
+              descriptionValue={description}
+              setDescriptionValue={setDescription}
+              maxPoints={maxPoints}
+              setMaxPoints={setMaxPoints}
+              dueDate={dueDate}
+              setDueDate={setDueDate}
+              active={active}
+              setActive={setActive}
+              onClose={closeEditor}
+              onConfirm={handleEditorSubmit}
+              isLoading={isSubmitting}
+              error={errorMessage}
+            />
           )}
-        </ModalForm>
+        </>
       )}
 
       {canEdit && deleteTarget && (

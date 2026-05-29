@@ -3,9 +3,8 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { joinCourseByCode } from '@/app/actions/courseActions';
-import { Modal } from '@/components/ui/modals';
-import { Button } from '@/components/ui/button';
-import { IconPlus, IconLoader } from '@tabler/icons-react';
+import { JoinCourseModalUI } from '@/components/ui/modals';
+import { IconPlus } from '@tabler/icons-react';
 
 interface JoinCourseModalProps {
   isOpen: boolean;
@@ -34,12 +33,6 @@ export default function JoinCourseModal({ isOpen, onClose }: JoinCourseModalProp
     setError('');
     setSuccess('');
     onClose();
-  };
-
-  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.toUpperCase().slice(0, 6);
-    setCode(value);
-    if (error) setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,7 +76,6 @@ export default function JoinCourseModal({ isOpen, onClose }: JoinCourseModalProp
 
   return (
     <>
-      {/* Botón que abre el modal (Desktop) */}
       <button 
         className="btn btn-secondary shadow-lg gap-2 hidden sm:inline-flex"
         onClick={openModal}
@@ -92,7 +84,6 @@ export default function JoinCourseModal({ isOpen, onClose }: JoinCourseModalProp
         Unirse a curso
       </button>
 
-      {/* Botón flotante (Mobile FAB) - Solo si no es profesor o si queremos ambos */}
       <div className="fab sm:hidden fixed bottom-6 right-6 z-40">
         <button
           type="button"
@@ -104,68 +95,17 @@ export default function JoinCourseModal({ isOpen, onClose }: JoinCourseModalProp
         </button>
       </div>
 
-      <Modal 
-        dialogRef={dialogRef} 
+      <JoinCourseModalUI
+        id="join-course-modal"
+        dialogRef={dialogRef}
         onClose={closeModal}
-        className="max-w-md"
-        showClose={true}
-      >
-        <h3 className="font-bold text-lg">Unirse a un curso</h3>
-        <p className="text-sm text-base-content/70 my-2">
-          Ingresa el código de invitación para unirte a un curso
-        </p>
-
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Código de invitación</span>
-            </label>
-            <input
-              type="text"
-              placeholder="Ej: AB12CD"
-              value={code}
-              onChange={handleCodeChange}
-              disabled={isLoading}
-              className="input input-bordered text-center text-lg tracking-widest font-mono"
-              maxLength={6}
-            />
-            <label className="label">
-              <span className="label-text-alt text-xs">6 caracteres alfanuméricos (mayúsculas)</span>
-            </label>
-          </div>
-
-          {error && (
-            <div className="alert alert-error">
-              <span>{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="alert alert-success">
-              <span>{success}</span>
-            </div>
-          )}
-
-          <div className="modal-action gap-2">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="btn btn-ghost"
-              disabled={isLoading}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading || code.length !== 6}
-              className="btn btn-primary gap-2"
-            >
-              {isLoading && <IconLoader size={16} className="animate-spin" />}
-              {isLoading ? 'Uniéndose...' : 'Unirse'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+        code={code}
+        setCode={setCode}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        error={error}
+        success={success}
+      />
     </>
   );
 }
