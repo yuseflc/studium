@@ -1,4 +1,4 @@
-import CourseNavbar from "@/components/ui/navbars/CourseNavbar";
+import CourseNavbar from "@/components/ui/Navbars/CourseNavbar";
 
 export default function ProfilePageLayout({
   children,

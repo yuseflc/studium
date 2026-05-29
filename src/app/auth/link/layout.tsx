@@ -1,4 +1,4 @@
-import Navbar from '@/components/ui/navbars/Navbar';
+import Navbar from '@/components/ui/Navbars/Navbar';
 export default function LoginLayout({
   children,
 }: {

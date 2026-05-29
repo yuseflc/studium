@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 // Componentes internos del curso
-import CourseSidebar from "@/components/ui/navbars/CourseSidebar"; 
+import CourseSidebar from "@/components/ui/Navbars/CourseSidebar"; 
 import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
 import CourseParticipants from "./CourseParticipants"; 
 import CourseInviteCodesManager from "./CourseInviteCodesManager";
@@ -618,7 +618,9 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   return (
     <div className="flex flex-col lg:flex-row">
       {/* SIDEBAR: muestra la lista de materias para navegación rápida */}
-      <CourseSidebar isTeacher={isTeacher} subjects={subjects} />
+      <div className="hidden lg:block">
+        <CourseSidebar isTeacher={isTeacher} subjects={subjects} />
+      </div>
 
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8">

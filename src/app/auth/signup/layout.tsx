@@ -1,5 +1,5 @@
 import React from 'react';
-import Navbar from '@/components/ui/navbars/Navbar'; 
+import Navbar from '@/components/ui/Navbars/Navbar'; 
 
 export default function SignUpLayout({
   children,

@@ -1,6 +1,7 @@
 import { IconBell, IconMessageCircle, IconX, IconMenu2 } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES } from "@/seed/data";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
+import CourseNavbarDrawerContent from "./CourseNavbarDrawerContent";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
@@ -396,7 +397,12 @@ export default async function CourseNavbar() {
                                 </div>
                             </div>
 
-                            {/* 3. Theme Switcher */}
+                            {/* 3. Contenido del curso (solo en drawer mobile) */}
+                            <div className="animate-[fadeInUp_0.35s_ease-out_0.12s_both] lg:hidden">
+                                <CourseNavbarDrawerContent />
+                            </div>
+
+                            {/* 4. Theme Switcher */}
                             <div className="animate-[fadeInUp_0.35s_ease-out_0.16s_both]">
                                 <div className="py-6 flex flex-col items-center gap-3 mt-4">
                                     <span className="text-sm opacity-50 uppercase font-bold tracking-widest">Modo de pantalla</span>
