@@ -39,7 +39,20 @@ export default async function MyCoursePage({ params }: { params: Promise<{ cours
   try {
     await connectDB();
     // Busca por _id (si el courseid es un ObjectId de MongoDB)
-    const rawCurso = await Course.findById(courseid).lean();
+    const rawCurso = await Course.findById(courseid)
+      .populate({
+        path: 'ownerId',
+        select: 'firstName email profile.lastName profile.profilePicture role',
+      })
+      .populate({
+        path: 'teachers',
+        select: 'firstName email profile.lastName profile.profilePicture role',
+      })
+      .populate({
+        path: 'enrolledStudents',
+        select: 'firstName email profile.lastName profile.profilePicture role',
+      })
+      .lean();
     
     // Si encontró el curso, obtener su estructura completa
     if (rawCurso) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { User } from "lucide-react";
+import Link from "next/link";
 
 interface Participante {
     id: string;
@@ -13,9 +14,10 @@ interface Participante {
 
 interface CourseParticipantsProps {
     participants: Participante[];
+    courseId: string;
 }
 
-export default function CourseParticipants({ participants }: CourseParticipantsProps) {
+export default function CourseParticipants({ participants, courseId }: CourseParticipantsProps) {
     const teachers = participants.filter(p => p.rol === "profesor");
     const students = participants
         .filter(p => p.rol !== "profesor")
@@ -33,9 +35,10 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                         {teachers.map((p) => (
-                            <div 
+                            <Link 
                                 key={p.id} 
-                                className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-0 group cursor-pointer aspect-square flex items-center justify-center"
+                                href={`/account/profile?id=${p.id}&courseId=${courseId}`}
+                                className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-0 group cursor-pointer aspect-square flex items-center justify-center text-current no-underline"
                             >
                                 <div className="flex flex-col items-center text-center gap-1 w-full p-0">
                                     <div className="avatar">
@@ -63,7 +66,7 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>
@@ -79,9 +82,10 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
                         {students.map((p) => (
-                            <div 
+                            <Link 
                                 key={p.id} 
-                                className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-0 group cursor-pointer aspect-square flex items-center justify-center"
+                                href={`/account/profile?id=${p.id}&courseId=${courseId}`}
+                                className="card bg-base-100 border border-base-200 shadow-sm hover:bg-primary/5 transition-all p-0 group cursor-pointer aspect-square flex items-center justify-center text-current no-underline"
                             >
                                 <div className="flex flex-col items-center text-center gap-1 w-full p-0">
                                     <div className="avatar">
@@ -109,7 +113,7 @@ export default function CourseParticipants({ participants }: CourseParticipantsP
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 </div>

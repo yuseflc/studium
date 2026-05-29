@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { GraduationCap } from "lucide-react";
 import IndividualStudentGradingView from "./IndividualStudentGradingView";
+import { getCourseSubmissions } from "@/app/actions/participantActions";
 
 interface Participant {
     id: string;
@@ -27,20 +28,58 @@ interface Subject {
 interface TeacherGradesViewProps {
     participants: Participant[];
     subjects: Subject[];
+    courseId: string;
 }
 
-export default function TeacherGradesView({ participants, subjects }: TeacherGradesViewProps) {
+export default function TeacherGradesView({ participants, subjects, courseId }: TeacherGradesViewProps) {
     const [selectedStudent, setSelectedStudent] = useState<Participant | null>(null);
+    const [submissions, setSubmissions] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const loadSubmissions = async () => {
+        setLoading(true);
+        try {
+            const res = await getCourseSubmissions(courseId);
+            if (res.success) {
+                setSubmissions(res.submissions);
+                setTasks(res.tasks);
+            }
+        } catch (error) {
+            console.error("Error loading submissions:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadSubmissions();
+    }, [courseId]);
 
     // Solo mostramos estudiantes en la lista de calificaciones
     const visibleStudents = participants.filter(p => p.rol === "estudiante");
+
+    // Calcular la media real para cada estudiante
+    const getStudentAverage = (studentId: string) => {
+        const studentSubs = submissions.filter(
+            (s: any) => String(s.studentId) === String(studentId) && s.grade !== undefined
+        );
+        if (studentSubs.length === 0) return "—";
+        const sum = studentSubs.reduce((acc: number, curr: any) => acc + curr.grade, 0);
+        return (sum / studentSubs.length).toFixed(1);
+    };
 
     if (selectedStudent) {
         return (
             <IndividualStudentGradingView 
                 student={selectedStudent} 
                 subjects={subjects} 
-                onBack={() => setSelectedStudent(null)} 
+                courseId={courseId}
+                initialSubmissions={submissions.filter(s => String(s.studentId) === String(selectedStudent.id))}
+                onBack={() => {
+                    setSelectedStudent(null);
+                    loadSubmissions(); // Recargar datos al volver
+                }} 
             />
         );
     }
@@ -54,15 +93,21 @@ export default function TeacherGradesView({ participants, subjects }: TeacherGra
                         <thead className="bg-base-200/50">
                             <tr>
                                 <th className="bg-transparent pl-6">Estudiante</th>
-                                <th className="text-center bg-transparent">Media Actual</th>
+                                <th className="text-center bg-transparent">Media Real</th>
                                 <th className="text-center bg-transparent">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {visibleStudents.length > 0 ? (
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={3} className="text-center py-12">
+                                        <span className="loading loading-spinner loading-md"></span>
+                                        <p className="mt-2 text-sm text-base-content/50">Cargando calificaciones...</p>
+                                    </td>
+                                </tr>
+                            ) : visibleStudents.length > 0 ? (
                                 visibleStudents.map((student) => {
-                                    // Media aleatoria para la demo
-                                    const average = (Math.random() * 5 + 5).toFixed(1);
+                                    const average = getStudentAverage(student.id);
 
                                     return (
                                         <tr key={student.id} className="hover:bg-base-200/30 transition-colors border-b border-base-300/10">
@@ -80,10 +125,14 @@ export default function TeacherGradesView({ participants, subjects }: TeacherGra
                                                 </div>
                                             </td>
                                             <td className="text-center">
-                                                <div className={`font-mono font-bold text-lg ${parseFloat(average) >= 5 ? 'text-primary' : 'text-error'}`}>
-                                                    {average}
-                                                    <span className="text-xs opacity-50 ml-0.5">/10</span>
-                                                </div>
+                                                {average !== "—" ? (
+                                                    <div className={`font-mono font-bold text-lg ${parseFloat(average) >= 5 ? 'text-primary' : 'text-error'}`}>
+                                                        {average}
+                                                        <span className="text-xs opacity-50 ml-0.5">/10</span>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-base-content/50">—</span>
+                                                )}
                                             </td>
                                             <td className="text-center">
                                                 <button 

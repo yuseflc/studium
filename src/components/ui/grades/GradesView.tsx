@@ -30,15 +30,16 @@ interface GradesViewProps {
     subjects: Subject[];
     isTeacher: boolean;
     currentUserEmail?: string;
+    courseId: string;
 }
 
-export default function GradesView({ participants, subjects, isTeacher, currentUserEmail }: GradesViewProps) {
+export default function GradesView({ participants, subjects, isTeacher, currentUserEmail, courseId }: GradesViewProps) {
     if (!isTeacher) {
         // La vista de estudiante solo muestra sus propias notas y temas
         return <StudentGradesView subjects={subjects} />;
     }
 
     // La vista de profesor muestra la tabla comparativa de todos los estudiantes
-    return <TeacherGradesView participants={participants} subjects={subjects} />;
+    return <TeacherGradesView participants={participants} subjects={subjects} courseId={courseId} />;
 }
 

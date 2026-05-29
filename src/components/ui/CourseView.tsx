@@ -76,6 +76,47 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   const router = useRouter();            // para redireccionar después de eliminar curso
   const { data: session } = useSession(); // sesión del usuario actual (para obtener su email)
 
+
+  // Compilar lista de participantes reales desde la base de datos poblada
+  const realParticipants = useMemo(() => {
+    if (!courseData) return [];
+    const list: any[] = [];
+    const seenIds = new Set<string>();
+
+    const addParticipant = (user: any, role: string) => {
+      if (!user || !user._id) return;
+      const idStr = String(user._id);
+      if (seenIds.has(idStr)) return;
+      seenIds.add(idStr);
+      list.push({
+        id: idStr,
+        nombre: user.firstName || "Usuario",
+        apellidos: user.profile?.lastName || "",
+        email: user.email || "",
+        rol: role,
+        avatar: user.profile?.profilePicture || `https://i.pravatar.cc/150?u=${user.email}`
+      });
+    };
+
+    // Owner (Propietario)
+    if (courseData.ownerId) {
+      addParticipant(courseData.ownerId, "profesor");
+    }
+
+    // Profesores
+    if (Array.isArray(courseData.teachers)) {
+      courseData.teachers.forEach((t: any) => addParticipant(t, "profesor"));
+    }
+
+    // Estudiantes
+    if (Array.isArray(courseData.enrolledStudents)) {
+      courseData.enrolledStudents.forEach((s: any) => addParticipant(s, "estudiante"));
+    }
+
+    // Si no hay participantes reales en base de datos, fallback a PARTICIPANTES mock
+    return list.length > 0 ? list : PARTICIPANTES;
+  }, [courseData]);
+
   // ========== ESTADOS DE NAVEGACIÓN ==========
   // Pestaña activa: "content" | "participants" | "grades" | "settings"
   const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
@@ -685,16 +726,17 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
               />
             )}
 
-            {/* TAB PARTICIPANTES: lista de alumnos y profesores (usando datos mock) */}
-            {activeTab === "participants" && <CourseParticipants participants={PARTICIPANTES} />}
+            {/* TAB PARTICIPANTES: lista de alumnos y profesores (usando datos reales) */}
+            {activeTab === "participants" && <CourseParticipants participants={realParticipants} courseId={courseId} />}
 
             {/* TAB CALIFICACIONES: vista de notas por estudiante/materia */}
             {activeTab === "grades" && (
               <GradesView
-                participants={PARTICIPANTES}
+                participants={realParticipants}
                 subjects={subjects}
                 isTeacher={isTeacher}
                 currentUserEmail={session?.user?.email || ""}
+                courseId={courseId}
               />
             )}
 
