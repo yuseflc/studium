@@ -449,3 +449,47 @@ export async function submitTask(formData: FormData): Promise<{ success: boolean
     return { success: false, error: message };
   }
 }
+
+export async function deleteSubmission(taskId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    if (!taskId || !mongoose.Types.ObjectId.isValid(taskId)) {
+      return { success: false, error: "ID de tarea inválido" };
+    }
+
+    await connectDB();
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    // Buscar y eliminar la entrega del estudiante para esta tarea
+    const result = await Submission.findOneAndDelete({
+      taskId: new mongoose.Types.ObjectId(taskId),
+      studentId: currentUser._id
+    });
+
+    if (!result) {
+      return { success: false, error: "No se encontró ninguna entrega para borrar" };
+    }
+
+    LOGGER.info(
+      {
+        taskId,
+        studentId: currentUser._id.toString(),
+      },
+      "Entrega eliminada con éxito"
+    );
+
+    return { success: true };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al eliminar la entrega";
+    LOGGER.error({ error, taskId }, "Error deleting submission from action");
+    return { success: false, error: message };
+  }
+}
