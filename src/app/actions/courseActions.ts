@@ -3,7 +3,7 @@
 import { connectDB } from "@/lib/database/database";
 import { revalidatePath } from "next/cache";
 import Course from "@/models/Course";
-import Subject from "@/models/Subject";
+// Subject model deprecated; use Unit model instead
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import Task from "@/models/Task";
@@ -42,6 +42,7 @@ export interface SerializedUnit {
 
 export interface SerializedSubject {
   _id: string;
+  courseId?: string;
   title: string;
   description?: string;
   order: number;
@@ -56,9 +57,7 @@ export interface SerializedCourse {
   ownerId: string;
   teachers: string[];
   status: "draft" | "active" | "archived";
-  subjectIds: string[];
   unitIds?: string[];
-  subjects?: SerializedSubject[];
   units?: SerializedUnit[];
   enrolledStudents: string[];
   createdAt: string;
@@ -163,6 +162,7 @@ function serializeUnit(unit: any): SerializedUnit {
 function serializeSubject(subject: any): SerializedSubject {
   return {
     _id: subject._id?.toString() || "",
+    courseId: subject.courseId?.toString?.() || subject.courseId || undefined,
     title: subject.title,
     description: subject.description,
     order: subject.order,
@@ -180,9 +180,7 @@ function serializeCourse(course: ICourse): SerializedCourse {
     ownerId: course.ownerId?.toString() || "",
     teachers: course.teachers?.map(t => t.toString()) || [],
     status: course.status,
-    subjectIds: course.subjectIds?.map(s => s.toString()) || [],
     unitIds: course.unitIds?.map(u => u.toString()) || [],
-    subjects: course.subjects?.map(serializeSubject) || [],
     units: course.units?.map(serializeUnit) || [],
     enrolledStudents: course.enrolledStudents?.map(e => e.toString()) || [],
     createdAt: course.createdAt?.toISOString() || new Date().toISOString(),
@@ -589,30 +587,30 @@ export async function createSubject(input: CreateSubjectActionInput): Promise<Su
       return { success: false, error: "No tienes permiso para crear materias en este curso" };
     }
 
-    const nextOrder = typeof order === "number" ? order : (course.subjectIds?.length || 0);
-    const subject = await Subject.create({
-      courseId,
+    const nextOrder = typeof order === "number" ? order : (course.unitIds?.length || 0);
+    const unit = await Unit.create({
+      courseId: new mongoose.Types.ObjectId(courseId),
       title,
-      description,
+      content: description || "",
       order: nextOrder,
-      unitIds: [],
+      resourceIds: [],
       taskIds: [],
     });
 
-    await Course.findByIdAndUpdate(courseId, { $push: { subjectIds: subject._id } });
+    await Course.findByIdAndUpdate(courseId, { $addToSet: { unitIds: unit._id } });
 
     return {
       success: true,
       subject: {
-        _id: subject._id.toString(),
-        courseId: subject.courseId.toString(),
-        title: subject.title,
-        description: subject.description,
-        order: subject.order,
-        unitIds: subject.unitIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
-        taskIds: subject.taskIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
-        createdAt: subject.createdAt.toISOString(),
-        updatedAt: subject.updatedAt.toISOString(),
+        _id: unit._id.toString(),
+        courseId: unit.courseId.toString(),
+        title: unit.title,
+        description: unit.content,
+        order: unit.order,
+        unitIds: [unit._id.toString()],
+        taskIds: unit.taskIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
+        createdAt: unit.createdAt.toISOString(),
+        updatedAt: unit.updatedAt.toISOString(),
       },
     };
   } catch (error: any) {
@@ -649,12 +647,13 @@ export async function updateSubject(
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
+    // Try to update a Unit (subjects deprecated)
+    const unit = await Unit.findById(subjectId);
+    if (!unit) {
+      return { success: false, error: "Unidad/Materia no encontrada" };
     }
 
-    const course = await Course.findById(subject.courseId);
+    const course = await Course.findById(unit.courseId);
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
     }
@@ -669,30 +668,30 @@ export async function updateSubject(
 
     const data = validationResult.data;
     if (data.title !== undefined) {
-      subject.title = data.title;
+      unit.title = data.title;
     }
     if (data.description !== undefined) {
-      subject.description = data.description;
+      unit.content = data.description;
     }
     if (data.order !== undefined) {
-      subject.order = data.order;
+      unit.order = data.order;
     }
 
-    subject.updatedAt = new Date();
-    await subject.save();
+    unit.updatedAt = new Date();
+    await unit.save();
 
     return {
       success: true,
       subject: {
-        _id: subject._id.toString(),
-        courseId: subject.courseId.toString(),
-        title: subject.title,
-        description: subject.description,
-        order: subject.order,
-        unitIds: subject.unitIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
-        taskIds: subject.taskIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
-        createdAt: subject.createdAt.toISOString(),
-        updatedAt: subject.updatedAt.toISOString(),
+        _id: unit._id.toString(),
+        courseId: unit.courseId.toString(),
+        title: unit.title,
+        description: unit.content,
+        order: unit.order,
+        unitIds: [unit._id.toString()],
+        taskIds: unit.taskIds?.map((id: mongoose.Types.ObjectId) => id.toString()) || [],
+        createdAt: unit.createdAt.toISOString(),
+        updatedAt: unit.updatedAt.toISOString(),
       },
     };
   } catch (error) {
@@ -720,12 +719,13 @@ export async function deleteSubject(subjectId: string): Promise<{ success: boole
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const subject = await Subject.findById(subjectId);
-    if (!subject) {
-      return { success: false, error: "Materia no encontrada" };
+    // Treat subjectId as unitId and delete the unit
+    const unit = await Unit.findById(subjectId);
+    if (!unit) {
+      return { success: false, error: "Unidad no encontrada" };
     }
 
-    const course = await Course.findById(subject.courseId);
+    const course = await Course.findById(unit.courseId);
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
     }
@@ -738,19 +738,12 @@ export async function deleteSubject(subjectId: string): Promise<{ success: boole
       return { success: false, error: "No tienes permiso para eliminar esta materia" };
     }
 
-    const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds.map((id: any) => id.toString()) : [];
-
+    const unitId = unit._id;
     await Promise.all([
-      // Eliminar tareas asociadas a las unidades de la materia
-      Task.deleteMany({ unitId: { $in: unitIds } }),
-      // Eliminar recursos de esas unidades
-      Resource.deleteMany({ unitId: { $in: unitIds } }),
-      // Eliminar las unidades por ID
-      Unit.deleteMany({ _id: { $in: unitIds } }),
-      // Eliminar la materia
-      Subject.findByIdAndDelete(subjectId),
-      // Quitar referencia en el curso
-      Course.findByIdAndUpdate(course._id, { $pull: { subjectIds: subject._id } }),
+      Task.deleteMany({ unitId }),
+      Resource.deleteMany({ unitId }),
+      Unit.findByIdAndDelete(unitId),
+      Course.findByIdAndUpdate(course._id, { $pull: { unitIds: unitId } }),
     ]);
 
     return { success: true };
@@ -799,16 +792,15 @@ export async function reorderSubjects(
       return { success: false, error: "No tienes permiso para reordenar las materias" };
     }
 
-    const subjects = await Subject.find({ _id: { $in: subjectIds }, courseId }).select("_id").lean();
-    if (subjects.length !== subjectIds.length) {
-      return { success: false, error: "Una o más materias no pertenecen al curso" };
+    // Validate unitIds belong to course
+    const units = await Unit.find({ _id: { $in: subjectIds }, courseId }).select("_id").lean();
+    if (units.length !== subjectIds.length) {
+      return { success: false, error: "Una o más unidades no pertenecen al curso" };
     }
 
     await Promise.all([
-      Course.findByIdAndUpdate(courseId, { subjectIds }),
-      ...subjectIds.map((subjectId, index) =>
-        Subject.findByIdAndUpdate(subjectId, { order: index })
-      ),
+      Course.findByIdAndUpdate(courseId, { unitIds: subjectIds }),
+      ...subjectIds.map((unitId, index) => Unit.findByIdAndUpdate(unitId, { order: index })),
     ]);
 
     return { success: true };

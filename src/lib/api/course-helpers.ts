@@ -1,6 +1,6 @@
 /**
  * MongoDB Query Helpers para la estructura normalizada de cursos
- * Proporciona funciones para queries comunes contra Subject, Unit y Resource
+ * Proporciona funciones para queries comunes contra Unit y Resource
  */
 
 import mongoose from "mongoose";
@@ -12,7 +12,7 @@ import Submission from "@/models/Submission";
 import User from "@/models/User";
 import { authOptions } from "@/config/auth.config";
 import { getServerSession } from "next-auth/next";
-import Subject from "@/models/Subject";
+// Subject model deprecated; use Units directly
 import { LOGGER } from "@/config/logger";
 
 function normalizeResource(resource: any) {
@@ -141,12 +141,6 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
 }
 
 /**
- * Obtiene una materia con todas sus unidades y recursos
- * Estructura completa de una materia específica
- */
-// getSubjectWithUnits removed: use getCourseFullStructure and filter by unit if necessary
-
-/**
  * Obtiene una unidad con todos sus recursos
  */
 export async function getUnitWithResources(unitId: string | mongoose.Types.ObjectId) {
@@ -164,7 +158,7 @@ export async function getUnitWithResources(unitId: string | mongoose.Types.Objec
 }
 
 /**
- * Obtiene todas las materias de un curso ordenadas
+ * Obtiene todas las unidades de un curso ordenadas
  */
 export async function getCourseSubjects(courseId: string | mongoose.Types.ObjectId) {
   try {
@@ -177,7 +171,7 @@ export async function getCourseSubjects(courseId: string | mongoose.Types.Object
 }
 
 /**
- * Obtiene todas las unidades de una materia ordenadas
+ * Compat: devuelve unidades asociadas a la materia identificada por subjectId.
  */
 export async function getSubjectUnits(subjectId: string | mongoose.Types.ObjectId) {
   try {
@@ -214,13 +208,20 @@ export async function createSubject(
   data: { title: string; description?: string; order?: number }
 ) {
   try {
-    const subject = await Subject.create({
+    // Create a Unit instead to represent the subject (normalized model)
+    const unit = await Unit.create({
       courseId,
-      ...data,
+      title: data.title,
+      content: data.description || "",
       order: data.order ?? 0,
+      resourceIds: [],
+      taskIds: [],
     });
 
-    return subject;
+    // Ensure course.unitIds includes this unit
+    await Course.findByIdAndUpdate(courseId, { $addToSet: { unitIds: unit._id } });
+
+    return unit;
   } catch (error) {
     LOGGER.error({ courseId, error }, "Error creating subject");
     throw error;
@@ -285,27 +286,21 @@ export async function createResource(
  */
 export async function deleteSubject(subjectId: string | mongoose.Types.ObjectId) {
   try {
-    const subject = await Subject.findById(subjectId);
-    if (!subject) throw new Error("Subject not found");
-    // Obtener las unitIds desde el documento de subject (compatibilidad)
-    const unitIds = Array.isArray(subject.unitIds) ? subject.unitIds.map((u: any) => u) : [];
+    // Treat subjectId as unitId in the new normalized model
+    const unit = await Unit.findById(subjectId);
+    if (!unit) throw new Error("Unit not found");
 
-    if (unitIds.length > 0) {
-      // Eliminar todos los recursos de esas unidades
-      await Resource.deleteMany({ unitId: { $in: unitIds } });
+    const unitIds = [unit._id];
 
-      // Eliminar todas las unidades
-      await Unit.deleteMany({ _id: { $in: unitIds } });
+    // Delete resources and tasks tied to the unit
+    await Resource.deleteMany({ unitId: { $in: unitIds } });
+    await Task.deleteMany({ unitId: { $in: unitIds } });
 
-      // Remover las unitIds del curso canonical
-      await Course.findByIdAndUpdate(subject.courseId, { $pull: { unitIds: { $in: unitIds } } }, { new: true });
-    }
+    // Delete the unit
+    await Unit.findByIdAndDelete(unit._id);
 
-    // Finalmente eliminar la materia (legacy)
-    await Subject.findByIdAndDelete(subjectId);
-
-    // Eliminar la materia del curso.subjectIds legacy
-    await Course.findByIdAndUpdate(subject.courseId, { $pull: { subjectIds: subjectId } }, { new: true });
+    // Remove from course.unitIds
+    await Course.findByIdAndUpdate(unit.courseId, { $pull: { unitIds: unit._id } }, { new: true });
 
     return { success: true };
   } catch (error) {

@@ -30,10 +30,7 @@ import {
   CourseStructureDeleteModal
 } from "./modals";
 import {
-  createSubject,
-  deleteSubject,
-  reorderSubjects,
-  updateSubject,
+  // Subjects removed — use Units actions instead
 } from "@/app/actions/courseActions";
 import {
   createUnit,
@@ -52,7 +49,7 @@ import { truncateText } from '@/lib/utils';
 import {
   createTask,
   deleteTask,
-  reorderSubjectTasks,
+  reorderUnitTasks,
   updateTask,
 } from "@/app/actions/taskActions";
 
@@ -262,15 +259,22 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
   const openCreateSubject = () => {
     if (!canEdit) return;
     resetForm();
-    setEditor({ kind: "subject", mode: "create" });
+    // Create a unit directly (subjects are deprecated)
+    setEditor({ kind: "unit", mode: "create", subjectId: subjects?.[0]?._id || "" });
   };
 
   const openEditSubject = (subject: CourseSubjectItem) => {
     if (!canEdit) return;
     resetForm();
-    setTitle(subject.title);
-    setDescription(subject.description || "");
-    setEditor({ kind: "subject", mode: "edit", subjectId: subject._id });
+    // Edit the first mapped unit if present, otherwise open unit create for this subject
+    const mappedUnit = subject.units && subject.units.length === 1 ? subject.units[0] : undefined;
+    if (mappedUnit) {
+      setTitle(mappedUnit.title);
+      setContent(mappedUnit.content);
+      setEditor({ kind: "unit", mode: "edit", subjectId: subject._id, unitId: mappedUnit._id });
+    } else {
+      setEditor({ kind: "unit", mode: "create", subjectId: subject._id });
+    }
   };
 
   const openCreateUnit = (subject: CourseSubjectItem) => {
@@ -404,24 +408,8 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     // en el estado local para mantener la vista sincronizada sin recargar.
 
   const handleMoveSubject = async (subjectId: string, direction: -1 | 1) => {
-    if (!canEdit) return;
-    const orderedSubjects = [...subjects].sort((left, right) => left.order - right.order);
-    const currentIndex = orderedSubjects.findIndex((subject) => subject._id === subjectId);
-    const nextIndex = currentIndex + direction;
-
-    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= orderedSubjects.length) {
-      return;
-    }
-
-    const nextSubjects = refreshSubjectOrder(swapItems(orderedSubjects, currentIndex, nextIndex));
-    const result = await reorderSubjects(courseId, nextSubjects.map((subject) => subject._id));
-
-    if (!result.success) {
-      setErrorMessage(result.error || "No se pudo reordenar la materia");
-      return;
-    }
-
-    setSubjects(nextSubjects);
+    // Delegate to mapped-unit reordering which maps subjects->units
+    await handleMoveMappedUnit(subjectId, direction);
   };
 
   const handleMoveMappedUnit = async (subjectId: string, direction: -1 | 1) => {
@@ -520,7 +508,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       setErrorMessage("Unidad no encontrada para reordenar tareas");
       return;
     }
-    const result = await reorderSubjectTasks(unitId, nextTasks.map((task) => task._id));
+    const result = await reorderUnitTasks(unitId, nextTasks.map((task) => task._id));
 
     if (!result.success) {
       setErrorMessage(result.error || "No se pudo reordenar la tarea");
@@ -541,44 +529,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     setErrorMessage(null);
 
     try {
-      if (editor.kind === "subject") {
-        if (editor.mode === "create") {
-          const result = await createSubject({ courseId, title, description });
-          if (!result.success || !result.subject) {
-            throw new Error(result.error || "No se pudo crear la materia");
-          }
-
-          const createdSubject = result.subject;
-
-          setSubjects((previous) =>
-            refreshSubjectOrder([
-              ...previous,
-              {
-                _id: createdSubject._id,
-                title: createdSubject.title,
-                order: createdSubject.order ?? previous.length,
-                units: [],
-                tasks: [],
-                unitIds: [],
-                taskIds: [],
-                courseId,
-              },
-            ])
-          );
-        } else {
-          if (!editor.subjectId) throw new Error("Materia inválida");
-          const result = await updateSubject(editor.subjectId, { title, description });
-          if (!result.success || !result.subject) {
-            throw new Error(result.error || "No se pudo actualizar la materia");
-          }
-
-          updateSubjectCollection(editor.subjectId, (currentSubject) => ({
-            ...currentSubject,
-            title: result.subject?.title || currentSubject.title,
-            description: result.subject?.description,
-          }));
-        }
-      }
+      // Subjects removed: creation/editing of course structure now operates on Units.
 
       if (editor.kind === "unit") {
           if (editor.mode === "create") {
@@ -776,8 +727,9 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
     try {
       if (deleteTarget.kind === "subject") {
-        const result = await deleteSubject(deleteTarget.id);
-        if (!result.success) throw new Error(result.error || "No se pudo eliminar la materia");
+        // Treat deleting a subject as deleting its mapped unit (subjects deprecated)
+        const result = await deleteUnit(deleteTarget.id);
+        if (!result.success) throw new Error(result.error || "No se pudo eliminar la unidad");
         setSubjects((previous) => refreshSubjectOrder(previous.filter((subject) => subject._id !== deleteTarget.id)));
       }
 

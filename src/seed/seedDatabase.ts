@@ -1,6 +1,6 @@
 import User from '@/models/User';
 import Course from '@/models/Course';
-import Subject from '@/models/Subject';
+// Subject model deprecated — seed creates Units directly
 import Unit from '@/models/Unit';
 import Resource from '@/models/Resource';
 import Task from '@/models/Task';
@@ -78,39 +78,18 @@ export async function seedDatabase() {
             enrolledStudents: [student1._id, student2._id],
         });
 
-        // Create sample subject
-        const subject = await Subject.create({
+        // Create sample unit (Subjects deprecated)
+        const unit = await Unit.create({
             courseId: course._id,
             title: 'Fundamentos de JavaScript',
-            description: 'Conceptos básicos del lenguaje',
+            content: 'Conceptos básicos del lenguaje',
             order: 1,
-            unitIds: [],
+            resourceIds: [],
             taskIds: [],
         });
 
-        // Add subject to course
-        await Course.findByIdAndUpdate(
-            course._id,
-            { $push: { subjectIds: subject._id } },
-            { new: true }
-        );
-
-        // Create sample unit
-        const unit = await Unit.create({
-            subjectId: subject._id,
-            courseId: course._id,
-            title: 'Variables y Tipos de Datos',
-            content: 'Aprende sobre var, let, const y los tipos de datos en JavaScript',
-            order: 1,
-            resourceIds: [],
-        });
-
-        // Add unit to subject
-        await Subject.findByIdAndUpdate(
-            subject._id,
-            { $push: { unitIds: unit._id } },
-            { new: true }
-        );
+        // Ensure course.unitIds includes this unit
+        await Course.findByIdAndUpdate(course._id, { $addToSet: { unitIds: unit._id } });
 
         // Create sample resource
         const resource = await Resource.create({
@@ -154,15 +133,8 @@ export async function seedDatabase() {
             active: true,
         });
 
-        // Add task to subject
-        await Subject.findByIdAndUpdate(
-            subject._id,
-            { $push: { taskIds: task._id } },
-            { new: true }
-        );
-
         // Add task to unit
-        await Unit.findByIdAndUpdate(unit._id, { $push: { taskIds: task._id } }, { new: true });
+        await Unit.findByIdAndUpdate(unit._id, { $addToSet: { taskIds: task._id } }, { new: true });
 
         // Create sample submissions
         await Submission.create({

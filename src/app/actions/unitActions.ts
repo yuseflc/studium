@@ -6,8 +6,7 @@ import { authOptions } from "@/config/auth.config";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
-import Subject from "@/models/Subject";
-// Subject model kept for compatibility: units may be linked via Subject.unitIds
+// Subject model removed: units are linked directly to Course
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import User from "@/models/User";
@@ -19,7 +18,6 @@ import {
 
 export interface CreateUnitActionInput {
   courseId: string;
-  subjectId?: string;
   title: string;
   content: string;
   order?: number;
@@ -92,7 +90,7 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    const { courseId, subjectId, title, content, order } = validationResult.data as CreateUnitActionInput;
+    const { courseId, title, content, order } = validationResult.data as CreateUnitActionInput;
 
     const course = await Course.findById(courseId);
 
@@ -121,13 +119,7 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
     // Añadir referencia de unidad en el curso
     await Course.findByIdAndUpdate(courseId, { $push: { unitIds: unit._id } });
 
-    // Compatibilidad: si nos pasan subjectId (cliente legado), añadir referencia en Subject.unitIds
-    if (subjectId) {
-      const subject = await Subject.findById(subjectId);
-      if (subject && subject.courseId.toString() === courseId) {
-        await Subject.findByIdAndUpdate(subjectId, { $push: { unitIds: unit._id } });
-      }
-    }
+    // No legacy subject linkage remains; units are canonical
 
     return { success: true, unit: serializeUnit(unit) };
   } catch (error) {

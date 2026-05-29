@@ -3,7 +3,7 @@
  */
 
 import mongoose from "mongoose";
-import { ISubject } from "@/models/Subject";
+// Subject model deprecated; types use normalized unit structures instead
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
@@ -18,9 +18,14 @@ export interface IUnitWithResources extends Omit<IUnit, 'resourceIds'> {
 /**
  * Estructura de una materia poblada con unidades y tareas
  */
-export interface ISubjectWithContent extends Omit<ISubject, 'unitIds' | 'taskIds'> {
-  units: IUnitWithResources[];
-  tasks?: ITask[];
+export interface ISubjectWithContent {
+    _id: string;
+    courseId: string;
+    title: string;
+    description?: string;
+    order: number;
+    units: IUnitWithResources[];
+    tasks?: ITask[];
 }
 
 /**

@@ -1,10 +1,9 @@
 import { ICourse } from "@/models/Course";
-import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 
 type SeedUnit = IUnit & { resources?: IResource[] };
-type SeedSubject = ISubject & { units?: SeedUnit[] };
+type SeedSubject = { _id: string; courseId: string; title: string; description?: string; order: number; taskIds?: string[]; unitIds?: string[]; createdAt: Date; updatedAt: Date; units?: SeedUnit[] };
 
 export interface SeedCourseStructure {
   subjects: SeedSubject[];
@@ -12,7 +11,7 @@ export interface SeedCourseStructure {
 
 const sameId = (left: unknown, right: unknown) => String(left) === String(right);
 
-const SEED_SUBJECTS: ISubject[] = [
+const SEED_SUBJECTS: any[] = [
   {
     _id: "general" as any,
     courseId: "course-1" as any,
@@ -333,7 +332,7 @@ const buildSeedSubjects = (courseId: string): SeedSubject[] => {
     .sort((left, right) => left.order - right.order)
     .map((subject) => ({
       ...subject,
-      units: SEED_UNITS.filter((unit) => (subject.unitIds || []).some((id) => sameId(id, unit._id)) && sameId(unit.courseId, courseId))
+      units: SEED_UNITS.filter((unit) => (subject.unitIds || []).some((id: any) => sameId(id, unit._id)) && sameId(unit.courseId, courseId))
         .sort((left, right) => left.order - right.order)
         .map((unit) => ({
           ...unit,

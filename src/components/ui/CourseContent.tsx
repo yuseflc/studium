@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   BookOpen, 
   FileText, 
   StickyNote,
@@ -11,7 +11,6 @@ import {
   ChevronDown,
   ClipboardList
 } from "lucide-react";
-import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
@@ -20,7 +19,12 @@ import TasksView from "./tasks/TasksView";
 /**
  * Tipo para Subject con units pobladas (estructura retornada por getCourseFullStructure)
  */
-interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
+interface ISubjectWithUnits {
+  _id: string;
+  courseId: string;
+  title: string;
+  description?: string;
+  order: number;
   units: (IUnit & { resources?: IResource[] })[];
   tasks?: ITask[];
 }

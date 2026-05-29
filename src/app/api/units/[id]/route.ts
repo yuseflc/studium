@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Unit from '@/models/Unit';
-import Subject from '@/models/Subject';
 import Course from '@/models/Course';
 import { logInfo } from '@/config/logger';
 import { validateRequest } from '@/lib/validators/api-validation';
@@ -227,8 +226,7 @@ export const DELETE = withErrorHandlingParams<{ id: string }>(
     // Actualizar curso: remover unidad de unitIds
     await Course.findByIdAndUpdate(unit.courseId, { $pull: { unitIds: new mongoose.Types.ObjectId(id) } });
 
-    // Actualizar subjects legacy: remover la unidad de cualquier subject.unitIds que la referencie
-    await Subject.updateMany({ unitIds: new mongoose.Types.ObjectId(id) }, { $pull: { unitIds: new mongoose.Types.ObjectId(id) } });
+    // Legacy subjects removed: no-op (subjects no longer used)
 
     logInfo('Unidad eliminada', {
       unitId: id,

@@ -1,7 +1,6 @@
 "use client";
 import { ChevronRight, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
-import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
@@ -13,10 +12,15 @@ interface IUnitWithContent extends IUnit {
         tasks?: ITask[];
 }
 
-interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
-        units?: IUnitWithContent[];
-    unitIds?: string[];
-  tasks?: ITask[];
+interface ISubjectWithUnits {
+                _id: string;
+                courseId?: string;
+                title: string;
+                description?: string;
+                order?: number;
+                units?: IUnitWithContent[];
+        unitIds?: string[];
+    tasks?: ITask[];
 }
 
 interface CourseSidebarProps {
@@ -92,7 +96,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
     const hasUnitExams = (subject: ISubjectWithUnits, unit: IUnitWithContent) =>
         getUnitTasks(subject, unit).some((task) => task.type === "quiz");
 
-    const sortedSubjects = [...subjects].sort((a, b) => a.order - b.order);
+    const sortedSubjects = [...subjects].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
     const isMappedUnitSubject = (subject: ISubjectWithUnits) =>
         !!subject.units && subject.units.length === 1 && String(subject._id) === String(subject.units[0]._id);

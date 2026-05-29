@@ -1,25 +1,23 @@
-import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X } from 'lucide-react';
+import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X, BookOpen } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ModalForm } from './modals';
 import { createTask } from '@/app/actions/taskActions';
 import { createResource } from '@/app/actions/resourceActions';
-import { createSubject } from '@/app/actions/courseActions';
+import { createUnit } from '@/app/actions/unitActions';
 
 interface CourseFABProps {
   onAddTask: (task: any) => void;
-  onAddSubject?: (subject: any) => void;
   onAddResource?: (resource: any) => void;
+  onAddUnit?: (unit: any) => void;
   courseId?: string;
-  defaultSubjectId?: string;
   defaultUnitId?: string;
   units?: any[];
-  subjects?: any[];
 }
 
-type CreationType = 'task' | 'exam' | 'resource' | 'subject' | null;
+type CreationType = 'task' | 'exam' | 'resource' | 'unit' | null;
 
-export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, courseId, defaultSubjectId, defaultUnitId, subjects = [], units = [] }: CourseFABProps) {
+export default function CourseFAB({ onAddTask, onAddResource, onAddUnit, courseId, defaultUnitId, units = [] }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
   const courseid = params?.courseid || 'course-1';
@@ -37,10 +35,10 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');
-  const initialUnitId = defaultUnitId || (units && units.length > 0 ? String(units[0]._id) : undefined) || defaultSubjectId || '';
+  const initialUnitId = defaultUnitId || (units && units.length > 0 ? String(units[0]._id) : '');
   const [selectedUnitId, setSelectedUnitId] = useState(initialUnitId);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isOpenSubjectDropdown, setIsOpenSubjectDropdown] = useState(false);
+  const [isOpenUnitDropdown, setIsOpenUnitDropdown] = useState(false);
   
   const handleOpenModal = (type: CreationType) => {
     // Resetear estados al abrir
@@ -50,7 +48,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
     setDueDate('');
     setSelectedUnitId(initialUnitId);
     setSelectedFile(null);
-    setIsOpenSubjectDropdown(false);
+    setIsOpenUnitDropdown(false);
     setIsSubmitting(false);
     setIsSuccess(false);
     setCreatedItemId(null);
@@ -64,16 +62,8 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    // Ensure we have a unitId for non-subject creations; prefer selectedUnitId, else first unit from props
-    let targetUnitId: string | undefined = selectedUnitId || undefined;
-    if (!targetUnitId) {
-      targetUnitId = units && units.length > 0 ? String(units[0]._id) : undefined;
-      if (!targetUnitId) {
-        // Last fallback: allow legacy defaultSubjectId (keeps compatibility with older clients)
-        targetUnitId = defaultSubjectId || '';
-      }
-    }
-    if (creationType !== 'subject' && !targetUnitId) return;
+    const targetUnitId = creationType === 'unit' ? '' : (selectedUnitId || (units && units.length > 0 ? String(units[0]._id) : ''));
+    if (creationType !== 'unit' && !targetUnitId) return;
 
     setIsSubmitting(true);
     setErrorMessage(null);
@@ -83,11 +73,11 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
       const isExamCreation = creationType === 'exam';
 
       if (isTaskCreation || isExamCreation) {
-          const result = await createTask({
+        const result = await createTask({
           title,
           description,
           courseId: courseId || '',
-            unitId: targetUnitId,
+          unitId: targetUnitId,
           dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
           startDate: new Date().toISOString(),
           type: isExamCreation ? 'quiz' : 'assignment',
@@ -112,27 +102,6 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
         const itemId = createdItem.task?._id;
         setCreatedItemId(itemId || null);
 
-        return;
-      }
-
-      if (creationType === 'subject') {
-        const result = await createSubject({
-          courseId: courseId || '',
-          title,
-          description,
-        });
-
-        if (!result.success) {
-          throw new Error(result.error || 'Error al guardar');
-        }
-
-        if (onAddSubject && result.subject) {
-          onAddSubject(result.subject);
-        }
-
-        setIsSubmitting(false);
-        setIsSuccess(true);
-        setCreatedItemId(result.subject?._id || null);
         return;
       }
 
@@ -162,6 +131,26 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
         return;
       }
 
+      if (creationType === 'unit') {
+        const result = await createUnit({
+          courseId: courseId || '',
+          title,
+          content: description || '',
+        });
+
+        if (!result.success || !result.unit) {
+          throw new Error(result.error || 'Error al crear unidad');
+        }
+
+        const created = result.unit;
+        if (onAddUnit) onAddUnit(created);
+
+        setIsSubmitting(false);
+        setIsSuccess(true);
+        setCreatedItemId(created._id || null);
+        return;
+      }
+
       throw new Error('Tipo de creación no soportado');
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error al guardar';
@@ -180,25 +169,14 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
         router.push(`/mycourses/${courseid}/exams/${createdItemId}`);
       } else if (creationType === 'resource') {
         router.push(`/mycourses/${courseid}/resources/${createdItemId}`);
-      } else if (creationType === 'subject') {
-        modalRef.current?.close();
+        } else if (creationType === 'unit') {
+          router.push(`/mycourses/${courseid}/units/${createdItemId}`);
       }
     }
   };
 
   const getModalConfig = () => {
     switch (creationType) {
-      case 'subject':
-        return {
-          icon: <CheckCircle size={20} />,
-          title: 'Crear Nueva Unidad',
-          successText: '¡Unidad creada con éxito!',
-          successDesc: 'La unidad se ha añadido al curso correctamente.',
-          btnText: 'Crear Unidad',
-          redirectText: 'Cerrar',
-          nameLabel: 'Nombre de la unidad',
-          namePlaceholder: 'Ej: Unidad 1'
-        };
       case 'exam':
         return {
           icon: <GraduationCap size={20} />,
@@ -220,6 +198,17 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           redirectText: 'Ir al Recurso',
           nameLabel: 'Nombre del recurso',
           namePlaceholder: 'Ej: Presentación tema 1'
+        };
+      case 'unit':
+        return {
+          icon: <BookOpen size={20} />,
+          title: 'Crear Nueva Unidad',
+          successText: '¡Unidad creada con éxito!',
+          successDesc: 'La unidad se ha añadido al curso correctamente.',
+          btnText: 'Crear Unidad',
+          redirectText: 'Ir a la unidad',
+          nameLabel: 'Nombre de la unidad',
+          namePlaceholder: 'Ej: Unidad 1 - Introducción'
         };
       case 'task':
       default:
@@ -303,22 +292,22 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Recurso</span>
         </div>
 
-        {/* Crear Unidad: Tooltip en desktop, Icono+Texto en mobile */}
-        <div
-          className="md:tooltip md:tooltip-hover md:tooltip-top md:tooltip-warning relative"
+        {/* Crear Unidad: Tooltip en desktop (arriba), Icono+Texto en mobile */}
+        <div 
+          className="md:tooltip md:tooltip-hover md:tooltip-top md:tooltip-warning relative" 
           data-tip="Unidad"
         >
-          <button
+          <button 
             onClick={() => {
-              handleOpenModal('subject');
+              handleOpenModal('unit');
               if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             }}
-            className="btn btn-circle btn-lg shadow-md hover:bg-base-200"
+            className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
             aria-label="Crear Unidad"
           >
-            <CheckCircle size={20} className="text-primary" aria-hidden="true" />
+            <BookOpen size={20} className="text-primary" aria-hidden="true" />
           </button>
-          <span className="absolute left-1/2 bottom-[110%] -translate-x-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Unidad</span>
+          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Unidad</span>
         </div>
       </div>
 
@@ -370,63 +359,63 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
               />
             </div>
 
-            {creationType !== 'subject' && (
+            {creationType !== 'unit' && (
               <div className="form-control relative">
                 <label className="label">
                   <span className="label-text font-bold text-warning/80">Unidad<span className="text-error"> *</span></span>
                 </label>
                 <div className="relative">
-                  <button
-                    type="button"
-                      onClick={() => setIsOpenSubjectDropdown(!isOpenSubjectDropdown)}
-                    className="input w-full flex items-center justify-between border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium cursor-pointer rounded-xl shadow-sm dark:shadow-none"
-                    disabled={isSubmitting}
-                  >
-                      <span>
-                        { (units.length ? units : subjects).find(s => (s._id?.toString() || s.id) === selectedUnitId)?.title || "Selecciona una unidad..." }
-                      </span>
-                    <span className="pointer-events-none flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isOpenSubjectDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
-                    </span>
-                  </button>
-                  
-                  {isOpenSubjectDropdown && (
-                    <>
-                      <div className="fixed inset-0 z-40" onClick={() => setIsOpenSubjectDropdown(false)} />
-                      <ul className="absolute left-0 w-full mt-1.5 p-1 bg-base-100 border border-base-300 dark:border-white/10 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
-                        <li className="px-3 py-2 text-xs font-semibold text-base-content/40 uppercase tracking-wider border-b border-base-200/50 mb-1">
-                          Selecciona un tema
-                        </li>
-                        {(units.length ? units : subjects).map((subject: any) => {
-                          const id = subject._id?.toString() || subject.id;
-                          const isSelected = id === selectedUnitId;
-                          return (
-                            <li key={id}>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSelectedUnitId(id);
-                                  setIsOpenSubjectDropdown(false);
-                                }}
-                                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors text-left cursor-pointer ${
-                                  isSelected
-                                    ? "bg-primary/10 text-primary font-bold"
-                                    : "hover:bg-base-200 text-base-content/85"
-                                }`}
-                              >
-                                {isSelected ? (
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
-                                ) : (
-                                  <span className="w-4 flex-shrink-0" />
-                                )}
-                                <span className="truncate">{subject.title}</span>
-                              </button>
-                            </li>
-                          );
-                        })}
-                      </ul>
-                    </>
-                  )}
+                <button
+                  type="button"
+                  onClick={() => setIsOpenUnitDropdown(!isOpenUnitDropdown)}
+                  className="input w-full flex items-center justify-between border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium cursor-pointer rounded-xl shadow-sm dark:shadow-none"
+                  disabled={isSubmitting}
+                >
+                  <span>
+                    {(units.length ? units : []).find((unit) => (unit._id?.toString() || unit.id) === selectedUnitId)?.title || 'Selecciona una unidad...'}
+                  </span>
+                  <span className="pointer-events-none flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isOpenUnitDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
+                  </span>
+                </button>
+
+                {isOpenUnitDropdown && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsOpenUnitDropdown(false)} />
+                    <ul className="absolute left-0 w-full mt-1.5 p-1 bg-base-100 border border-base-300 dark:border-white/10 rounded-xl shadow-xl z-50 max-h-60 overflow-y-auto">
+                      <li className="px-3 py-2 text-xs font-semibold text-base-content/40 uppercase tracking-wider border-b border-base-200/50 mb-1">
+                        Selecciona una unidad
+                      </li>
+                      {(units.length ? units : []).map((unit: any) => {
+                        const id = unit._id?.toString() || unit.id;
+                        const isSelected = id === selectedUnitId;
+                        return (
+                          <li key={id}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedUnitId(id);
+                                setIsOpenUnitDropdown(false);
+                              }}
+                              className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-colors text-left cursor-pointer ${
+                                isSelected
+                                  ? "bg-primary/10 text-primary font-bold"
+                                  : "hover:bg-base-200 text-base-content/85"
+                              }`}
+                            >
+                              {isSelected ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
+                              ) : (
+                                <span className="w-4 flex-shrink-0" />
+                              )}
+                              <span className="truncate">{unit.title}</span>
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </>
+                )}
                 </div>
               </div>
             )}

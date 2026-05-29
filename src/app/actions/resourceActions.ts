@@ -6,7 +6,6 @@ import { authOptions } from "@/config/auth.config";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
-import Subject from "@/models/Subject";
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import User from "@/models/User";
@@ -18,7 +17,6 @@ import {
 
 export interface CreateResourceActionInput {
   courseId: string;
-  subjectId?: string;
   unitId?: string;
   title: string;
   description?: string;
@@ -106,7 +104,7 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       return { success: false, error: "Curso no encontrado" };
     }
 
-    // Resolve unit: prefer explicit unitId, fall back to subject -> first unit
+    // Resolve unit: prefer explicit unitId
     let unit: any = null;
     if (input.unitId) {
       unit = await Unit.findById(input.unitId);
@@ -116,30 +114,8 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       if (unit.courseId.toString() !== course._id.toString()) {
         return { success: false, error: "La unidad no pertenece al curso" };
       }
-    } else if (input.subjectId) {
-      const subject = await Subject.findById(input.subjectId);
-      if (!subject) {
-        return { success: false, error: "Materia no encontrada" };
-      }
-      if (subject.courseId.toString() !== course._id.toString()) {
-        return { success: false, error: "La materia no pertenece al curso" };
-      }
-
-      const candidateUnitId = subject.unitIds?.[0]?.toString();
-      if (!candidateUnitId) {
-        return { success: false, error: "La materia no tiene unidades disponibles" };
-      }
-
-      // Encontrar la unidad por su id (Unit ya no referencia subjectId)
-      unit = await Unit.findById(candidateUnitId);
-      if (!unit) {
-        return { success: false, error: "La unidad no existe" };
-      }
-      if (unit.courseId.toString() !== course._id.toString()) {
-        return { success: false, error: "La unidad no pertenece al curso" };
-      }
     } else {
-      return { success: false, error: "Se requiere unitId o subjectId" };
+      return { success: false, error: "Se requiere unitId" };
     }
 
     const currentUserId = currentUser._id.toString();
@@ -183,7 +159,6 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       {
         resourceId: resource._id.toString(),
         courseId: input.courseId,
-        subjectId: input.subjectId,
         unitId: unit._id.toString(),
         createdBy: currentUserId,
       },

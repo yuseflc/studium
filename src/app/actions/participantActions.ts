@@ -40,7 +40,7 @@ interface CourseSubmissionsResult {
 interface SerializedTask {
   _id: string;
   title: string;
-  subjectId: string;
+  unitId: string;
   maxPoints: number;
 }
 
@@ -74,7 +74,7 @@ async function assertTeacherAccess(
 
   const isOwner = String(course.ownerId) === userId;
   const isTeacher = (course.teachers ?? []).some(
-    (t) => String(t) === userId
+    (t: any) => String(t) === userId
   );
 
   if (!isOwner && !isTeacher) {
@@ -124,7 +124,7 @@ export async function deleteParticipant(
 
     const isOwner = String(course.ownerId) === session.user.id;
     const isTeacher = (course.teachers ?? []).some(
-      (t) => String(t) === session.user.id
+      (t: any) => String(t) === session.user.id
     );
 
     if (!isOwner && !isTeacher) {
@@ -144,7 +144,7 @@ export async function deleteParticipant(
     }
 
     const isTargetTeacher = (course.teachers ?? []).some(
-      (t) => String(t) === studentId
+      (t: any) => String(t) === studentId
     );
     if (isTargetTeacher) {
       return { success: false, message: 'No puedes eliminar a otros profesores' };
@@ -183,7 +183,7 @@ export async function getCourseSubmissions(
 
     // Obtener todas las tareas activas del curso
     const rawTasks = await Task.find({ courseId })
-      .select('_id title subjectId maxPoints')
+      .select('_id title unitId maxPoints')
       .lean();
 
     const taskIds = rawTasks.map((t) => t._id);
@@ -196,10 +196,10 @@ export async function getCourseSubmissions(
       .lean();
 
     // Serializar para que sean seguros en Client Components (ObjectId → string)
-    const tasks: SerializedTask[] = rawTasks.map((t) => ({
+    const tasks: SerializedTask[] = rawTasks.map((t: any) => ({
       _id: String(t._id),
       title: t.title,
-      subjectId: String(t.subjectId),
+      unitId: String(t.unitId),
       maxPoints: t.maxPoints,
     }));
 

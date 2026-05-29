@@ -336,6 +336,59 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     );
   };
 
+  /**
+   * Agrega una unidad nueva al estado local como subject mapeado (compatibilidad).
+   */
+  const handleAddUnit = (unit: any) => {
+    if (!unit?._id) return;
+
+    setSubjects((prev) => {
+      const already = prev.some((s: any) => String(s?._id || s?.id || '') === String(unit._id));
+      if (already) return prev;
+
+      // Ensure new units are appended at the end: compute next order as max(existing orders)+1
+      const maxOrder = prev.reduce((max: number, s: any) => {
+        const o = Number.isFinite(s?.order) ? Number(s.order) : -1;
+        return Math.max(max, o);
+      }, -1);
+      const nextOrder = maxOrder >= 0 ? maxOrder + 1 : prev.length;
+
+      return [
+        ...prev,
+        {
+          _id: unit._id,
+          courseId: unit.courseId,
+          title: unit.title,
+          description: '',
+          order: nextOrder,
+          units: [unit],
+          tasks: [],
+          unitIds: [unit._id],
+          taskIds: [],
+        },
+      ];
+    });
+
+    // Scroll to the newly added unit when it appears in the DOM.
+    const scrollToUnit = (attempt = 0) => {
+      const el = document.getElementById(`unit-${unit._id}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "start" });
+        el.classList.add("ring", "ring-primary/20");
+        setTimeout(() => el.classList.remove("ring", "ring-primary/20"), 2200);
+        return;
+      }
+
+      if (attempt < 10) {
+        // Retry a few times while the UI updates
+        setTimeout(() => scrollToUnit(attempt + 1), 120);
+      }
+    };
+
+    // Defer initial attempt to allow React to commit DOM updates
+    setTimeout(() => scrollToUnit(0), 50);
+  };
+
   // ========== HANDLER PARA ELIMINAR TAREA ==========
   
   /**
@@ -1079,8 +1132,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       {isTeacher && activeTab === "content" && (
         <CourseFAB
           onAddTask={handleAddTask}
-          onAddSubject={handleAddSubject}
           onAddResource={handleAddResource}
+          onAddUnit={handleAddUnit}
           courseId={courseId}
           defaultUnitId={
             courseStructure?.units && courseStructure.units.length > 0
@@ -1090,7 +1143,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                 : undefined
           }
           units={courseStructure?.units || subjects.flatMap((s: any) => s.units || [])}
-          subjects={subjects}
         />
       )}
 
