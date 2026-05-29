@@ -4,17 +4,14 @@ import Logo from '@/components/ui/Logo'
 interface FooterLink {
     name: string;
     href: string;
-    disabled?: boolean;
 }
 interface FooterSection {
     title: string;
-    disabled: boolean;
     links: FooterLink[]
 }
 const footerSections = [
     {
         title: 'Recursos',
-        disabled: false,
         links: [
             { name: 'Mis Cursos', href: '/mycourses' },
             { name: 'Explorar', href: '/mycourses' },
@@ -33,7 +30,6 @@ const footerSections = [
     },
     {
         title: 'Integrantes',
-        disabled: false,
         links: [
             { name: 'Darío Muñoz', href: 'https://dmrstudio.dev/' },
             { name: 'Yusef Laroussi', href: 'https://yuxey.pages.dev/' },
@@ -63,7 +59,7 @@ export const Footer = () => {
 
                         {footerSections.map((section: FooterSection) => (
                             <div key={section.title} className='flex flex-col gap-1 md:gap-4'>
-                                <h4 className={`uppercase font-display text-md font-semibold ${section.disabled ? 'text-neutral/50' : 'text-base-content'}`}>
+                                <h4 className="uppercase font-display text-md font-semibold text-base-content">
                                     {section.title}
                                 </h4>
                                 <div className="flex flex-wrap md:flex-col gap-2 text-sm text-neutral items-start ">
@@ -71,7 +67,7 @@ export const Footer = () => {
                                         <Link
                                             key={link.name}
                                             href={link.href}
-                                            className={`whitespace-nowrap font-medium transition-all duration-200 hover: hover:text-primary ${link.disabled ? 'pointer-events-none text-neutral/50' : 'text-base-content/70 hover:text-primary'}`}
+                                            className="whitespace-nowrap font-medium hover: hover:text-primary text-base-content/70"
                                         >
                                             {link.name}
                                         </Link>
@@ -89,8 +85,8 @@ export const Footer = () => {
                         ©{currentYear} Studium.
                     </p>
                     <div className="flex flex-row gap-4">
-                        <Link href="/legal/privacy-policy" className="font-medium text-base-content/70 hover:text-primary transition-all duration-200">Política de Privacidad</Link>
-                        <Link href="/legal/tos" className="font-medium text-base-content/70 hover:text-primary transition-all duration-200">Términos &#38; Condiciones</Link>
+                        <Link href="/legal/privacy-policy" className="font-medium text-base-content/70 hover:text-primary">Política de Privacidad</Link>
+                        <Link href="/legal/tos" className="font-medium text-base-content/70 hover:text-primary">Términos &#38; Condiciones</Link>
                     </div>
                 </div>
             </div>

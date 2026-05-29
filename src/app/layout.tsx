@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import SessionProviderLayout from "@/providers/SessionProvider";
 
 export const metadata: Metadata = {
-  title: "Studium",
+  title: "Studium.",
   description: "Plataforma de aprendizaje educativo",
 };
 
@@ -19,6 +19,7 @@ export default function RootLayout({
     <html
       lang="es"
       className={`${manrope.variable} ${googleSans.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <link rel="icon" href="/favicon.ico" />
