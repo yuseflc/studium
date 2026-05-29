@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState, useCallback, type Dispatch, type 
 import HoldConfirmButton from "@/components/ui/HoldConfirmButton";
 
 import {
-  ArrowDown,
+  ArrowDown, 
   ArrowUp,
   Calendar,
   CheckCircle2,
@@ -742,10 +742,20 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       if (deleteTarget.kind === "unit") {
         const result = await deleteUnit(deleteTarget.id);
         if (!result.success) throw new Error(result.error || "No se pudo eliminar la unidad");
-        updateSubjectCollection(deleteTarget.subjectId || "", (currentSubject) => ({
-          ...currentSubject,
-          units: refreshUnitOrder((currentSubject.units || []).filter((unit) => unit._id !== deleteTarget.id)),
-        }));
+        const currentSubject = subjects.find((subject) => subject._id === deleteTarget.subjectId);
+        const isMappedUnitSubject =
+          currentSubject?.units &&
+          currentSubject.units.length === 1 &&
+          String(currentSubject._id) === String(currentSubject.units[0]._id);
+
+        if (isMappedUnitSubject) {
+          setSubjects((previous) => refreshSubjectOrder(previous.filter((subject) => subject._id !== deleteTarget.subjectId)));
+        } else {
+          updateSubjectCollection(deleteTarget.subjectId || "", (currentSubject) => ({
+            ...currentSubject,
+            units: refreshUnitOrder((currentSubject.units || []).filter((unit) => unit._id !== deleteTarget.id)),
+          }));
+        }
       }
 
       if (deleteTarget.kind === "resource") {
@@ -788,12 +798,12 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="card-title text-xl">Estructura del curso</h2>
-              <p className="text-sm text-base-content/60">Gestiona materias, unidades, recursos, tareas y exámenes desde aquí.</p>
+              <p className="text-sm text-base-content/60">Gestiona unidades, recursos, tareas y exámenes desde aquí.</p>
             </div>
             {canEdit && (
               <button type="button" className="btn btn-primary gap-2" onClick={openCreateSubject}>
                 <Plus size={16} />
-                Nueva materia
+                Nueva unidad
               </button>
             )}
           </div>
@@ -806,8 +816,8 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
         <div className="card bg-base-100 border border-base-300">
           <div className="card-body items-center text-center py-12">
             <BookOpen size={48} className="text-base-content/20" />
-            <h3 className="text-xl font-semibold">No hay materias todavía</h3>
-            <p className="text-base-content/60 max-w-xl">Crea la primera materia para empezar a añadir unidades, recursos, tareas y exámenes.</p>
+                  <h3 className="text-xl font-semibold">No hay unidades todavía</h3>
+                  <p className="text-base-content/60 max-w-xl">Crea la primera unidad para empezar a añadir recursos, tareas y exámenes.</p>
           </div>
         </div>
       ) : (
@@ -819,6 +829,171 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
               subject.units &&
               subject.units.length === 1 &&
               String(subject._id) === String(subject.units[0]._id);
+
+            if (isMappedUnitSubject) {
+              const unit = subject.units?.[0];
+
+              if (!unit) {
+                return null;
+              }
+
+              const resources = [...(unit.resources || [])];
+
+              return (
+                <div key={subject._id} id={`unit-${unit._id}`} className="card scroll-mt-24 bg-base-100 border border-base-300 shadow-sm">
+                  <div className="card-body gap-5">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <BookOpen size={20} className="text-primary" />
+                          <h3 className="text-2xl font-bold">{unit.title}</h3>
+                        </div>
+                        {unit.content && <p className="text-sm text-base-content/60 max-w-3xl whitespace-pre-wrap">{unit.content}</p>}
+                      </div>
+
+                      {canEdit && (
+                        <div className="dropdown dropdown-end">
+                          {renderMenuButton()}
+                          <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
+                            <li><button type="button" onClick={() => openEditUnit(subject._id, unit)}><Pencil size={14} />Editar unidad</button></li>
+                            <li><button type="button" onClick={() => openCreateResource(subject._id, unit)}><Plus size={14} />Añadir recurso</button></li>
+                            <li><button type="button" onClick={() => openCreateTask(subject, "assignment", unit._id)}><ClipboardTaskIcon />Nueva tarea</button></li>
+                            <li><button type="button" onClick={() => openCreateTask(subject, "quiz", unit._id)}><GraduationCap size={14} />Nuevo examen</button></li>
+                            <li className="menu-title"><span>Reordenar</span></li>
+                            <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveSubject(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                            <li><button type="button" disabled={subject.order >= sortedSubjects.length - 1} onClick={() => handleMoveSubject(subject._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                            <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "unit", id: unit._id, title: unit.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar unidad</button></li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-5">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/40">
+                          <FileText size={14} />
+                          Recursos
+                        </div>
+
+                        {resources.length === 0 ? (
+                          <div className="rounded-xl border border-dashed border-base-200 px-3 py-2 text-sm text-base-content/45">Sin recursos en esta unidad.</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {resources.map((resource, resourceIndex) => (
+                              <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
+                                <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
+                                  <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                                    {getResourceTypeIcon(resource.type)}
+                                  </div>
+
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{getResourceTypeLabel(resource.type)}</span>
+                                      <p className="font-bold text-base text-base-content/90 truncate">{resource.title}</p>
+                                    </div>
+                                    {resource.description && <p className="text-sm text-base-content/55 truncate mt-1">{resource.description}</p>}
+                                  </div>
+                                </div>
+
+                                {canEdit && (
+                                  <div className="flex items-center gap-1 pr-2 self-center">
+                                    {isResourceDownloadable(resource) && (
+                                      resource.url ? (
+                                        <a
+                                          href={resource.url}
+                                          download
+                                          className="btn btn-ghost btn-xs btn-circle"
+                                          aria-label={`Descargar ${resource.title}`}
+                                          title="Descargar recurso"
+                                        >
+                                          <Download size={16} aria-hidden="true" />
+                                        </a>
+                                      ) : (
+                                        <button
+                                          type="button"
+                                          className="btn btn-ghost btn-xs btn-circle"
+                                          disabled
+                                          aria-label={`Descargar ${resource.title}`}
+                                          title="Este recurso no tiene archivo asociado"
+                                        >
+                                          <Download size={16} aria-hidden="true" />
+                                        </button>
+                                      )
+                                    )}
+                                    <div className="dropdown dropdown-end">
+                                      {renderMenuButton()}
+                                      <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
+                                        <li><button type="button" onClick={() => openEditResource(subject._id, unit._id, resource)}><Pencil size={14} />Editar recurso</button></li>
+                                        <li className="menu-title"><span>Reordenar</span></li>
+                                        <li><button type="button" disabled={resourceIndex === 0} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                        <li><button type="button" disabled={resourceIndex === resources.length - 1} onClick={() => handleMoveResource(subject._id, unit._id, resource._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                        <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "resource", id: resource._id, title: resource.title, subjectId: subject._id, unitId: unit._id })}><Trash2 size={14} />Eliminar recurso</button></li>
+                                      </ul>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {sortedTasks.length > 0 ? (
+                        <div>
+                          <div className="flex items-center justify-between gap-3 mb-3">
+                            <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/50">
+                              <GraduationCap size={16} />
+                              Tareas y exámenes
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            {sortedTasks.map((task, taskIndex) => (
+                              <div key={task._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
+                                <Link
+                                  href={`/mycourses/${courseId}/tasks/${task._id}`}
+                                  className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
+                                  aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
+                                >
+                                  <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                                    {task.type === "quiz" ? <GraduationCap size={18} aria-hidden="true" /> : <ClipboardList size={18} aria-hidden="true" />}
+                                  </div>
+
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2 flex-wrap">
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                      <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
+                                    </div>
+                                    {task.description && <p className="text-sm text-base-content/55 truncate mt-1">{task.description}</p>}
+                                  </div>
+                                </Link>
+
+                                {canEdit && (
+                                  <div className="flex items-center gap-1 pr-2 self-center">
+                                    <div className="dropdown dropdown-end">
+                                      {renderMenuButton()}
+                                      <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
+                                        <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar tarea</button></li>
+                                        <li className="menu-title"><span>Reordenar</span></li>
+                                        <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                                        <li><button type="button" disabled={taskIndex === sortedTasks.length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                                        <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar tarea</button></li>
+                                      </ul>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-base-300 p-4 text-sm text-base-content/50">Todavía no hay tareas en esta unidad.</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            }
 
             return (
               <div key={subject._id} id={`subject-${subject._id}`} className="card scroll-mt-24 bg-base-100 border border-base-300 shadow-sm">

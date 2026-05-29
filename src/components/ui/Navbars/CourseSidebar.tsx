@@ -3,13 +3,19 @@ import { ChevronRight, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";
 import { ISubject } from "@/models/Subject";
 import { IUnit } from "@/models/Unit";
+import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
+interface IUnitWithContent extends IUnit {
+        resources?: IResource[];
+        tasks?: ITask[];
+}
+
 interface ISubjectWithUnits extends Omit<ISubject, 'unitIds'> {
-    units?: (IUnit & { resources?: unknown[] })[];
-  unitIds?: any[];
+        units?: IUnitWithContent[];
+    unitIds?: string[];
   tasks?: ITask[];
 }
 
@@ -72,7 +78,56 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
         }
     };
 
+    const getUnitTasks = (subject: ISubjectWithUnits, unit: IUnitWithContent) => {
+        const unitTasks = subject.tasks || [];
+        const nestedTasks = unit.tasks || [];
+        return [...unitTasks, ...nestedTasks];
+    };
+
+    const hasUnitResources = (unit: IUnitWithContent) => (unit.resources?.length || 0) > 0;
+
+    const hasUnitAssignments = (subject: ISubjectWithUnits, unit: IUnitWithContent) =>
+        getUnitTasks(subject, unit).some((task) => task.type !== "quiz");
+
+    const hasUnitExams = (subject: ISubjectWithUnits, unit: IUnitWithContent) =>
+        getUnitTasks(subject, unit).some((task) => task.type === "quiz");
+
     const sortedSubjects = [...subjects].sort((a, b) => a.order - b.order);
+
+    const isMappedUnitSubject = (subject: ISubjectWithUnits) =>
+        !!subject.units && subject.units.length === 1 && String(subject._id) === String(subject.units[0]._id);
+
+    const getUnitMenuEntries = (subject: ISubjectWithUnits, unit: IUnitWithContent) => {
+        const entries: Array<{ label: string; onClick: () => void }> = [
+            {
+                label: "Ver unidad",
+                onClick: () => handleScrollToUnit(unit._id?.toString() || ""),
+            },
+        ];
+
+        if (hasUnitResources(unit)) {
+            entries.push({
+                label: "Ver recursos",
+                onClick: () => handleScrollToUnit(unit._id?.toString() || ""),
+            });
+        }
+
+        if (hasUnitAssignments(subject, unit)) {
+            entries.push({
+                label: "Ver Tareas",
+                onClick: () => handleScrollToUnit(unit._id?.toString() || ""),
+            });
+        }
+
+        if (hasUnitExams(subject, unit)) {
+            entries.push({
+                label: "Ver Examenes",
+                onClick: () => handleScrollToUnit(unit._id?.toString() || ""),
+            });
+        }
+
+        return entries;
+    };
 
     return (
         <>
@@ -88,57 +143,105 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
 
                 <div className="flex flex-col p-2 gap-1 relative">
                     {subjects && subjects.length > 0 ? (
-                        sortedSubjects.map((subject) => (
-                            <motion.div
-                                key={subject._id?.toString()}
-                                variants={itemVariants}
-                                className="relative"
-                            >
-                                <details className="group relative rounded-xl border border-base-200 bg-base-100/50">
-                                    <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
-                                        <div className="flex items-center gap-3">
-                                            <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
-                                            <span className="font-bold text-sm truncate max-w-[200px]">
-                                                {subject.title}
-                                            </span>
+                        sortedSubjects.map((subject) => {
+                            if (isMappedUnitSubject(subject)) {
+                                const unit = subject.units?.[0];
+
+                                if (!unit) {
+                                    return null;
+                                }
+
+                                const unitMenuEntries = getUnitMenuEntries(subject, unit);
+
+                                return (
+                                    <motion.div
+                                        key={subject._id?.toString()}
+                                        variants={itemVariants}
+                                        className="relative"
+                                    >
+                                        <details className="group relative rounded-xl border border-base-200 bg-base-100/50">
+                                            <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
+                                                <div className="flex items-center gap-3">
+                                                    <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
+                                                    <span className="font-bold text-sm truncate max-w-[200px]">
+                                                        {unit.title}
+                                                    </span>
+                                                </div>
+                                                <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-base-200 text-base-content/60 border border-base-300 shadow-sm">{unitMenuEntries.length}</span>
+                                            </summary>
+                                            <div className="pb-2">
+                                                <ul className="space-y-1 mt-1 px-2 pb-2">
+                                                    {unitMenuEntries.map((entry) => (
+                                                        <li key={`${unit._id?.toString()}-${entry.label}`}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={entry.onClick}
+                                                                className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
+                                                            >
+                                                                <ClipboardList size={14} className="text-base-content/30" />
+                                                                <span className="truncate">{entry.label}</span>
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        </details>
+                                    </motion.div>
+                                );
+                            }
+
+                            return (
+                                <motion.div
+                                    key={subject._id?.toString()}
+                                    variants={itemVariants}
+                                    className="relative"
+                                >
+                                    <details className="group relative rounded-xl border border-base-200 bg-base-100/50">
+                                        <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-primary/10 hover:text-primary rounded-xl transition-all list-none relative">
+                                            <div className="flex items-center gap-3">
+                                                <ChevronRight size={16} className="group-open:rotate-90 transition-transform text-base-content/40 group-hover:text-primary" />
+                                                <span className="font-bold text-sm truncate max-w-[200px]">
+                                                    {subject.title}
+                                                </span>
+                                            </div>
+                                            <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-base-200 text-base-content/60 border border-base-300 shadow-sm">{subject.units?.length || 0}</span>
+                                        </summary>
+                                        <div className="pb-2">
+                                            <ul className="space-y-1 mt-1 px-2 pb-2">
+                                                <li>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleScrollToSubject(subject._id?.toString() || "")}
+                                                        className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
+                                                    >
+                                                        <ClipboardList size={14} className="text-base-content/30" />
+                                                        <span className="truncate">Ver materia</span>
+                                                    </button>
+                                                </li>
+                                                {subject.units && subject.units.length > 0 ? (
+                                                    subject.units.map((unit, unitIndex) => (
+                                                        <li key={unit._id?.toString() || `${subject._id}-${unitIndex}`}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => handleScrollToUnit(unit._id?.toString() || "")}
+                                                                className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
+                                                            >
+                                                                <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                                                                    {unitIndex + 1}
+                                                                </span>
+                                                                <span className="truncate">{unit.title}</span>
+                                                            </button>
+                                                        </li>
+                                                    ))
+                                                ) : (
+                                                    <li className="px-4 py-2 text-xs italic text-base-content/40">Sin unidades</li>
+                                                )}
+                                            </ul>
                                         </div>
-                                        <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-base-200 text-base-content/60 border border-base-300 shadow-sm">{subject.units?.length || 0}</span>
-                                    </summary>
-                                    <div className="pb-2">
-                                        <ul className="space-y-1 mt-1 px-2 pb-2">
-                                            <li>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => handleScrollToSubject(subject._id?.toString() || "")}
-                                                    className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
-                                                >
-                                                    <ClipboardList size={14} className="text-base-content/30" />
-                                                    <span className="truncate">Ver materia</span>
-                                                </button>
-                                            </li>
-                                            {subject.units && subject.units.length > 0 ? (
-                                                subject.units.map((unit, unitIndex) => (
-                                                    <li key={unit._id?.toString() || `${subject._id}-${unitIndex}`}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleScrollToUnit(unit._id?.toString() || "")}
-                                                            className="flex w-full items-center gap-3 rounded-lg px-4 py-2 text-left text-sm text-base-content/70 transition-colors hover:bg-base-200 hover:text-base-content"
-                                                        >
-                                                            <span className="inline-flex items-center justify-center px-1.5 min-w-[1.25rem] h-5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                                                                {unitIndex + 1}
-                                                            </span>
-                                                            <span className="truncate">{unit.title}</span>
-                                                        </button>
-                                                    </li>
-                                                ))
-                                            ) : (
-                                                <li className="px-4 py-2 text-xs italic text-base-content/40">Sin unidades</li>
-                                            )}
-                                        </ul>
-                                    </div>
-                                </details>
-                            </motion.div>
-                        ))
+                                    </details>
+                                </motion.div>
+                            );
+                        })
                     ) : (
                         <div className="p-4 text-center text-sm text-base-content/40 italic">
                             No hay contenido disponible

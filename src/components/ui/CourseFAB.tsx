@@ -191,13 +191,13 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
       case 'subject':
         return {
           icon: <CheckCircle size={20} />,
-          title: 'Crear Nueva Materia',
-          successText: '¡Materia creada con éxito!',
-          successDesc: 'La materia se ha añadido al curso correctamente.',
-          btnText: 'Crear Materia',
+          title: 'Crear Nueva Unidad',
+          successText: '¡Unidad creada con éxito!',
+          successDesc: 'La unidad se ha añadido al curso correctamente.',
+          btnText: 'Crear Unidad',
           redirectText: 'Cerrar',
-          nameLabel: 'Nombre de la materia',
-          namePlaceholder: 'Ej: Matemáticas Aplicadas'
+          nameLabel: 'Nombre de la unidad',
+          namePlaceholder: 'Ej: Unidad 1'
         };
       case 'exam':
         return {
@@ -303,10 +303,10 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
           <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Recurso</span>
         </div>
 
-        {/* Crear Materia: Tooltip en desktop, Icono+Texto en mobile */}
+        {/* Crear Unidad: Tooltip en desktop, Icono+Texto en mobile */}
         <div
           className="md:tooltip md:tooltip-hover md:tooltip-top md:tooltip-warning relative"
-          data-tip="Materia"
+          data-tip="Unidad"
         >
           <button
             onClick={() => {
@@ -314,11 +314,11 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
               if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             }}
             className="btn btn-circle btn-lg shadow-md hover:bg-base-200"
-            aria-label="Crear Materia"
+            aria-label="Crear Unidad"
           >
             <CheckCircle size={20} className="text-primary" aria-hidden="true" />
           </button>
-          <span className="absolute left-1/2 bottom-[110%] -translate-x-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Materia</span>
+          <span className="absolute left-1/2 bottom-[110%] -translate-x-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Unidad</span>
         </div>
       </div>
 
@@ -373,7 +373,7 @@ export default function CourseFAB({ onAddTask, onAddSubject, onAddResource, cour
             {creationType !== 'subject' && (
               <div className="form-control relative">
                 <label className="label">
-                  <span className="label-text font-bold text-warning/80">Tema / Materia<span className="text-error"> *</span></span>
+                  <span className="label-text font-bold text-warning/80">Unidad<span className="text-error"> *</span></span>
                 </label>
                 <div className="relative">
                   <button
