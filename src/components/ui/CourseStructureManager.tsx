@@ -191,6 +191,7 @@ function isResourceDownloadable(resource: CourseResourceItem) {
 
 export default function CourseStructureManager({ courseId, subjects, setSubjects, canEdit = true }: CourseStructureManagerProps) {
   const editorDialogRef = useRef<HTMLDialogElement>(null);
+  const pendingUnitScrollRef = useRef<string | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -231,6 +232,19 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       dialog.close();
     }
   }, [editor]);
+
+  useEffect(() => {
+    const unitId = pendingUnitScrollRef.current;
+    if (!unitId) return;
+
+    pendingUnitScrollRef.current = null;
+    const element = document.getElementById(`unit-${unitId}`);
+    if (!element) return;
+
+    requestAnimationFrame(() => {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }, [subjects]);
 
   const resetForm = () => {
     setTitle("");
@@ -406,6 +420,33 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       return;
     }
 
+    setSubjects(nextSubjects);
+  };
+
+  const handleMoveMappedUnit = async (subjectId: string, direction: -1 | 1) => {
+    if (!canEdit) return;
+
+    const orderedSubjects = [...subjects].sort((left, right) => left.order - right.order);
+    const currentIndex = orderedSubjects.findIndex((subject) => subject._id === subjectId);
+    const nextIndex = currentIndex + direction;
+
+    if (currentIndex < 0 || nextIndex < 0 || nextIndex >= orderedSubjects.length) {
+      return;
+    }
+
+    const nextSubjects = refreshSubjectOrder(swapItems(orderedSubjects, currentIndex, nextIndex));
+    const unitIds = nextSubjects
+      .map((subject) => subject.units?.[0]?._id || subject._id)
+      .filter((unitId): unitId is string => Boolean(unitId));
+
+    const result = await reorderUnits(courseId, unitIds);
+
+    if (!result.success) {
+      setErrorMessage(result.error || "No se pudo reordenar la unidad");
+      return;
+    }
+
+    pendingUnitScrollRef.current = nextSubjects[nextIndex]?.units?.[0]?._id || nextSubjects[nextIndex]?._id || null;
     setSubjects(nextSubjects);
   };
 
@@ -860,8 +901,8 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                             <li><button type="button" onClick={() => openCreateTask(subject, "assignment", unit._id)}><ClipboardTaskIcon />Nueva tarea</button></li>
                             <li><button type="button" onClick={() => openCreateTask(subject, "quiz", unit._id)}><GraduationCap size={14} />Nuevo examen</button></li>
                             <li className="menu-title"><span>Reordenar</span></li>
-                            <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveSubject(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
-                            <li><button type="button" disabled={subject.order >= sortedSubjects.length - 1} onClick={() => handleMoveSubject(subject._id, 1)}><ArrowDown size={14} />Bajar</button></li>
+                            <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveMappedUnit(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
+                            <li><button type="button" disabled={subject.order >= sortedSubjects.length - 1} onClick={() => handleMoveMappedUnit(subject._id, 1)}><ArrowDown size={14} />Bajar</button></li>
                             <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "unit", id: unit._id, title: unit.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar unidad</button></li>
                           </ul>
                         </div>
@@ -938,15 +979,13 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                         )}
                       </div>
 
-                      {sortedTasks.length > 0 ? (
-                        <div>
-                          <div className="flex items-center justify-between gap-3 mb-3">
-                            <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-base-content/50">
-                              <GraduationCap size={16} />
-                              Tareas y exámenes
-                            </div>
-                          </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-base-content/40">
+                          <GraduationCap size={16} />
+                          Tareas y exámenes
+                        </div>
 
+                        {sortedTasks.length > 0 ? (
                           <div className="space-y-2">
                             {sortedTasks.map((task, taskIndex) => (
                               <div key={task._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
@@ -985,10 +1024,10 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                               </div>
                             ))}
                           </div>
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl border border-dashed border-base-300 p-4 text-sm text-base-content/50">Todavía no hay tareas en esta unidad.</div>
-                      )}
+                        ) : (
+                          <div className="rounded-xl border border-dashed border-base-200 px-3 py-2 text-sm text-base-content/45">Todavía no hay tareas en esta unidad.</div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
