@@ -472,7 +472,7 @@ const PARTICIPANTES = [
 ];
 
 export interface IGrade {
-  id: string;
+  _id: string;
   studentName: string;
   studentEmail: string;
   avatar: string;
@@ -487,7 +487,7 @@ export interface IGrade {
 
 const CALIFICACIONES: IGrade[] = [
   {
-    id: "g-pass",
+    _id: "g-pass",
     studentName: "Yusef Laroussi",
     studentEmail: "yusef.laroussi@studium.com",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
@@ -500,7 +500,7 @@ const CALIFICACIONES: IGrade[] = [
     feedback: "Maquetación perfecta. Has demostrado un dominio absoluto de Flexbox y CSS Grid.",
   },
   {
-    id: "g-fail",
+    _id: "g-fail",
     studentName: "Yusef Laroussi",
     studentEmail: "yusef.laroussi@studium.com",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
@@ -513,7 +513,7 @@ const CALIFICACIONES: IGrade[] = [
     feedback: "Debes revisar los conceptos de contraste de color y etiquetas ARIA. Te recomiendo volver a leer el tema 2.",
   },
   {
-    id: "g-pending",
+    _id: "g-pending",
     studentName: "Yusef Laroussi",
     studentEmail: "yusef.laroussi@studium.com",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
@@ -525,7 +525,7 @@ const CALIFICACIONES: IGrade[] = [
     submittedAt: "2024-03-21",
   },
   {
-    id: "g-late",
+    _id: "g-late",
     studentName: "Yusef Laroussi",
     studentEmail: "yusef.laroussi@studium.com",
     avatar: "https://upload.wikimedia.org/wikipedia/commons/2/2c/Default_pfp.svg",
@@ -541,7 +541,7 @@ const CALIFICACIONES: IGrade[] = [
 
 const RESOURCES = [
   {
-    id: "res-1",
+    _id: "res-1",
     title: "Tarea 1",
     type: "task",
     status: "pending, completed, late",

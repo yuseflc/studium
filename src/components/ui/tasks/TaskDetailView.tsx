@@ -35,14 +35,14 @@ const TaskDetailView = () => {
 
   // rerender-memo: Memoizar la búsqueda de tarea
   const task = useMemo(
-    () => CALIFICACIONES.find(t => t.id === taskId),
+    () => CALIFICACIONES.find(t => t._id === taskId),
     [taskId]
   );
 
   // js-cache-property-access: Cachear propiedades para evitar accesos repetidos
   const memoizedTask = useMemo(
     () => task ? {
-      id: task.id,
+      _id: task._id,
       title: task.taskTitle,
       category: task.category,
       status: task.status,

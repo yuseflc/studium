@@ -47,7 +47,7 @@ export default async function TaskDetailPage({
     }
   } else {
     // Fallback temporal para las tareas que vienen de CALIFICACIONES u otras pruebas
-    const seedTask = CALIFICACIONES.find(t => String(t.id) === taskId);
+    const seedTask = CALIFICACIONES.find(t => String(t._id) === taskId);
     if (seedTask) {
       taskInfo = {
         title: seedTask.taskTitle,

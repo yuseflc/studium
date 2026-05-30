@@ -365,7 +365,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         prev.map((subject: any) => ({
           ...subject,
           tasks: Array.isArray(subject.tasks)
-            ? subject.tasks.filter((task: any) => String(task?._id || task?.id || "") !== id)
+            ? subject.tasks.filter((task: any) => String(task?._id || "") !== id)
             : subject.tasks,
         }))
       );

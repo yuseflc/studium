@@ -8,7 +8,6 @@ import { FeedbackModal } from "@/components/ui/modals/FeedbackModal";
 // Task puede venir con _id o id, normalizamos a _id
 interface Task {
     _id?: string;
-    id?: string;
     title: string;
 }
 
@@ -45,8 +44,8 @@ export default function IndividualStudentGradingView({
     );
     
     // Estado local para almacenar calificaciones y feedback editados
-    const [gradesState, setGradesState] = useState<Record<string, { grade: string; feedback: string }>>({});
-    const [originalGrades, setOriginalGrades] = useState<Record<string, { grade: string; feedback: string }>>({});
+    const [gradesState, setGradesState] = useState<Record<string, { grade: string; feedback: string; taskId: string }>>({});
+    const [originalGrades, setOriginalGrades] = useState<Record<string, { grade: string; feedback: string; taskId: string }>>({});
     
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
@@ -68,7 +67,7 @@ export default function IndividualStudentGradingView({
             (subj.tasks || []).forEach((task, taskIndex) => {
                 const uniqueKey = `${subjIndex}-${taskIndex}`;
                 // Normalizar: usar _id si existe, sino id, asegurar que es string
-                const taskId = String(task._id || task.id || "").trim();
+                const taskId = String(task._id || "").trim();
                 
                 if (taskId) {
                     state[uniqueKey] = { grade: "", feedback: "", taskId };

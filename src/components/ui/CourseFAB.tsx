@@ -371,7 +371,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
                   disabled={isSubmitting}
                 >
                   <span>
-                    {(units.length ? units : []).find((unit) => (unit._id?.toString() || unit.id) === selectedUnitId)?.title || 'Selecciona una unidad...'}
+                    {(units.length ? units : []).find((unit) => String(unit._id) === selectedUnitId)?.title || 'Selecciona una unidad...'}
                   </span>
                   <span className="pointer-events-none flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-200 ${isOpenUnitDropdown ? 'rotate-180' : ''}`}><path d="m6 9 6 6 6-6"/></svg>
@@ -386,7 +386,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
                         Selecciona una unidad
                       </li>
                       {(units.length ? units : []).map((unit: any) => {
-                        const id = unit._id?.toString() || unit.id;
+                        const id = String(unit._id);
                         const isSelected = id === selectedUnitId;
                         return (
                           <li key={id}>

@@ -16,7 +16,6 @@ interface Submission {
 
 interface Task {
     _id?: string;
-    id?: string;
     title: string;
 }
 
@@ -103,7 +102,7 @@ export default function StudentGradesView({
                                         </tr>
                                         {isExpanded && subjectTasks.map((task) => {
                                             // [SSR] Obtener datos reales de la entrega
-                                            const taskId = task._id || task.id;
+                                            const taskId = task._id;
                                             const grade = getTaskGrade(taskId, submissions);
                                             const feedback = getTaskFeedback(taskId, submissions);
                                             
