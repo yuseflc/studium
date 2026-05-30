@@ -24,6 +24,7 @@ function normalizeResource(resource: any) {
     type: resource.type,
     url: resource.url,
     description: resource.description,
+    content: resource.content,
     createdAt: resource.createdAt,
     updatedAt: resource.updatedAt,
   };
@@ -84,7 +85,7 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
     const units = await Unit.find({ courseId: course._id })
       .populate({
         path: "resourceIds",
-        select: "_id unitId title type url description createdAt updatedAt",
+        select: "_id unitId title type url description content createdAt updatedAt",
       })
       .sort({ order: 1 })
       .lean();
@@ -147,7 +148,7 @@ export async function getUnitWithResources(unitId: string | mongoose.Types.Objec
   try {
     const unit = await Unit.findById(unitId).populate({
       path: "resourceIds",
-      select: "_id title type url description createdAt updatedAt",
+      select: "_id title type url description content createdAt updatedAt",
     });
 
     return unit ? normalizeUnit(unit.toObject()) : unit;

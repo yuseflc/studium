@@ -296,17 +296,12 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
   const openCreateResource = (subjectId: string, unit: CourseUnitItem) => {
     if (!canEdit) return;
     resetForm();
-    setEditor({ kind: "resource", mode: "create", subjectId, unitId: unit._id });
+    router.push(`/mycourses/${courseId}/resources/new?unitId=${unit._id}`);
   };
 
-  const openEditResource = (subjectId: string, unitId: string, resource: CourseResourceItem) => {
+  const openEditResource = (_subjectId: string, _unitId: string, resource: CourseResourceItem) => {
     if (!canEdit) return;
-    resetForm();
-    setTitle(resource.title);
-    setDescription(resource.description || "");
-    setResourceType(resource.type);
-    setResourceUrl(resource.url || "");
-    setEditor({ kind: "resource", mode: "edit", subjectId, unitId, resourceId: resource._id });
+    router.push(`/mycourses/${courseId}/resources/${resource._id}/edit`);
   };
 
   const openCreateTask = (subject: CourseSubjectItem, taskType: TaskDraftType, unitId?: string) => {
@@ -881,7 +876,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                           <div className="space-y-2">
                             {resources.map((resource, resourceIndex) => (
                               <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
-                                <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
+                                <Link href={`/mycourses/${courseId}/resources/${resource._id}`} className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
                                   <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                                     {getResourceTypeIcon(resource.type)}
                                   </div>
@@ -893,33 +888,21 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                     </div>
                                     {resource.description && <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(resource.description, 140)}</p>}
                                   </div>
-                                </div>
+                                </Link>
 
                                 {canEdit && (
                                   <div className="flex items-center gap-1 pr-2 self-center">
-                                    {isResourceDownloadable(resource) && (
-                                      resource.url ? (
-                                        <a
-                                          href={resource.url}
-                                          download
-                                          className="btn btn-ghost btn-xs btn-circle"
-                                          aria-label={`Descargar ${resource.title}`}
-                                          title="Descargar recurso"
-                                        >
-                                          <Download size={16} aria-hidden="true" />
-                                        </a>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className="btn btn-ghost btn-xs btn-circle"
-                                          disabled
-                                          aria-label={`Descargar ${resource.title}`}
-                                          title="Este recurso no tiene archivo asociado"
-                                        >
-                                          <Download size={16} aria-hidden="true" />
-                                        </button>
-                                      )
-                                    )}
+                                    {isResourceDownloadable(resource) && resource.url ? (
+                                      <a
+                                        href={resource.url}
+                                        download
+                                        className="btn btn-ghost btn-xs btn-circle"
+                                        aria-label={`Descargar ${resource.title}`}
+                                        title="Descargar recurso"
+                                      >
+                                        <Download size={16} aria-hidden="true" />
+                                      </a>
+                                    ) : null}
                                     <div className="dropdown dropdown-end">
                                       {renderMenuButton()}
                                       <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
@@ -1075,7 +1058,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                   <div className="space-y-2">
                                     {resources.map((resource, resourceIndex) => (
                                       <div key={resource._id} className="flex items-stretch gap-3 rounded-2xl border border-base-200 bg-base-100 shadow-sm transition-all hover:shadow-md">
-                                        <div className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
+                                        <Link href={`/mycourses/${courseId}/resources/${resource._id}`} className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3">
                                           <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                                             {getResourceTypeIcon(resource.type)}
                                           </div>
@@ -1087,33 +1070,21 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                             </div>
                                             {resource.description && <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(resource.description, 140)}</p>}
                                           </div>
-                                        </div>
+                                        </Link>
 
                                         {canEdit && (
                                           <div className="flex items-center gap-1 pr-2 self-center">
-                                            {isResourceDownloadable(resource) && (
-                                              resource.url ? (
-                                                <a
-                                                  href={resource.url}
-                                                  download
-                                                  className="btn btn-ghost btn-xs btn-circle"
-                                                  aria-label={`Descargar ${resource.title}`}
-                                                  title="Descargar recurso"
-                                                >
-                                                  <Download size={16} aria-hidden="true" />
-                                                </a>
-                                              ) : (
-                                                <button
-                                                  type="button"
-                                                  className="btn btn-ghost btn-xs btn-circle"
-                                                  disabled
-                                                  aria-label={`Descargar ${resource.title}`}
-                                                  title="Este recurso no tiene archivo asociado"
-                                                >
-                                                  <Download size={16} aria-hidden="true" />
-                                                </button>
-                                              )
-                                            )}
+                                            {isResourceDownloadable(resource) && resource.url ? (
+                                              <a
+                                                href={resource.url}
+                                                download
+                                                className="btn btn-ghost btn-xs btn-circle"
+                                                aria-label={`Descargar ${resource.title}`}
+                                                title="Descargar recurso"
+                                              >
+                                                <Download size={16} aria-hidden="true" />
+                                              </a>
+                                            ) : null}
                                             <div className="dropdown dropdown-end">
                                               {renderMenuButton()}
                                               <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">

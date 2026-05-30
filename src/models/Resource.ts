@@ -4,10 +4,12 @@ export interface IResource {
   _id?: mongoose.Types.ObjectId;
   unitId: mongoose.Types.ObjectId; // Referencia a la unidad
   courseId: mongoose.Types.ObjectId; // Referencia al curso (desnormalización para queries rápidas)
+  createdBy?: mongoose.Types.ObjectId; // Profesor que creó/subió el recurso
   title: string;
   type: "link" | "file" | "text";
   url?: string;
   description?: string;
+  content?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -24,6 +26,11 @@ const ResourceSchema = new mongoose.Schema<IResource>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: [true, "El ID del curso es requerido"],
+      index: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       index: true,
     },
     title: {
@@ -43,7 +50,11 @@ const ResourceSchema = new mongoose.Schema<IResource>(
     },
     description: {
       type: String,
-      maxlength: [500, "La descripción no puede exceder 500 caracteres"],
+      maxlength: [5000, "El texto del recurso no puede exceder 5000 caracteres"],
+    },
+    content: {
+      type: String,
+      maxlength: [5000, "El contenido del recurso no puede exceder 5000 caracteres"],
     },
   },
   {

@@ -20,6 +20,7 @@ export interface CreateResourceActionInput {
   unitId?: string;
   title: string;
   description?: string;
+  content?: string;
   fileName?: string;
   type?: "link" | "file" | "text";
   url?: string;
@@ -30,6 +31,7 @@ export interface UpdateResourceActionInput {
   type?: "link" | "file" | "text";
   url?: string;
   description?: string;
+  content?: string;
 }
 
 export interface ResourceActionResult {
@@ -39,10 +41,12 @@ export interface ResourceActionResult {
     _id: string;
     unitId: string;
     courseId: string;
+    createdBy?: string;
     title: string;
     type: "link" | "file" | "text";
     url?: string;
     description?: string;
+    content?: string;
     createdAt: string;
     updatedAt?: string;
   };
@@ -52,10 +56,12 @@ function serializeResource(resource: {
   _id: mongoose.Types.ObjectId;
   unitId: mongoose.Types.ObjectId;
   courseId: mongoose.Types.ObjectId;
+  createdBy?: mongoose.Types.ObjectId;
   title: string;
   type: "link" | "file" | "text";
   url?: string;
   description?: string;
+  content?: string;
   createdAt: Date;
   updatedAt: Date;
 }): NonNullable<ResourceActionResult["resource"]> {
@@ -63,10 +69,12 @@ function serializeResource(resource: {
     _id: resource._id.toString(),
     unitId: resource.unitId.toString(),
     courseId: resource.courseId.toString(),
+    createdBy: resource.createdBy?.toString(),
     title: resource.title,
     type: resource.type,
     url: resource.url,
     description: resource.description,
+    content: resource.content,
     createdAt: resource.createdAt.toISOString(),
     updatedAt: resource.updatedAt?.toISOString(),
   };
@@ -135,6 +143,7 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       type: resourceType,
       url: input.url,
       description: normalizeDescription(input),
+      content: input.content,
     });
 
     if (!validationResult.success) {
@@ -144,13 +153,22 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       };
     }
 
+    if (validationResult.data.type === "text" && !validationResult.data.content) {
+      return {
+        success: false,
+        error: "Introduce el contenido del recurso",
+      };
+    }
+
     const resource = await Resource.create({
       unitId: unit._id,
       courseId: new mongoose.Types.ObjectId(input.courseId),
+      createdBy: currentUser._id,
       title: validationResult.data.title,
       type: validationResult.data.type,
       url: validationResult.data.url,
       description: validationResult.data.description,
+      content: validationResult.data.content,
     });
 
     await Unit.findByIdAndUpdate(unit._id, { $push: { resourceIds: resource._id } });
@@ -188,6 +206,13 @@ export async function updateResource(
       return {
         success: false,
         error: validationResult.error.issues[0]?.message || "Datos de recurso inválidos",
+      };
+    }
+
+    if (validationResult.data.type === "text" && !validationResult.data.content) {
+      return {
+        success: false,
+        error: "Introduce el contenido del recurso",
       };
     }
 
@@ -232,6 +257,9 @@ export async function updateResource(
     }
     if (data.description !== undefined) {
       resource.description = data.description;
+    }
+    if (data.content !== undefined) {
+      resource.content = data.content;
     }
 
     resource.updatedAt = new Date();

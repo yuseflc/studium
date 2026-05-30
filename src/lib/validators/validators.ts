@@ -269,7 +269,12 @@ export const createResourceSchema = z.object({
     .optional(),
   description: z
     .string()
-    .max(500, "La descripción no puede exceder 500 caracteres")
+    .max(5000, "El texto del recurso no puede exceder 5000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+  content: z
+    .string()
+    .max(5000, "El contenido del recurso no puede exceder 5000 caracteres")
     .optional()
     .transform((val) => val?.trim()),
 });
@@ -295,7 +300,12 @@ export const updateResourceSchema = z.object({
     .optional(),
   description: z
     .string()
-    .max(500, "La descripción no puede exceder 500 caracteres")
+    .max(5000, "El texto del recurso no puede exceder 5000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
+  content: z
+    .string()
+    .max(5000, "El contenido del recurso no puede exceder 5000 caracteres")
     .optional()
     .transform((val) => val?.trim()),
 });

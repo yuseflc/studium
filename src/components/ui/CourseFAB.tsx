@@ -280,7 +280,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
         >
           <button 
             onClick={() => {
-              handleOpenModal('resource');
+              router.push(`/mycourses/${courseId || courseid}/resources/new${defaultUnitId ? `?unitId=${defaultUnitId}` : ""}`);
               if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             }}
             className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
