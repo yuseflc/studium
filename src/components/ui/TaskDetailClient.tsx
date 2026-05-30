@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from 'react';
-import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3 } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { submitTask, deleteSubmission } from '@/app/actions/taskActions';
+import { TASK_SUBMISSION_MAX_FILE_SIZE_BYTES, TASK_SUBMISSION_MAX_FILE_SIZE_LABEL } from '@/lib/upload-limits';
 
 interface TaskDetailClientProps {
   taskInfo: {
@@ -59,6 +60,12 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
     try {
       const form = e.currentTarget as HTMLFormElement;
       const formData = new FormData(form);
+      const file = selectedFile;
+
+      if (file && file.size > TASK_SUBMISSION_MAX_FILE_SIZE_BYTES) {
+        setError(`El archivo supera el límite de ${TASK_SUBMISSION_MAX_FILE_SIZE_LABEL}.`);
+        return;
+      }
       
       // Aseguramos que el taskId esté presente
       formData.set('taskId', taskInfo._id || '');
@@ -315,9 +322,12 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                               />
                               {selectedFile && (
                                 <span className="text-xs text-success font-medium mt-1.5 block truncate">
-                                  Archivo seleccionado: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                                  Archivo seleccionado: {selectedFile.name} ({selectedFile.size >= 1024 * 1024 ? `${(selectedFile.size / (1024 * 1024)).toFixed(1)} MB` : `${(selectedFile.size / 1024).toFixed(1)} KB`})
                                 </span>
                               )}
+                              <p className="text-[11px] text-base-content/45 mt-1">
+                                Límite por entrega: {TASK_SUBMISSION_MAX_FILE_SIZE_LABEL}
+                              </p>
                             </>
                           )}
                         </div>

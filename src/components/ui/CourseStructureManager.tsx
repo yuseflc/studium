@@ -971,7 +971,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                     <div className="dropdown dropdown-end">
                                       {renderMenuButton()}
                                       <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-200">
-                                        <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar tarea</button></li>
+                                        <li><button type="button" onClick={() => router.push(`/mycourses/${courseId}/tasks/${task._id}/edit`)}><Pencil size={14} />Editar tarea</button></li>
                                         <li className="menu-title"><span>Reordenar</span></li>
                                         <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
                                         <li><button type="button" disabled={taskIndex === sortedTasks.length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
@@ -1182,7 +1182,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                           <div className="dropdown dropdown-end">
                                             {renderMenuButton()}
                                             <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
-                                              <li><button type="button" onClick={() => openEditTask(subject._id, task)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                              <li><button type="button" onClick={() => router.push(`/mycourses/${courseId}/tasks/${task._id}/edit`)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
                                               <li className="menu-title"><span>Reordenar</span></li>
                                               <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
                                               <li><button type="button" disabled={taskIndex === (subject.tasks || []).length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>

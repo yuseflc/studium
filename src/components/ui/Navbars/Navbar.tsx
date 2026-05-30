@@ -22,13 +22,13 @@ export default function Navbar() {
                 <ul className="menu menu-horizontal px-1">
                     
                     <li>
-                        <Link href="#top" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); }}>Inicio</Link>
+                        <Link href="/#top" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); }}>Inicio</Link>
                     </li>
                     <li>
-                        <Link href="#features" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>Herramientas</Link>
+                        <Link href="/#features" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); }}>Herramientas</Link>
                     </li>
                     <li>
-                        <Link href="#pricing" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Precios</Link>
+                        <Link href="/#pricing" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); }}>Precios</Link>
                     </li>
                 </ul>
             </div>

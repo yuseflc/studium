@@ -4,7 +4,8 @@ import React, { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface Task {
-    id: string;
+    id?: string;
+    _id?: string;
     title: string;
 }
 
@@ -59,10 +60,11 @@ export default function StudentGradesView({ subjects = [] }: StudentGradesViewPr
                                                 </div>
                                             </td>
                                         </tr>
-                                        {isExpanded && subjectTasks.map((task) => {
+                                        {isExpanded && subjectTasks.map((task, taskIndex) => {
+                                            const taskKey = task._id || task.id || `${subject._id}-${task.title}-${taskIndex}`;
                                             const gradeVal = Math.random() * 10;
                                             return (
-                                                <tr key={task.id} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10">
+                                                <tr key={taskKey} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10">
                                                     <td className="pl-12 font-medium text-base-content/70">{task.title}</td>
                                                     <td className="text-center">
                                                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 shadow-sm">
