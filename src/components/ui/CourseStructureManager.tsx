@@ -18,6 +18,7 @@ import {
   MoreVertical,
   Pencil,
   Plus,
+  ExternalLink,
   Type,
   Trash2,
 } from "lucide-react";
@@ -186,6 +187,10 @@ function getResourceTypeIcon(type: CourseResourceItem["type"]) {
 
 function isResourceDownloadable(resource: CourseResourceItem) {
   return resource.type === "file";
+}
+
+function isResourceExternalLink(resource: CourseResourceItem) {
+  return resource.type === "link" && Boolean(resource.url);
 }
 
 export default function CourseStructureManager({ courseId, subjects, setSubjects, canEdit = true }: CourseStructureManagerProps) {
@@ -902,6 +907,17 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                       >
                                         <Download size={16} aria-hidden="true" />
                                       </a>
+                                    ) : isResourceExternalLink(resource) ? (
+                                      <a
+                                        href={resource.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-ghost btn-xs btn-circle"
+                                        aria-label={`Visitar enlace de ${resource.title}`}
+                                        title="Visitar enlace"
+                                      >
+                                        <ExternalLink size={16} aria-hidden="true" />
+                                      </a>
                                     ) : null}
                                     <div className="dropdown dropdown-end">
                                       {renderMenuButton()}
@@ -1083,6 +1099,17 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                                 title="Descargar recurso"
                                               >
                                                 <Download size={16} aria-hidden="true" />
+                                              </a>
+                                            ) : isResourceExternalLink(resource) ? (
+                                              <a
+                                                href={resource.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="btn btn-ghost btn-xs btn-circle"
+                                                aria-label={`Visitar enlace de ${resource.title}`}
+                                                title="Visitar enlace"
+                                              >
+                                                <ExternalLink size={16} aria-hidden="true" />
                                               </a>
                                             ) : null}
                                             <div className="dropdown dropdown-end">

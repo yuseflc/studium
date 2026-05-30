@@ -4,7 +4,7 @@ import Course from '@/models/Course';
 import Unit from '@/models/Unit';
 import User from '@/models/User';
 import { notFound } from 'next/navigation';
-import { FileText, Download, ArrowLeft, Eye, CalendarDays, GraduationCap, Users, UserCircle2 } from 'lucide-react';
+import { FileText, Download, ArrowLeft, CalendarDays, GraduationCap, Users, UserCircle2, ExternalLink, Link2 } from 'lucide-react';
 import Link from 'next/link';
 import mongoose from 'mongoose';
 
@@ -70,6 +70,7 @@ export default async function ResourceDetailPage({
   const isPdf = resourceInfo.url?.toLowerCase().endsWith('.pdf');
   const isImage = /\.(jpeg|jpg|gif|png|webp)$/i.test(resourceInfo.url || '');
   const isTextResource = resourceInfo.type === "text";
+  const isLinkResource = resourceInfo.type === "link";
   const textContent = resourceInfo.content || resourceInfo.description || "";
   const uploadedLabel = new Date(resourceInfo.createdAt || Date.now()).toLocaleDateString("es-ES", {
     day: "2-digit",
@@ -174,6 +175,40 @@ export default async function ResourceDetailPage({
                   </div>
                 </div>
               </section>
+            ) : isLinkResource ? (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/40">
+                  <Link2 size={14} />
+                  Enlace externo
+                </div>
+                <div className="rounded-[1.75rem] border border-base-300 bg-base-200/30 p-2 shadow-sm">
+                  <div className="flex flex-col gap-6 rounded-[1.4rem] border border-base-300 bg-base-100 p-5 sm:p-6 lg:p-8">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="rounded-2xl bg-primary/10 p-3 text-primary">
+                          <ExternalLink size={28} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="truncate text-lg font-semibold text-base-content">{resourceInfo.title || 'Enlace del recurso'}</p>
+                          <p className="text-sm text-base-content/60">Abre el enlace asociado a este recurso</p>
+                        </div>
+                      </div>
+
+                      {resourceInfo.url ? (
+                        <a 
+                          href={resourceInfo.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="btn btn-primary flex items-center gap-2 self-start lg:self-auto"
+                        >
+                          <ExternalLink size={16} />
+                          Visitar enlace
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </section>
             ) : (
               <section className="space-y-4">
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.24em] text-base-content/40">
@@ -208,7 +243,7 @@ export default async function ResourceDetailPage({
                     {resourceInfo.url && (
                       <div className="border-t border-base-300 pt-6">
                         <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.24em] text-base-content/50">
-                          <Eye size={16} />
+                          <FileText size={16} />
                           Previsualización
                         </h3>
                         {isPdf ? (
