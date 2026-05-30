@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare } from "lucide-react";
 import { saveStudentTaskGrade } from "@/app/actions/participantActions";
+import { FeedbackModal } from "@/components/ui/modals/FeedbackModal";
 
+// Task puede venir con _id o id, normalizamos a _id
 interface Task {
-    id: string;
+    _id?: string;
+    id?: string;
     title: string;
 }
 
@@ -26,6 +29,7 @@ interface IndividualStudentGradingViewProps {
     courseId: string;
     initialSubmissions: any[];
     onBack: () => void;
+    onGradesSaved?: () => Promise<void>; // [SSR] Callback para refrescar datos al guardar
 }
 
 export default function IndividualStudentGradingView({ 
@@ -33,7 +37,8 @@ export default function IndividualStudentGradingView({
     subjects = [], 
     courseId,
     initialSubmissions,
-    onBack 
+    onBack,
+    onGradesSaved
 }: IndividualStudentGradingViewProps) {
     const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>(
         Object.fromEntries((subjects || []).map(s => [s._id, true]))
@@ -45,44 +50,76 @@ export default function IndividualStudentGradingView({
     
     const [isSaving, setIsSaving] = useState(false);
     const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "success" | "error">("idle");
+    
+    // Estado para el modal de feedback
+    const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+    const [selectedTaskForFeedback, setSelectedTaskForFeedback] = useState<{ stateKey: string; title: string } | null>(null);
+    const feedbackModalRef = useRef<HTMLDialogElement>(null);
 
     // Inicializar el estado local con las entregas iniciales de la base de datos
     useEffect(() => {
-        const state: Record<string, { grade: string; feedback: string }> = {};
+        const state: Record<string, { grade: string; feedback: string; taskId: string }> = {};
         
-        // Mapear entregas existentes
-        initialSubmissions.forEach((sub: any) => {
-            const taskIdStr = String(sub.taskId);
-            state[taskIdStr] = {
-                grade: sub.grade !== undefined ? String(sub.grade) : "",
-                feedback: sub.feedback || ""
-            };
-        });
-
-        // Asegurar que todas las tareas en los temas tengan un objeto en el estado (vacío si no hay entrega)
-        subjects.forEach(subj => {
-            (subj.tasks || []).forEach(task => {
-                if (!state[task.id]) {
-                    state[task.id] = { grade: "", feedback: "" };
+        // Crear un mapa de taskId normalizado -> (subjectIndex, taskIndex) para búsquedas rápidas
+        const taskIdMap = new Map<string, string>();
+        
+        // Asegurar que todas las tareas en los temas tengan un objeto en el estado
+        subjects.forEach((subj, subjIndex) => {
+            (subj.tasks || []).forEach((task, taskIndex) => {
+                const uniqueKey = `${subjIndex}-${taskIndex}`;
+                // Normalizar: usar _id si existe, sino id, asegurar que es string
+                const taskId = String(task._id || task.id || "").trim();
+                
+                if (taskId) {
+                    state[uniqueKey] = { grade: "", feedback: "", taskId };
+                    taskIdMap.set(taskId, uniqueKey);
+                    console.debug(`[Grade Init] Task ${taskIndex} in Subject ${subjIndex}: taskId=${taskId}, stateKey=${uniqueKey}`);
+                } else {
+                    console.warn(`[Grade Init] Task ${taskIndex} in Subject ${subjIndex} has no ID`, task);
                 }
             });
         });
 
+        // Mapear entregas existentes por taskId
+        initialSubmissions.forEach((sub: any) => {
+            const subTaskId = String(sub.taskId || "").trim();
+            
+            if (!subTaskId) {
+                console.warn(`[Grade Init] Submission has no taskId`, sub);
+                return;
+            }
+            
+            const foundKey = taskIdMap.get(subTaskId);
+            
+            if (foundKey && state[foundKey]) {
+                // Actualizar grade y feedback, preservando taskId
+                state[foundKey] = {
+                    ...state[foundKey],
+                    grade: sub.grade !== undefined && sub.grade !== null ? String(sub.grade) : "",
+                    feedback: sub.feedback ? String(sub.feedback).trim() : ""
+                };
+                console.debug(`[Grade Init] Loaded submission for taskId=${subTaskId}: grade=${state[foundKey].grade}, feedback=${state[foundKey].feedback.substring(0, 30)}...`);
+            } else {
+                console.warn(`[Grade Init] Submission taskId=${subTaskId} not found in subjects`, { foundKey, inState: !!foundKey });
+            }
+        });
+
         setGradesState(state);
         setOriginalGrades(JSON.parse(JSON.stringify(state)));
+        console.info(`[Grade Init] Initialized ${Object.keys(state).length} tasks, ${initialSubmissions.length} submissions loaded`);
     }, [initialSubmissions, subjects]);
 
     const toggleSubject = (id: string) => {
         setExpandedSubjects(prev => ({ ...prev, [id]: !prev[id] }));
     };
 
-    const handleFieldChange = (taskId: string, field: "grade" | "feedback", value: string) => {
+    const handleFieldChange = (stateKey: string, field: "grade" | "feedback", value: string) => {
         if (field === "grade") {
             // Permitir vacío
             if (value === "") {
                 setGradesState(prev => ({
                     ...prev,
-                    [taskId]: { ...prev[taskId], grade: "" }
+                    [stateKey]: { ...(prev[stateKey] || { grade: "", feedback: "", taskId: "" }), grade: "" }
                 }));
                 return;
             }
@@ -93,13 +130,50 @@ export default function IndividualStudentGradingView({
             if (!isNaN(num) && (num < 0 || num > 10)) return;
         }
 
-        setGradesState(prev => ({
-            ...prev,
-            [taskId]: {
-                ...prev[taskId],
-                [field]: value
-            }
-        }));
+        setGradesState(prev => {
+            const currentTask = prev[stateKey] || { grade: "", feedback: "", taskId: "" };
+            return {
+                ...prev,
+                [stateKey]: {
+                    ...currentTask,
+                    [field]: value
+                }
+            };
+        });
+    };
+
+    // [FIX] Abrir el modal de feedback - usar isOpen del Modal, sin showModal()
+    const handleOpenFeedbackModal = (stateKey: string, taskTitle: string) => {
+        setSelectedTaskForFeedback({ stateKey, title: taskTitle });
+        setFeedbackModalOpen(true);
+    };
+
+    // Guardar feedback desde el modal
+    const handleSaveFeedback = async (newFeedback: string): Promise<boolean> => {
+        if (!selectedTaskForFeedback) return false;
+
+        try {
+            // Actualizar el estado local
+            setGradesState(prev => {
+                const currentTask = prev[selectedTaskForFeedback.stateKey] || { grade: "", feedback: "", taskId: "" };
+                return {
+                    ...prev,
+                    [selectedTaskForFeedback.stateKey]: {
+                        ...currentTask,
+                        feedback: newFeedback
+                    }
+                };
+            });
+
+            // Cerrar el modal
+            setFeedbackModalOpen(false);
+            setSelectedTaskForFeedback(null);
+
+            return true;
+        } catch (error) {
+            console.error("Error saving feedback:", error);
+            return false;
+        }
     };
 
     // Guardar todos los cambios modificados
@@ -107,37 +181,84 @@ export default function IndividualStudentGradingView({
         setIsSaving(true);
         setSaveStatus("saving");
         try {
-            // Filtrar cuáles calificaciones o feedbacks cambiaron respecto al original
-            const promises = Object.keys(gradesState)
-                .filter(taskId => {
-                    const current = gradesState[taskId];
-                    const original = originalGrades[taskId] || { grade: "", feedback: "" };
+            // Identificar tareas que han cambiado
+            const tasksToSave = Object.keys(gradesState)
+                .filter(stateKey => {
+                    const current = gradesState[stateKey];
+                    const original = originalGrades[stateKey] || { grade: "", feedback: "", taskId: "" };
                     return current.grade !== original.grade || current.feedback !== original.feedback;
-                })
-                .map(async (taskId) => {
-                    const current = gradesState[taskId];
-                    const gradeVal = current.grade === "" ? 0 : parseFloat(current.grade);
-                    return saveStudentTaskGrade(taskId, student.id, gradeVal, current.feedback);
                 });
 
+            console.log(`[Save] Iniciando guardado de ${tasksToSave.length} tareas`);
+
+            // Crear promesas para cada tarea a guardar
+            const promises = tasksToSave.map(async (stateKey) => {
+                const current = gradesState[stateKey];
+                
+                // Validar que taskId existe y es válido
+                const taskId = (current.taskId || "").trim();
+                if (!taskId) {
+                    console.error(`[Save] taskId vacío para stateKey ${stateKey}`, current);
+                    return { success: false, message: 'Error: taskId no encontrado' };
+                }
+                
+                // Convertir grade a número, usar 0 si está vacío
+                let gradeVal = 0;
+                if (current.grade) {
+                    gradeVal = parseFloat(current.grade);
+                    if (isNaN(gradeVal)) {
+                        console.error(`[Save] Grade inválido para taskId=${taskId}: ${current.grade}`);
+                        return { success: false, message: 'Calificación inválida' };
+                    }
+                }
+                
+                // Feedback puede ser vacío
+                const feedback = (current.feedback || "").trim();
+                
+                console.log(`[Save] Guardando: taskId=${taskId}, studentId=${student.id}, grade=${gradeVal}, feedback_len=${feedback.length}`);
+                
+                const result = await saveStudentTaskGrade(taskId, student.id, gradeVal, feedback);
+                
+                if (!result.success) {
+                    console.error(`[Save] Error guardando taskId=${taskId}: ${result.message}`);
+                }
+                
+                return result;
+            });
+
             if (promises.length === 0) {
+                console.log(`[Save] No hay cambios para guardar`);
                 setSaveStatus("idle");
                 setIsSaving(false);
                 return;
             }
 
+            // Esperar a que todas las promesas se resuelvan
             const results = await Promise.all(promises);
             const hasError = results.some(r => !r.success);
+            const successCount = results.filter(r => r.success).length;
+
+            console.log(`[Save] Resultado: ${successCount}/${results.length} guardadas correctamente`);
 
             if (hasError) {
                 setSaveStatus("error");
+                console.error("[Save] Errores encontrados:", results);
             } else {
-                setSaveStatus("success");
+                // Actualizar originalGrades para reflejar lo guardado
                 setOriginalGrades(JSON.parse(JSON.stringify(gradesState)));
+                setSaveStatus("success");
+                console.log(`[Save] Todas las calificaciones se guardaron correctamente`);
+                
+                // [SSR] Refrescar datos en el componente padre después de guardar
+                if (onGradesSaved) {
+                    console.log('[Save] Llamando a onGradesSaved para refrescar datos...');
+                    await onGradesSaved();
+                }
+                
                 setTimeout(() => setSaveStatus("idle"), 3000);
             }
         } catch (error) {
-            console.error("Error saving grades:", error);
+            console.error("[Save] Error inesperado:", error);
             setSaveStatus("error");
         } finally {
             setIsSaving(false);
@@ -202,7 +323,7 @@ export default function IndividualStudentGradingView({
                             </tr>
                         </thead>
                         <tbody>
-                            {subjects.map((subject) => {
+                            {subjects.map((subject, subjectIndex) => {
                                 const subjectTasks = subject.tasks || [];
                                 if (subjectTasks.length === 0) return null;
                                 const isExpanded = expandedSubjects[subject._id];
@@ -220,15 +341,16 @@ export default function IndividualStudentGradingView({
                                                 </div>
                                             </td>
                                         </tr>
-                                        {isExpanded && subjectTasks.map((task) => {
-                                            const state = gradesState[task.id] || { grade: "", feedback: "" };
+                                        {isExpanded && subjectTasks.map((task, taskIndex) => {
+                                            const stateKey = `${subjectIndex}-${taskIndex}`;
+                                            const state = gradesState[stateKey] || { grade: "", feedback: "", taskId: "" };
                                             const gradeVal = parseFloat(state.grade);
                                             
                                             // Saber si esta entregado o no (asumir entregado si hay nota o feedback)
                                             const hasSubmission = state.grade !== "" || state.feedback !== "";
 
                                             return (
-                                                <tr key={task.id} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10">
+                                                <tr key={stateKey} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10">
                                                     <td className="pl-12 font-medium text-base-content/70">{task.title}</td>
                                                     <td className="text-center">
                                                         {hasSubmission ? (
@@ -247,7 +369,7 @@ export default function IndividualStudentGradingView({
                                                                 <input 
                                                                     type="text" 
                                                                     value={state.grade}
-                                                                    onChange={(e) => handleFieldChange(task.id, "grade", e.target.value)}
+                                                                    onChange={(e) => handleFieldChange(stateKey, "grade", e.target.value)}
                                                                     placeholder="—"
                                                                     className={`w-14 bg-transparent text-right font-mono font-bold text-lg focus:outline-none border-b border-transparent focus:border-base-content/30 ${!isNaN(gradeVal) && gradeVal >= 5 ? 'text-success' : 'text-error'}`}
                                                                 />
@@ -256,13 +378,13 @@ export default function IndividualStudentGradingView({
                                                         </div>
                                                     </td>
                                                     <td className="text-center">
-                                                        <input 
-                                                            type="text"
-                                                            value={state.feedback}
-                                                            onChange={(e) => handleFieldChange(task.id, "feedback", e.target.value)}
-                                                            className="input input-bordered input-sm w-full font-medium"
-                                                            placeholder="Añadir feedback..."
-                                                        />
+                                                        <button
+                                                            onClick={() => handleOpenFeedbackModal(stateKey, task.title)}
+                                                            className="btn btn-sm btn-outline btn-primary gap-2"
+                                                        >
+                                                            <MessageSquare size={16} />
+                                                            {state.feedback ? "Editar" : "Añadir"}
+                                                        </button>
                                                     </td>
                                                 </tr>
                                             );
@@ -274,6 +396,22 @@ export default function IndividualStudentGradingView({
                     </table>
                 </div>
             </div>
+
+            {/* Modal de Feedback */}
+            {selectedTaskForFeedback && (
+                <FeedbackModal
+                    dialogRef={feedbackModalRef}
+                    isOpen={feedbackModalOpen}
+                    onClose={() => {
+                        setFeedbackModalOpen(false);
+                        setSelectedTaskForFeedback(null);
+                    }}
+                    taskTitle={selectedTaskForFeedback.title}
+                    studentName={`${student.nombre} ${student.apellidos}`}
+                    initialFeedback={gradesState[selectedTaskForFeedback.stateKey]?.feedback || ""}
+                    onSubmit={handleSaveFeedback}
+                />
+            )}
         </div>
     );
 }

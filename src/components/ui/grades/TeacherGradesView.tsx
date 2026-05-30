@@ -79,7 +79,12 @@ export default function TeacherGradesView({ participants, subjects, courseId }: 
                 onBack={() => {
                     setSelectedStudent(null);
                     loadSubmissions(); // Recargar datos al volver
-                }} 
+                }}
+                // [SSR] Callback para refrescar datos después de guardar
+                onGradesSaved={async () => {
+                    console.log('[TeacherGradesView] Refrescando submissions después de guardar...');
+                    await loadSubmissions();
+                }}
             />
         );
     }

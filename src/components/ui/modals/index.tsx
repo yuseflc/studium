@@ -2,6 +2,7 @@ export * from './Modal';
 export * from './ModalDanger';
 export * from './ModalAdvise';
 export * from './ModalForm';
+export * from './FeedbackModal';
 export * from './CourseSubjectModal';
 export * from './CourseUnitModal';
 export * from './CourseResourceModal';
