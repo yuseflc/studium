@@ -338,7 +338,7 @@ export async function createTaskFromFormData(
       success: true,
       taskId: result.task._id,
       message: "Tarea creada correctamente",
-      redirectTo: isActive ? `/mycourses/${payload.courseId}/tasks/${result.task._id}` : `/mycourses/${payload.courseId}`,
+      redirectTo: payload.active ? `/mycourses/${payload.courseId}/tasks/${result.task._id}` : `/mycourses/${payload.courseId}`,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al crear la tarea";
