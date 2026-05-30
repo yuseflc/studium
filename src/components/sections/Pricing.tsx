@@ -1,151 +1,189 @@
 export default function Pricing() {
     return (
-        <section id="pricing" className="bg-base-100 py-24">
-            <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div className="max-w-3xl text-center mx-auto">
-                    <p className="text-sm font-bold uppercase tracking-[0.32em] text-primary/80">Planes y precios</p>
-                    <h2 className="mt-6 text-4xl md:text-5xl font-bold text-base-content tracking-tight">
-                        Elige el plan que se adapte a tu ritmo de aprendizaje
-                    </h2>
-                    <p className="mt-4 text-lg text-base-content/70 leading-relaxed">
-                        Accede a cursos, tareas y recursos desde un plan gratuito, sube al básico para obtener certificaciones o elige premium para tu equipo.
-                    </p>
-                </div>
+        <section id="pricing" className="flex flex-col lg:flex-row w-full items-center lg:items-stretch justify-center py-24 bg-base-100 gap-6 px-4">
 
-                <div className="mt-16 grid gap-8 lg:grid-cols-3">
-                    <div className="card w-full bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all duration-300 rounded-[2rem] hover:-translate-y-1">
-                        <div className="card-body flex flex-col justify-between p-8">
-                            <div>
-                                <div className="h-2 w-16 rounded-full bg-primary/20 mb-6"></div>
-                                <div className="flex items-center justify-between gap-4">
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-base-content">Gratuito</h3>
-                                        <p className="text-sm text-base-content/60 mt-2">Acceso inmediato a recursos de estudio y actividades básicas.</p>
-                                    </div>
-                                    <span className="text-2xl font-semibold text-base-content">0 €/mes</span>
-                                </div>
-                                <p className="mt-5 text-sm text-base-content/70">
-                                    Ideal para explorar la plataforma, aprender contenidos introductorios y familiarizarte con el flujo de cursos.
-                                </p>
-                            </div>
-
-                            <div className="mt-10 space-y-4 text-sm">
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Contenido gratuito ilimitado</div>
-                                        <div className="text-xs text-base-content/70">Acceso inmediato a lecciones y recursos de inicio.</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Apoyo comunitario</div>
-                                        <div className="text-xs text-base-content/70">Participa en foros y comparte dudas con otros estudiantes.</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3 opacity-70">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-base-content/10 text-base-content/60 text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium line-through text-base-content">Certificado oficial</div>
-                                        <div className="text-xs text-base-content/50">Actívalo al pasar a un plan de pago.</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button className="btn btn-outline btn-block mt-10 text-base-content">Comenzar gratis</button>
+            {/* Tarjeta Gratuito */}
+            <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-base-200">
+                <div className="card-body flex flex-col justify-between">
+                    <div>
+                        <span className="badge w-full bg-info/10 text-info text-center py-3 mb-4">
+                            Ideal para empezar
+                        </span>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl md:text-3xl font-bold text-base-content">Gratuito</h2>
+                            <span className="text-xl font-semibold text-base-content">0 €/mes</span>
                         </div>
                     </div>
 
-                    <div className="card w-full bg-base-100 shadow-[0_24px_80px_-48px_rgba(59,130,246,0.45)] border border-primary/20 hover:shadow-[0_26px_110px_-64px_rgba(59,130,246,0.35)] transition-all duration-300 rounded-[2rem] hover:-translate-y-1">
-                        <div className="card-body flex flex-col justify-between p-8">
+                    <ul className="mt-6 flex flex-col gap-3 text-sm">
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                             <div>
-                                <div className="h-2 w-16 rounded-full bg-primary/30 mb-6"></div>
-                                <div className="flex items-center justify-between gap-4">
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-base-content">Básico</h3>
-                                        <p className="text-sm text-base-content/60 mt-2">Diseñado para aprender con estructura y certificación.</p>
-                                    </div>
-                                    <span className="text-2xl font-semibold text-base-content">9 €/mes</span>
-                                </div>
-                                <p className="mt-5 text-sm text-base-content/70">
-                                    Ideal para estudiantes que quieren avanzar con proyectos prácticos, evaluaciones y acceso a certificaciones oficiales.
-                                </p>
+                                <div className="font-medium text-base-content">Hasta 10 alumnos activos</div>
+                                <div className="text-xs text-base-content/70">Ideal para probar la plataforma</div>
                             </div>
-
-                            <div className="mt-10 space-y-4 text-sm">
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Certificado oficial</div>
-                                        <div className="text-xs text-base-content/70">Obtén un certificado digital al completar el curso.</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Aprendizaje guiado</div>
-                                        <div className="text-xs text-base-content/70">Trabaja proyectos prácticos con instrucciones paso a paso.</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Soporte prioritario</div>
-                                        <div className="text-xs text-base-content/70">Atención rápida para dudas y correcciones.</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <button className="btn btn-primary btn-block mt-10">Suscribirse</button>
-                        </div>
-                    </div>
-
-                    <div className="card w-full bg-base-100 shadow-xl border border-secondary/20 hover:shadow-2xl transition-all duration-300 rounded-[2rem] hover:-translate-y-1">
-                        <div className="card-body flex flex-col justify-between p-8">
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                             <div>
-                                <div className="h-2 w-16 rounded-full bg-secondary/20 mb-6"></div>
-                                <div className="flex items-center justify-between gap-4">
-                                    <div>
-                                        <h3 className="text-2xl font-bold text-base-content">Premium</h3>
-                                        <p className="text-sm text-base-content/60 mt-2">La opción completa para equipos con necesidades avanzadas.</p>
-                                    </div>
-                                    <span className="text-2xl font-semibold text-base-content">29 €/mes</span>
-                                </div>
-                                <p className="mt-5 text-sm text-base-content/70">
-                                    Perfecto para equipos que quieren mentoría, integraciones y análisis de desempeño con prioridad activa.
-                                </p>
+                                <div className="font-medium text-base-content">Hasta 3 cursos públicos</div>
+                                <div className="text-xs text-base-content/70">Comparte tu conocimiento</div>
                             </div>
-
-                            <div className="mt-10 space-y-4 text-sm">
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Mentoría 1:1</div>
-                                        <div className="text-xs text-base-content/70">Recibe orientación personalizada con sesiones directas.</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Integraciones profesionales</div>
-                                        <div className="text-xs text-base-content/70">Conecta tu trabajo con GitHub, Slack y exporta resultados.</div>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <span className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-success/10 text-success text-xs font-bold">✓</span>
-                                    <div>
-                                        <div className="font-medium text-base-content">Feedback experto</div>
-                                        <div className="text-xs text-base-content/70">Recibe evaluaciones detalladas de tus ejercicios.</div>
-                                    </div>
-                                </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Subida de archivos hasta 10MB</div>
+                                <div className="text-xs text-base-content/70">PDFs, imágenes y documentos</div>
                             </div>
+                        </li>
+                        <li className="flex items-start gap-3 opacity-60">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-base-content/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Sin evaluaciones automáticas</div>
+                                <div className="text-xs text-base-content/70">Las evaluaciones requieren plan de pago</div>
+                            </div>
+                        </li>
+                    </ul>
 
-                            <button className="btn btn-primary btn-block mt-10">Suscribirse</button>
-                        </div>
+                    <div className="mt-8">
+                        <button className="btn btn-outline btn-primary btn-block">Comenzar gratis</button>
                     </div>
                 </div>
+            </div>
 
+            {/* Tarjeta Básico (MÁS ELEGIDO) */}
+            <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-primary relative">
+                <div className="card-body flex flex-col justify-between">
+                    <div>
+                        <span className="badge w-full badge-primary text-center py-3 mb-4">
+                            ⭐ Más elegido
+                        </span>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl md:text-3xl font-bold text-base-content">Básico</h2>
+                            <span className="text-xl font-semibold text-base-content">9 €/mes</span>
+                        </div>
+                        <span className="badge mt-3 bg-secondary/10 text-secondary border-none">
+                            Ideal para pequeños creadores
+                        </span>
+                    </div>
+
+                    <ul className="mt-6 flex flex-col gap-3 text-sm">
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Hasta 30 alumnos activos</div>
+                                <div className="text-xs text-base-content/70">Perfecto para clases pequeñas</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Hasta 15 cursos privados</div>
+                                <div className="text-xs text-base-content/70">Crea y organiza tu contenido</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Subida de archivos hasta 50MB</div>
+                                <div className="text-xs text-base-content/70">Videos cortos y documentos</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Evaluaciones automáticas</div>
+                                <div className="text-xs text-base-content/70">Cuestionarios y tests con corrección automática</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Soporte por correo 48h</div>
+                                <div className="text-xs text-base-content/70">Respuesta garantizada</div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div className="mt-8">
+                        <button className="btn btn-primary btn-block">Suscribirse</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Tarjeta Premium */}
+            <div className="card w-full max-w-sm bg-base-100 shadow-xl border border-secondary">
+                <div className="card-body flex flex-col justify-between">
+                    <div>
+                        <span className="badge w-full bg-black text-white text-center py-3 mb-4">
+                            🚀 Para empresas
+                        </span>
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-2xl md:text-3xl font-bold text-base-content">Premium</h2>
+                            <span className="text-xl font-semibold text-base-content">29 €/mes</span>
+                        </div>
+                        <span className="badge mt-3 bg-success/10 text-success border-none">
+                            Escalabilidad total
+                        </span>
+                    </div>
+
+                    <ul className="mt-6 flex flex-col gap-3 text-sm">
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Alumnos ilimitados</div>
+                                <div className="text-xs text-base-content/70">Sin límites de capacidad</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Cursos ilimitados</div>
+                                <div className="text-xs text-base-content/70">Crea todos los cursos que necesites</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Subida de archivos hasta 100MB</div>
+                                <div className="text-xs text-base-content/70">Videos HD, proyectos y archivos grandes</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Evaluaciones avanzadas</div>
+                                <div className="text-xs text-base-content/70">IA, análisis de rendimiento y feedback personalizado</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Certificados personalizados</div>
+                                <div className="text-xs text-base-content/70">Con tu marca y logo</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">Soporte prioritario 24/7</div>
+                                <div className="text-xs text-base-content/70">Respuesta en menos de 2 horas</div>
+                            </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-success shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                            <div>
+                                <div className="font-medium text-base-content">API y Webhooks</div>
+                                <div className="text-xs text-base-content/70">Integración con tus sistemas</div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div className="mt-8">
+                        <button className="btn btn-primary btn-block">Suscribirse</button>
+                    </div>
+                </div>
             </div>
         </section>
     );
