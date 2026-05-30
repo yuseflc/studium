@@ -166,7 +166,7 @@ export default function CourseNavbarDrawerContent() {
                               Tareas asignadas
                             </p>
                             <ul className="space-y-1">
-                              {unit.tasks.map((task) => (
+                              {unit.tasks?.map((task) => (
                                 <li key={task._id}>
                                   <button
                                     type="button"

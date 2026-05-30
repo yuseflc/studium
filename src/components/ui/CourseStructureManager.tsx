@@ -535,7 +535,6 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
           if (editor.mode === "create") {
           const result = await createUnit({
             courseId,
-            subjectId: editor.subjectId,
             title,
             content,
           });
@@ -583,7 +582,6 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
         if (editor.mode === "create") {
           const result = await createResource({
             courseId,
-            subjectId: editor.subjectId,
             unitId: editor.unitId,
             title,
             description,

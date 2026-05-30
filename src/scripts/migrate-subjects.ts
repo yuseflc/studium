@@ -44,6 +44,10 @@ async function main() {
     family: 4,
   });
 
+  if (!mongoose.connection.db) {
+    throw new Error("Mongoose connection established but database reference is missing");
+  }
+
   // Read legacy subjects collection directly to avoid depending on Subject model
   const subjects = await mongoose.connection.db
     .collection('subjects')
