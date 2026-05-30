@@ -239,51 +239,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     setStatus(courseData?.status || "draft");
   }, [courseData?.title, courseData?.description, courseData?.status]);
 
-  // ========== HANDLERS PARA AGREGAR CONTENIDO (optimista local) ==========
-  
-  /**
-   * Agrega una tarea al subject correspondiente.
-   * Actualización optimista: actualizo el estado local inmediatamente,
-   * luego el servidor confirmará (o no) pero asumo éxito porque es creación.
-   */
-  const handleAddTask = (task: any) => {
-    // Prefer task.unitId (new model), fallback to task.subjectId (legacy)
-    const unitId = task?.unitId;
-    const subjectIdFallback = task?.subjectId;
-
-    if (unitId) {
-      setSubjects((prev) =>
-        prev.map((subject: any) => {
-          const units = Array.isArray(subject.units) ? subject.units : [];
-          const found = units.some((u: any) => String(u?._id || u?.id || "") === String(unitId));
-          if (!found) return subject;
-
-          const existingTasks = Array.isArray(subject.tasks) ? subject.tasks : [];
-          return {
-            ...subject,
-            tasks: [task, ...existingTasks],
-          };
-        })
-      );
-      return;
-    }
-
-    if (subjectIdFallback) {
-      setSubjects((prev) =>
-        prev.map((subject: any) => {
-          const subjectId = String(subject?._id || subject?.id || "");
-          if (subjectId !== String(subjectIdFallback)) return subject;
-
-          const existingTasks = Array.isArray(subject.tasks) ? subject.tasks : [];
-          return {
-            ...subject,
-            tasks: [task, ...existingTasks],
-          };
-        })
-      );
-    }
-  };
-
   /**
    * Agrega un nuevo subject (materia) al curso.
    * También optimista: lo pusheo localmente, el servidor ya lo guardó porque viene del FAB.
@@ -1131,7 +1086,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       {/* BOTÓN FLOTANTE (FAB): solo visible en pestaña "content" y para profesores */}
       {isTeacher && activeTab === "content" && (
         <CourseFAB
-          onAddTask={handleAddTask}
           onAddResource={handleAddResource}
           onAddUnit={handleAddUnit}
           courseId={courseId}

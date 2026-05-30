@@ -1,4 +1,5 @@
 import { connectDB } from '@/lib/database/database';
+import Course from '@/models/Course';
 import Task from '@/models/Task';
 import Submission from '@/models/Submission';
 import User from '@/models/User';
@@ -24,18 +25,25 @@ export default async function TaskDetailPage({
 
   await connectDB();
 
+  const currentUser = session?.user?.email
+    ? await User.findOne({ email: session.user.email }).lean()
+    : null;
+
+  const course = await Course.findById(courseid).select('ownerId teachers').lean();
+  const isTeacherView = !!currentUser && !!course && (
+    course.ownerId?.toString() === currentUser._id.toString() ||
+    Array.isArray(course.teachers) && course.teachers.some((teacherId: any) => teacherId.toString() === currentUser._id.toString())
+  );
+
   // Buscar en BD si es un ObjectId
   if (mongoose.Types.ObjectId.isValid(taskId)) {
     taskInfo = await Task.findById(taskId).lean();
     
-    if (taskInfo && session?.user?.email) {
-      const user = await User.findOne({ email: session.user.email }).lean();
-      if (user) {
+    if (taskInfo && currentUser) {
         existingSubmission = await Submission.findOne({ 
           taskId: taskInfo._id, 
-          studentId: user._id 
+          studentId: currentUser._id 
         }).lean();
-      }
     }
   } else {
     // Fallback temporal para las tareas que vienen de CALIFICACIONES u otras pruebas
@@ -54,13 +62,23 @@ export default async function TaskDetailPage({
     notFound();
   }
 
+  const deliveredCount = taskInfo._id
+    ? await Submission.countDocuments({
+        taskId: taskInfo._id,
+        submissionStatus: { $in: ["submitted", "late"] },
+      })
+    : 0;
+
   // Serializar campos no serializables de Mongoose a objetos limpios
   const serializedTask = {
     _id: taskInfo._id ? String(taskInfo._id) : undefined,
     title: taskInfo.title,
     description: taskInfo.description,
-    dueDate: taskInfo.dueDate,
-    maxPoints: taskInfo.maxPoints
+    instructions: taskInfo.instructions,
+    dueDate: taskInfo.dueDate ? String(taskInfo.dueDate) : undefined,
+    maxPoints: taskInfo.maxPoints,
+    isOptional: taskInfo.isOptional,
+    allowLateSubmission: taskInfo.allowLateSubmission,
   };
 
   const serializedSubmission = existingSubmission ? {
@@ -73,6 +91,9 @@ export default async function TaskDetailPage({
     <TaskDetailClient 
       taskInfo={serializedTask} 
       courseid={courseid} 
+      isTeacherView={isTeacherView}
+      deliveredCount={deliveredCount}
+      editTaskHref={`/mycourses/${courseid}/tasks/${taskId}/edit`}
       existingSubmission={serializedSubmission}
     />
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ClipboardList, Calendar, ArrowLeft, Upload, Loader2, CheckCircle2, Pencil, Trash2, FileText } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3 } from 'lucide-react';
 import Link from 'next/link';
 import { submitTask, deleteSubmission } from '@/app/actions/taskActions';
 
@@ -10,12 +10,18 @@ interface TaskDetailClientProps {
     _id?: string;
     title: string;
     description: string;
-    dueDate: Date;
+    instructions?: string;
+    dueDate?: string | Date | null;
     maxPoints?: number;
     image?: string;
     priority?: string;
+    isOptional?: boolean;
+    allowLateSubmission?: boolean;
   };
   courseid: string;
+  isTeacherView?: boolean;
+  deliveredCount?: number;
+  editTaskHref?: string;
   existingSubmission?: {
     content: string;
     files: string[];
@@ -31,13 +37,19 @@ interface TaskDetailClientProps {
  * entrega a la derecha.
  *
 */
-export default function TaskDetailClient({ taskInfo, courseid, existingSubmission }: TaskDetailClientProps) {
+export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = false, deliveredCount = 0, editTaskHref, existingSubmission }: TaskDetailClientProps) {
   // Estado local del componente
   const [submissionText, setSubmissionText] = useState(existingSubmission?.content || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(!!existingSubmission);
   const [error, setError] = useState<string | null>(null);
+
+  const hasDueDate = !!taskInfo.dueDate;
+  const hasFlexibleDeadline = !!taskInfo.isOptional || !!taskInfo.allowLateSubmission || !hasDueDate;
+  const dueDateLabel = hasDueDate
+    ? `${new Date(taskInfo.dueDate as string | Date).toLocaleDateString()} a las 23:59`
+    : "Sin fecha de entrega";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -127,14 +139,21 @@ export default function TaskDetailClient({ taskInfo, courseid, existingSubmissio
           <div className="flex items-center gap-4 text-sm text-base-content/70 flex-wrap">
             <div className="flex items-center gap-1.5 font-medium">
               <Calendar size={16} className="text-primary" />
-              <span>Entrega: <strong className="text-base-content">{new Date(taskInfo.dueDate).toLocaleDateString()} a las 23:59</strong></span>
+              <span>
+                Entrega: <strong className="text-base-content">{dueDateLabel}</strong>
+              </span>
             </div>
+            {hasFlexibleDeadline ? (
+              <span className="inline-flex items-center rounded-full border border-base-300 bg-base-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-base-content/60">
+                {taskInfo.isOptional ? "Entrega opcional" : taskInfo.allowLateSubmission ? "Entrega tardía permitida" : "Sin plazo fijo"}
+              </span>
+            ) : null}
           </div>
         </div>
 
-        {/* Vista principal dividida: izquierda -> descripción (scrollable), derecha -> panel de entrega */}
+        {/* Vista principal dividida: izquierda -> contenido de la tarea, derecha -> panel de entrega */}
         <div className="w-full flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
-          {/* Izquierda: descripción de la tarea. Esta columna está pensada para poder scrollear
+          {/* Izquierda: contenido de la tarea. Esta columna está pensada para poder scrollear
               independientemente del panel de entrega. */}
           <div className="lg:col-span-7 flex flex-col min-h-0 h-full">
             <div className="card bg-base-100 shadow-md border border-base-300 h-full flex flex-col overflow-hidden">
@@ -143,21 +162,34 @@ export default function TaskDetailClient({ taskInfo, courseid, existingSubmissio
                   <div className="p-2.5 rounded-full bg-primary/10 text-primary border border-primary/20 shadow-sm">
                     <ClipboardList size={24} />
                   </div>
-                  <h2 className="card-title text-2xl font-bold text-base-content break-words">{taskInfo.title}</h2>
+                  <div className="min-w-0">
+                    <h2 className="card-title text-2xl font-bold text-base-content break-words">{taskInfo.title}</h2>
+                    <p className="mt-1 text-sm leading-relaxed text-base-content/60 line-clamp-2 whitespace-pre-wrap break-words">
+                      {taskInfo.description}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="divider my-0"></div>
 
-                {/* Contenedor scrollable para las instrucciones; solo este bloque debe hacer scroll */}
+                {/* Contenedor scrollable para el contenido; solo este bloque debe hacer scroll */}
                 <div className="flex-1 overflow-y-auto pr-2 mt-4 space-y-4 min-h-0">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/50">Instrucciones de la tarea</h3>
-                  <div className="prose prose-base-content max-w-none">
-                    {taskInfo.description.split('\n').map((line, i) => (
-                      <p key={i} className="text-base leading-relaxed text-base-content/85 whitespace-pre-wrap break-words break-all max-w-full">
-                        {line}
-                      </p>
-                    ))}
-                  </div>
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/50">Instrucciones de la tarea</h3>
+                    <div className="prose prose-base-content max-w-none">
+                      {taskInfo.instructions ? (
+                        taskInfo.instructions.split('\n').map((line, i) => (
+                          <p key={i} className="text-base leading-relaxed text-base-content/85 whitespace-pre-wrap break-words break-all max-w-full">
+                            {line}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="text-base leading-relaxed text-base-content/55 italic">
+                          Sin instrucciones adicionales.
+                        </p>
+                      )}
+                    </div>
+                  </section>
                 </div>
               </div>
             </div>
@@ -168,149 +200,190 @@ export default function TaskDetailClient({ taskInfo, courseid, existingSubmissio
           <div className="lg:col-span-5 flex flex-col min-h-0 h-full">
             <div className="card bg-base-100 shadow-md border border-base-300 h-full flex flex-col overflow-hidden">
               <div className="card-body p-5 sm:p-6 flex flex-col justify-between h-full min-h-0">
-                {/* Formulario de entrega: textarea + input file */}
-                <form onSubmit={handleSubmit} className="flex flex-col h-full justify-between min-h-0">
-                  <div className="flex flex-col min-h-0">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                        <Upload size={24} />
+                {isTeacherView ? (
+                  <div className="flex h-full flex-col justify-between min-h-0 gap-6">
+                    <div className="space-y-5">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                          <Users size={24} />
+                        </div>
+                        <div>
+                          <h2 className="card-title text-xl font-bold text-base-content">Vista del profesor</h2>
+                          <p className="text-sm text-base-content/60">No se muestra la sección de entrega.</p>
+                        </div>
                       </div>
-                      <h2 className="card-title text-xl font-bold text-base-content">
-                        Tu Entrega
-                      </h2>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Entregas recibidas</p>
+                          <div className="mt-2 flex items-end gap-2">
+                            <span className="text-4xl font-semibold text-base-content">{deliveredCount}</span>
+                            <span className="pb-1 text-sm text-base-content/50">alumnos</span>
+                          </div>
+                        </div>
+
+                        <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Configuración</p>
+                          <p className="mt-2 text-sm font-medium text-base-content">
+                            {taskInfo.isOptional
+                              ? "Entrega opcional"
+                              : taskInfo.allowLateSubmission
+                                ? "Acepta entregas tardías"
+                                : "Plazo cerrado"}
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="divider my-0"></div>
-
-                    {/* Contenido compacto con instrucciones y controles */}
-                    <div className="mt-4 space-y-4">
-                      {/* Sección de Archivo */}
-                      <div className="form-control w-full">
-                        <label className="label py-1">
-                          <span className="label-text font-semibold text-sm">
-                            {isSubmitted ? "Archivo Entregado" : "Adjuntar Archivo de Trabajo"}
-                          </span>
-                        </label>
-                        
-                        {isSubmitted ? (
-                          <div className="flex flex-col gap-2">
-                            {existingSubmission?.files && existingSubmission.files.length > 0 ? (
-                              existingSubmission.files.map((file, idx) => {
-                                // Extraer el nombre del archivo de la URL (después del timestamp)
-                                const fileNameParts = file.split('-');
-                                const fileName = fileNameParts.length > 2 
-                                  ? fileNameParts.slice(2).join('-').split('?')[0] 
-                                  : file.split('/').pop()?.split('?')[0] || `archivo_${idx + 1}`;
-                                
-                                return (
-                                  <a 
-                                    key={idx} 
-                                    href={file} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="flex items-center w-full p-3 rounded-lg border border-base-300 bg-base-100 transition-all gap-3 shadow-sm cursor-pointer"
-                                  >
-                                    <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                                      <FileText size={20} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-base-content truncate">
-                                        {decodeURIComponent(fileName)}
-                                      </p>
-                                      <p className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider">
-                                        Archivo guardado
-                                      </p>
-                                    </div>
-                                  </a>
-                                );
-                              })
-                            ) : (
-                              <div className="flex items-center w-full p-4 rounded-lg border border-dashed border-base-300 bg-base-200/50 justify-center text-sm italic text-base-content/40">
-                                Sin archivo adjunto
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <>
-                            <input
-                              type="file"
-                              name="file"
-                              className="file-input file-input-bordered file-input-primary w-full text-sm bg-base-100 text-base-content"
-                              onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                              disabled={isSubmitting}
-                            />
-                            {selectedFile && (
-                              <span className="text-xs text-success font-medium mt-1.5 block truncate">
-                                Archivo seleccionado: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                              </span>
-                            )}
-                          </>
-                        )}
-                      </div>
-
-                      {/* Textarea para la respuesta escrita */}
-                      <div className="form-control w-full">
-                        <label className="label py-1 flex justify-between">
-                          <span className="label-text font-semibold text-sm">Respuesta Escrita</span>
-                        </label>
-                        <textarea
-                          placeholder="Escribe aquí tu respuesta o comentarios para el profesor..."
-                          className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
-                          value={submissionText}
-                          onChange={(e) => setSubmissionText(e.target.value)}
-                          disabled={isSubmitting}
-                        />
-                      </div>
-
-                      {error && (
-                        <div className="alert alert-error text-xs p-2 rounded-lg">
-                          <span>{error}</span>
-                        </div>
-                      )}
+                    <div className="space-y-3">
+                      {editTaskHref ? (
+                        <Link href={editTaskHref} className="btn btn-primary btn-block gap-2 shadow-lg">
+                          <Edit3 size={16} />
+                          Editar tarea
+                        </Link>
+                      ) : null}
+                      <p className="text-center text-xs text-base-content/50">
+                        Si quieres modificar título, fecha, puntos o activación, abre el editor del curso.
+                      </p>
                     </div>
                   </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="flex flex-col h-full justify-between min-h-0">
+                    <div className="flex flex-col min-h-0">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                          <Upload size={24} />
+                        </div>
+                        <h2 className="card-title text-xl font-bold text-base-content">Tu Entrega</h2>
+                      </div>
 
-                  {/* Pie del formulario con botones de acción */}
-                  <div className="pt-4 border-t border-base-300 mt-4 flex gap-3 flex-shrink-0">
-                    {isSubmitted ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={handleDelete}
-                          disabled={isSubmitting}
-                          className="btn btn-outline btn-error flex-1 gap-2"
-                        >
-                          {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                          <span>Borrar Entrega</span>
-                        </button>
-                        
+                      <div className="divider my-0"></div>
+
+                      <div className="mt-4 space-y-4">
+                        <div className="form-control w-full">
+                          <label className="label py-1">
+                            <span className="label-text font-semibold text-sm">
+                              {isSubmitted ? "Archivo Entregado" : "Adjuntar Archivo de Trabajo"}
+                            </span>
+                          </label>
+
+                          {isSubmitted ? (
+                            <div className="flex flex-col gap-2">
+                              {existingSubmission?.files && existingSubmission.files.length > 0 ? (
+                                existingSubmission.files.map((file, idx) => {
+                                  const fileNameParts = file.split('-');
+                                  const fileName = fileNameParts.length > 2
+                                    ? fileNameParts.slice(2).join('-').split('?')[0]
+                                    : file.split('/').pop()?.split('?')[0] || `archivo_${idx + 1}`;
+
+                                  return (
+                                    <a
+                                      key={idx}
+                                      href={file}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center w-full p-3 rounded-lg border border-base-300 bg-base-100 transition-all gap-3 shadow-sm cursor-pointer"
+                                    >
+                                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                        <FileText size={20} />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-base-content truncate">
+                                          {decodeURIComponent(fileName)}
+                                        </p>
+                                        <p className="text-[10px] text-base-content/50 uppercase font-bold tracking-wider">
+                                          Archivo guardado
+                                        </p>
+                                      </div>
+                                    </a>
+                                  );
+                                })
+                              ) : (
+                                <div className="flex items-center w-full p-4 rounded-lg border border-dashed border-base-300 bg-base-200/50 justify-center text-sm italic text-base-content/40">
+                                  Sin archivo adjunto
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <>
+                              <input
+                                type="file"
+                                name="file"
+                                className="file-input file-input-bordered file-input-primary w-full text-sm bg-base-100 text-base-content"
+                                onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                                disabled={isSubmitting}
+                              />
+                              {selectedFile && (
+                                <span className="text-xs text-success font-medium mt-1.5 block truncate">
+                                  Archivo seleccionado: {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+
+                        <div className="form-control w-full">
+                          <label className="label py-1 flex justify-between">
+                            <span className="label-text font-semibold text-sm">Respuesta Escrita</span>
+                          </label>
+                          <textarea
+                            placeholder="Escribe aquí tu respuesta o comentarios para el profesor..."
+                            className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
+                            value={submissionText}
+                            onChange={(e) => setSubmissionText(e.target.value)}
+                            disabled={isSubmitting}
+                          />
+                        </div>
+
+                        {error && (
+                          <div className="alert alert-error text-xs p-2 rounded-lg">
+                            <span>{error}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-base-300 mt-4 flex gap-3 flex-shrink-0">
+                      {isSubmitted ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleDelete}
+                            disabled={isSubmitting}
+                            className="btn btn-outline btn-error flex-1 gap-2"
+                          >
+                            {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                            <span>Borrar Entrega</span>
+                          </button>
+
+                          <button
+                            type="submit"
+                            disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
+                            className="btn btn-primary flex-1 hover:bg-primary/95 transition-all duration-200 gap-2"
+                          >
+                            {isSubmitting ? (
+                              <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+                            ) : (
+                              <><Pencil size={18} /> Editar Entrega</>
+                            )}
+                          </button>
+                        </>
+                      ) : (
                         <button
                           type="submit"
                           disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
-                          className="btn btn-primary flex-1 hover:bg-primary/95 transition-all duration-200 gap-2"
+                          className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200 gap-2"
                         >
                           {isSubmitting ? (
-                            <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+                            <><Loader2 size={18} className="animate-spin" /> Entregando...</>
                           ) : (
-                            <><Pencil size={18} /> Editar Entrega</>
+                            <><Upload size={18} /> Entregar Tarea</>
                           )}
                         </button>
-                      </>
-                    ) : (
-                      <button
-                        type="submit"
-                        disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
-                        className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200 gap-2"
-                      >
-                        {isSubmitting ? (
-                          <><Loader2 size={18} className="animate-spin" /> Entregando...</>
-                        ) : (
-                          <><Upload size={18} /> Entregar Tarea</>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </form>
+                      )}
+                    </div>
+                  </form>
+                )}
               </div>
             </div>
           </div>

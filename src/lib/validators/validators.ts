@@ -334,6 +334,11 @@ export const createTaskSchema = z.object({
     .string()
     .min(1, "La descripción es requerida")
     .transform((val) => val.trim()),
+  instructions: z
+    .string()
+    .max(5000, "Las instrucciones no pueden exceder 5000 caracteres")
+    .optional()
+    .transform((val) => val?.trim()),
   type: z
     .enum(["assignment", "quiz", "forum", "project"])
     .default("assignment"),
@@ -364,9 +369,67 @@ export const createTaskSchema = z.object({
   priority: z
     .enum(["low", "medium", "high"])
     .default("medium"),
+  isOptional: z
+    .boolean()
+    .default(false),
+  countsTowardAverage: z
+    .boolean()
+    .default(true),
+  assignmentMode: z
+    .enum(["all", "manual", "filtered"])
+    .default("all"),
+  assignedStudentIds: z
+    .array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de estudiante inválido"))
+    .default([]),
+  assignmentFilterKind: z
+    .enum(["failing_average", "below_threshold", "failed_task"])
+    .optional(),
+  assignmentThreshold: z
+    .number()
+    .min(0, "El umbral no puede ser negativo")
+    .max(10, "El umbral no puede superar 10")
+    .optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
+
+export const createTaskWithAssignmentSchema = createTaskSchema.extend({
+  instructions: z
+    .string()
+    .min(1, "Las instrucciones son requeridas")
+    .max(5000, "Las instrucciones no pueden exceder 5000 caracteres")
+    .transform((val) => val.trim()),
+  assignmentMode: z.enum(["all", "manual", "filtered"]),
+  assignedStudentIds: z.array(z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de estudiante inválido")),
+}).superRefine((value, context) => {
+  if (value.assignmentMode === "manual" && value.assignedStudentIds.length === 0) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["assignedStudentIds"],
+      message: "Selecciona al menos un alumno para la asignación manual",
+    });
+  }
+
+  if (value.assignmentMode === "filtered") {
+    if (!value.assignmentFilterKind) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["assignmentFilterKind"],
+        message: "Selecciona un filtro para la asignación",
+      });
+    }
+
+    if (value.assignmentFilterKind === "below_threshold" && typeof value.assignmentThreshold !== "number") {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["assignmentThreshold"],
+        message: "Define una nota umbral para el filtro",
+      });
+    }
+  }
+});
+
+export type CreateTaskWithAssignmentInput = z.infer<typeof createTaskWithAssignmentSchema>;
 
 /**
  * Validación para actualizar una tarea

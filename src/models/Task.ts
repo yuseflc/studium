@@ -11,6 +11,7 @@ export interface ITask {
   _id?: mongoose.Types.ObjectId;
   title: string; // Título de la tarea
   description: string; // Descripción de la tarea
+  instructions?: string; // Instrucciones detalladas
   type: "assignment" | "quiz" | "forum" | "project"; // Tipo: tarea, cuestionario, foro, proyecto
   courseId: mongoose.Types.ObjectId; // ID del curso
   unitId?: mongoose.Types.ObjectId; // ID de la unidad (opcional durante migración)
@@ -23,6 +24,12 @@ export interface ITask {
   active: boolean; // Activa
   image?: string; // URL o base64 de la imagen
   priority?: "low" | "medium" | "high"; // Prioridad de la tarea
+  isOptional?: boolean; // Si la tarea es opcional/extra
+  countsTowardAverage?: boolean; // Si cuenta para la media
+  assignmentMode?: "all" | "manual" | "filtered"; // Cómo se asigna la tarea
+  assignmentFilterKind?: "failing_average" | "below_threshold" | "failed_task"; // Tipo de filtro aplicado
+  assignmentThreshold?: number; // Umbral para los filtros numéricos
+  assignedStudentIds?: mongoose.Types.ObjectId[]; // Estudiantes asignados/resueltos
   createdAt: Date; // Fecha de creación
   updatedAt: Date; // Fecha de actualización
 }
@@ -57,6 +64,10 @@ const TaskSchema = new mongoose.Schema<ITask>(
     description: {
       type: String,
       required: [true, "La descripción de la tarea es requerida"], // Descripción requerida
+    },
+    instructions: {
+      type: String,
+      required: false,
     },
     type: {
       type: String,
@@ -113,6 +124,36 @@ const TaskSchema = new mongoose.Schema<ITask>(
       enum: ["low", "medium", "high"],
       default: "medium",
     },
+    isOptional: {
+      type: Boolean,
+      default: false,
+    },
+    countsTowardAverage: {
+      type: Boolean,
+      default: true,
+    },
+    assignmentMode: {
+      type: String,
+      enum: ["all", "manual", "filtered"],
+      default: "all",
+    },
+    assignmentFilterKind: {
+      type: String,
+      enum: ["failing_average", "below_threshold", "failed_task"],
+      required: false,
+    },
+    assignmentThreshold: {
+      type: Number,
+      required: false,
+      min: [0, "El umbral no puede ser negativo"],
+      max: [10, "El umbral no puede superar 10"],
+    },
+    assignedStudentIds: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   {
     timestamps: true, // Habilita createdAt y updatedAt automáticamente

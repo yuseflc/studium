@@ -7,7 +7,6 @@ import { createResource } from '@/app/actions/resourceActions';
 import { createUnit } from '@/app/actions/unitActions';
 
 interface CourseFABProps {
-  onAddTask: (task: any) => void;
   onAddResource?: (resource: any) => void;
   onAddUnit?: (unit: any) => void;
   courseId?: string;
@@ -17,7 +16,7 @@ interface CourseFABProps {
 
 type CreationType = 'task' | 'exam' | 'resource' | 'unit' | null;
 
-export default function CourseFAB({ onAddTask, onAddResource, onAddUnit, courseId, defaultUnitId, units = [] }: CourseFABProps) {
+export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultUnitId, units = [] }: CourseFABProps) {
   const router = useRouter();
   const params = useParams();
   const courseid = params?.courseid || 'course-1';
@@ -238,14 +237,14 @@ export default function CourseFAB({ onAddTask, onAddResource, onAddUnit, courseI
           <X size={24} aria-hidden="true" />
         </button>
 
-        {/* Crear Tarea: Tooltip en desktop, Icono+Texto en mobile */}
+        {/* Crear Tarea: redirige a la pantalla de composición */}
         <div 
           className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-warning relative" 
           data-tip="Tarea"
         >
           <button 
             onClick={() => {
-              handleOpenModal('task');
+              router.push(`/mycourses/${courseId || courseid}/tasks/new${defaultUnitId ? `?unitId=${defaultUnitId}` : ""}`);
               if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             }}
             className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 

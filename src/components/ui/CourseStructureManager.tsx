@@ -52,6 +52,7 @@ import {
   reorderUnitTasks,
   updateTask,
 } from "@/app/actions/taskActions";
+import { useRouter } from "next/navigation";
 
 export interface CourseResourceItem {
   _id: string;
@@ -188,6 +189,7 @@ function isResourceDownloadable(resource: CourseResourceItem) {
 }
 
 export default function CourseStructureManager({ courseId, subjects, setSubjects, canEdit = true }: CourseStructureManagerProps) {
+  const router = useRouter();
   const editorDialogRef = useRef<HTMLDialogElement>(null);
   const pendingUnitScrollRef = useRef<string | null>(null);
   const [editor, setEditor] = useState<EditorState | null>(null);
@@ -312,6 +314,12 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     resetForm();
     setResourceType("file");
     setEditor({ kind: "task", mode: "create", subjectId: subject._id, taskType, unitId });
+  };
+
+  const goToTaskCreationPage = (unitId?: string) => {
+    if (!canEdit) return;
+    const query = unitId ? `?unitId=${unitId}` : "";
+    router.push(`/mycourses/${courseId}/tasks/new${query}`);
   };
 
   const openEditTask = (subjectId: string, task: CourseTaskItem) => {
@@ -849,7 +857,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                           <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
                             <li><button type="button" onClick={() => openEditUnit(subject._id, unit)}><Pencil size={14} />Editar unidad</button></li>
                             <li><button type="button" onClick={() => openCreateResource(subject._id, unit)}><Plus size={14} />Añadir recurso</button></li>
-                            <li><button type="button" onClick={() => openCreateTask(subject, "assignment", unit._id)}><ClipboardTaskIcon />Nueva tarea</button></li>
+                            <li><button type="button" onClick={() => goToTaskCreationPage(unit._id)}><ClipboardTaskIcon />Nueva tarea</button></li>
                             <li><button type="button" onClick={() => openCreateTask(subject, "quiz", unit._id)}><GraduationCap size={14} />Nuevo examen</button></li>
                             <li className="menu-title"><span>Reordenar</span></li>
                             <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveMappedUnit(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
@@ -1006,7 +1014,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                           <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
                             <li><button type="button" onClick={() => openEditSubject(subject)}><Pencil size={14} />Editar materia</button></li>
                             <li><button type="button" onClick={() => openCreateUnit(subject)}><Plus size={14} />Añadir unidad</button></li>
-                            <li><button type="button" onClick={() => openCreateTask(subject, "assignment")}><ClipboardTaskIcon />Nueva tarea</button></li>
+                            <li><button type="button" onClick={() => goToTaskCreationPage()}><ClipboardTaskIcon />Nueva tarea</button></li>
                             <li><button type="button" onClick={() => openCreateTask(subject, "quiz")}><GraduationCap size={14} />Nuevo examen</button></li>
                             <li className="menu-title"><span>Reordenar</span></li>
                             <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveSubject(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
