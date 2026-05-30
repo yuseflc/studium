@@ -326,7 +326,11 @@ export async function createTaskFromFormData(
       };
     }
 
-    const result = await createTask(validationResult.data);
+    const result = await createTask({
+      ...validationResult.data,
+      startDate: validationResult.data.startDate.toISOString(),
+      dueDate: validationResult.data.dueDate ? validationResult.data.dueDate.toISOString() : undefined,
+    });
     if (!result.success || !result.task) {
       return {
         success: false,

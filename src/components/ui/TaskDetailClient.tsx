@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { submitTask, deleteSubmission } from '@/app/actions/taskActions';
+import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
+import { Modal } from '@/components/ui/modals/Modal';
+import { submitTask, deleteSubmission, deleteTask } from '@/app/actions/taskActions';
 import { TASK_SUBMISSION_MAX_FILE_SIZE_BYTES, TASK_SUBMISSION_MAX_FILE_SIZE_LABEL } from '@/lib/upload-limits';
 
 interface TaskDetailClientProps {
@@ -39,12 +42,16 @@ interface TaskDetailClientProps {
  *
 */
 export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = false, deliveredCount = 0, editTaskHref, existingSubmission }: TaskDetailClientProps) {
+  const router = useRouter();
   // Estado local del componente
   const [submissionText, setSubmissionText] = useState(existingSubmission?.content || '');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(!!existingSubmission);
   const [error, setError] = useState<string | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeletingTask, setIsDeletingTask] = useState(false);
+  const [taskDeleteError, setTaskDeleteError] = useState<string | null>(null);
 
   const hasDueDate = !!taskInfo.dueDate;
   const hasFlexibleDeadline = !!taskInfo.isOptional || !!taskInfo.allowLateSubmission || !hasDueDate;
@@ -106,6 +113,35 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
       setError('Ocurrió un error inesperado');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteTask = async () => {
+    const currentTaskId = taskInfo._id;
+
+    if (!currentTaskId) {
+      setTaskDeleteError('No se pudo identificar la tarea.');
+      return;
+    }
+
+    setIsDeletingTask(true);
+    setTaskDeleteError(null);
+
+    try {
+      const result = await deleteTask(currentTaskId);
+
+      if (!result.success) {
+        setTaskDeleteError(result.error || 'Error al eliminar la tarea');
+        return;
+      }
+
+      setIsDeleteModalOpen(false);
+      router.push(`/mycourses/${courseid}`);
+      router.refresh();
+    } catch (err) {
+      setTaskDeleteError(err instanceof Error ? err.message : 'Ocurrió un error inesperado');
+    } finally {
+      setIsDeletingTask(false);
     }
   };
 
@@ -244,10 +280,20 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
 
                     <div className="space-y-3">
                       {editTaskHref ? (
-                        <Link href={editTaskHref} className="btn btn-primary btn-block gap-2 shadow-lg">
-                          <Edit3 size={16} />
-                          Editar tarea
-                        </Link>
+                        <div className="space-y-3">
+                          <Link href={editTaskHref} className="btn btn-primary btn-block gap-2 shadow-lg">
+                            <Edit3 size={16} />
+                            Editar tarea
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => setIsDeleteModalOpen(true)}
+                            className="btn btn-outline btn-error btn-block gap-2"
+                          >
+                            <Trash2 size={16} />
+                            Eliminar tarea
+                          </button>
+                        </div>
                       ) : null}
                       <p className="text-center text-xs text-base-content/50">
                         Si quieres modificar título, fecha, puntos o activación, abre el editor del curso.
@@ -399,6 +445,50 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => {
+          if (!isDeletingTask) {
+            setIsDeleteModalOpen(false);
+            setTaskDeleteError(null);
+          }
+        }}
+        className="max-w-xl border border-error/20"
+      >
+        <h3 className="font-bold text-lg text-error">Eliminar tarea</h3>
+        <p className="py-4 text-base-content/80">
+          Esta acción es irreversible. Se eliminará la tarea y también se retirará de la unidad correspondiente.
+        </p>
+        {taskDeleteError ? (
+          <div className="alert alert-error mb-4 text-sm">
+            <span>{taskDeleteError}</span>
+          </div>
+        ) : null}
+        <div className="modal-action">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => {
+              if (!isDeletingTask) {
+                setIsDeleteModalOpen(false);
+                setTaskDeleteError(null);
+              }
+            }}
+            disabled={isDeletingTask}
+          >
+            Cancelar
+          </button>
+          <HoldConfirmButton
+            className="btn btn-error text-white"
+            onConfirm={handleDeleteTask}
+            disabled={isDeletingTask || !taskInfo._id}
+            holdText="Suelta para eliminar"
+          >
+            {isDeletingTask ? 'Eliminando...' : 'Eliminar tarea'}
+          </HoldConfirmButton>
+        </div>
+      </Modal>
     </div>
   );
 }
