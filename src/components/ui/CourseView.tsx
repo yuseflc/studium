@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 
 import { useEffect, useMemo, useState, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
@@ -6,57 +6,57 @@ import { useSession } from "next-auth/react";
 
 // Importación de íconos de lucide-react
 import {
-  BookOpen,        
-  Users,           
-  GraduationCap,   
-  Settings,        
-  AlertTriangle,   
-  Archive,          
-  Trash2,          
-  Send,            
-  Copy,            
-  RefreshCw,       
-  Eye,             
-  UserPlus,       
-  Check,           
-  X,               
+  BookOpen,
+  Users,
+  GraduationCap,
+  Settings,
+  AlertTriangle,
+  Archive,
+  Trash2,
+  Send,
+  Copy,
+  RefreshCw,
+  Eye,
+  UserPlus,
+  Check,
+  X,
 } from "lucide-react";
 
 // Componentes internos del curso
-import CourseSidebar from "@/components/ui/navbars/CourseSidebar"; 
-import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
-import CourseParticipants from "./CourseParticipants"; 
+import CourseSidebar from "@/components/ui/navbars/CourseSidebar";
+import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager";
+import CourseParticipants from "./CourseParticipants";
 import CourseInviteCodesManager from "./CourseInviteCodesManager";
-import GradesView from "./grades/GradesView"; 
-import CourseFAB from "./CourseFAB"; 
-import { ICourse } from "@/models/Course"; 
-import { CourseStructureGeneric } from "@/lib/api/types"; 
+import GradesView from "./grades/GradesView";
+import CourseFAB from "./CourseFAB";
+import { ICourse } from "@/models/Course";
+import { CourseStructureGeneric } from "@/lib/api/types";
 
 // SERVER ACTIONS: funciones que se ejecutan en el servidor (Next.js App Router)
-import { deleteTask } from "@/app/actions/taskActions"; 
+import { deleteTask } from "@/app/actions/taskActions";
 import {
-  deleteCourse as deleteCourseAction,      
-  inviteStudentByEmail,                    
-  transferCourseOwnership,                
-  updateCourse,                           
+  deleteCourse as deleteCourseAction,
+  inviteStudentByEmail,
+  transferCourseOwnership,
+  updateCourse,
 } from "@/app/actions/courseActions";
 
 // Modales reutilizables con efecto blur
-import { 
+import {
   ModalAdvise,
   CourseVisibilityModal,
   CourseTransferModal,
   CourseArchiveModal,
-  CourseDeleteModal 
+  CourseDeleteModal
 } from "@/components/ui/modals";
 
 /**
  * PROPS DEL COMPONENTE PRINCIPAL
  */
 interface CourseViewProps {
-  courseData: ICourse | null;           
-  courseStructure: CourseStructureGeneric | null; 
-  isTeacher: boolean;                   
+  courseData: ICourse | null;
+  courseStructure: CourseStructureGeneric | null;
+  isTeacher: boolean;
 }
 
 // Tipos posibles para el estado del curso
@@ -118,7 +118,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   // ========== ESTADOS DE NAVEGACIÓN ==========
   // Pestaña activa: "content" | "participants" | "grades" | "settings"
   const [activeTab, setActiveTab] = useState<"content" | "participants" | "grades" | "settings">("content");
-  
+
   // Lista de IDs de tareas eliminadas (para feedback visual mientras se elimina)
   const [deletedItems, setDeletedItems] = useState<string[]>([]);
 
@@ -170,50 +170,50 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
   // ========== MODALES DE RESULTADO ==========
   // Cada uno tiene su propio modal para mostrar éxito/error sin bloquear la UI
-  const [inviteModal, setInviteModal] = useState<{ 
-    isOpen: boolean; 
-    success: boolean; 
-    message: string; 
-    email?: string 
+  const [inviteModal, setInviteModal] = useState<{
+    isOpen: boolean;
+    success: boolean;
+    message: string;
+    email?: string
   }>({
     isOpen: false,
     success: false,
     message: "",
   });
-  
-  const [regenerateModal, setRegenerateModal] = useState<{ 
-    isOpen: boolean; 
-    newCode: string 
+
+  const [regenerateModal, setRegenerateModal] = useState<{
+    isOpen: boolean;
+    newCode: string
   }>({
     isOpen: false,
     newCode: "",
   });
-  
-  const [visibilityResultModal, setVisibilityResultModal] = useState<{ 
-    isOpen: boolean; 
-    success: boolean; 
-    message: string 
+
+  const [visibilityResultModal, setVisibilityResultModal] = useState<{
+    isOpen: boolean;
+    success: boolean;
+    message: string
   }>({
     isOpen: false,
     success: false,
     message: "",
   });
-  
-  const [archiveResultModal, setArchiveResultModal] = useState<{ 
-    isOpen: boolean; 
-    success: boolean; 
-    message: string 
+
+  const [archiveResultModal, setArchiveResultModal] = useState<{
+    isOpen: boolean;
+    success: boolean;
+    message: string
   }>({
     isOpen: false,
     success: false,
     message: "",
   });
-  
-  const [transferResultModal, setTransferResultModal] = useState<{ 
-    isOpen: boolean; 
-    success: boolean; 
-    message: string; 
-    email?: string 
+
+  const [transferResultModal, setTransferResultModal] = useState<{
+    isOpen: boolean;
+    success: boolean;
+    message: string;
+    email?: string
   }>({
     isOpen: false,
     success: false,
@@ -224,7 +224,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   const courseId = String(courseData?._id || "");
 
   // ========== EFECTOS PARA SINCRONIZAR ESTADO CON PROPS ==========
-  
+
   // Cuando cambian los subjects iniciales (por ejemplo, después de guardar cambios), actualizo el estado local
   useEffect(() => {
     setSubjects(initialSubjects as any[]);
@@ -343,7 +343,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   };
 
   // ========== HANDLER PARA ELIMINAR TAREA ==========
-  
+
   /**
    * Elimina una tarea usando la server action deleteTask.
    * Actualización optimista: la marco como "deleting" visualmente con deletedItems,
@@ -375,7 +375,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   };
 
   // ========== HANDLER PARA GUARDAR INFORMACIÓN GENERAL ==========
-  
+
   /**
    * Guarda título, descripción y estado del curso usando updateCourse server action.
    * Muestra mensaje de éxito o error temporal.
@@ -409,7 +409,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   };
 
   // ========== HANDLERS PARA INVITACIONES ==========
-  
+
   /**
    * Invita a un estudiante por email usando la server action.
    * Muestra un modal de Studium con el resultado (éxito o error).
@@ -477,7 +477,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   };
 
   // ========== HANDLERS PARA ACCIONES DE LA ZONA DE PELIGRO ==========
-  
+
   /**
    * Cambia la visibilidad del curso (borrador <-> publicado).
    * Usa updateCourse server action.
@@ -496,13 +496,13 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
       setStatus(newStatus);                 // actualizo estado local
       setShowVisibilityModal(false);        // cierro modal de confirmación
-      
+
       // Si se publica el curso desde borrador, generar automáticamente un código
       if (newStatus === "active" && status === "draft") {
         try {
           const { generateInviteCode } = await import("@/app/actions/courseActions");
           const inviteResult = await generateInviteCode(courseId);
-          
+
           // Muestro modal de resultado con el mensaje especial sobre la auto-generación
           setVisibilityResultModal({
             isOpen: true,
@@ -549,7 +549,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
       setStatus("archived");
       setShowArchiveModal(false);
-      
+
       setArchiveResultModal({
         isOpen: true,
         success: true,
@@ -579,7 +579,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       }
 
       setShowTransferModal(false);
-      
+
       setTransferResultModal({
         isOpen: true,
         success: true,
@@ -620,7 +620,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   };
 
   // ========== RENDERIZADO PRINCIPAL ==========
-  
+
   return (
     <div className="flex flex-col lg:flex-row">
       {/* SIDEBAR: muestra la lista de materias para navegación rápida */}
@@ -631,26 +631,26 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         <div className="w-full mx-auto">
-          
+
           {/* ENCABEZADO: título del curso + badges de estado */}
           <div className="mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">
               {title || "Cargando curso..."}
-              
+
               {/* Badge BORRADOR: solo visible cuando status === "draft" */}
               {status === "draft" && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 ml-2 align-middle shadow-sm">
                   BORRADOR
                 </span>
               )}
-              
+
               {/* Badge PUBLICADO */}
               {status === "active" && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 ml-2 align-middle shadow-sm">
                   PUBLICADO
                 </span>
               )}
-              
+
               {/* Badge ARCHIVADO */}
               {status === "archived" && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 ml-2 align-middle shadow-sm">
@@ -666,54 +666,50 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
             <button
               type="button"
               onClick={() => setActiveTab("content")}
-              className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "content"
+              className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${activeTab === "content"
                   ? "border-primary text-primary font-semibold"
                   : "border-transparent text-base-content/60 hover:text-base-content"
-              }`}
+                }`}
             >
               <BookOpen size={18} />
               <span className="text-sm sm:text-base">Curso</span>
             </button>
-            
+
             {/* Tab: Participantes */}
             <button
               type="button"
               onClick={() => setActiveTab("participants")}
-              className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "participants"
+              className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${activeTab === "participants"
                   ? "border-primary text-primary font-semibold"
                   : "border-transparent text-base-content/60 hover:text-base-content"
-              }`}
+                }`}
             >
               <Users size={18} />
               <span className="text-sm sm:text-base">Participantes</span>
             </button>
-            
+
             {/* Tab: Calificaciones */}
             <button
               type="button"
               onClick={() => setActiveTab("grades")}
-              className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${
-                activeTab === "grades"
+              className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${activeTab === "grades"
                   ? "border-primary text-primary font-semibold"
                   : "border-transparent text-base-content/60 hover:text-base-content"
-              }`}
+                }`}
             >
               <GraduationCap size={18} />
               <span className="text-sm sm:text-base">Calificaciones</span>
             </button>
-            
+
             {/* Tab: Ajustes (solo visible para profesores) */}
             {isTeacher && (
               <button
                 type="button"
                 onClick={() => setActiveTab("settings")}
-                className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${
-                  activeTab === "settings"
+                className={`pb-3 px-3 sm:px-4 flex items-center gap-1.5 sm:gap-2 border-b-2 transition-colors shrink-0 whitespace-nowrap ${activeTab === "settings"
                     ? "border-primary text-primary font-semibold"
                     : "border-transparent text-base-content/60 hover:text-base-content"
-                }`}
+                  }`}
               >
                 <Settings size={18} />
                 <span className="text-sm sm:text-base">Ajustes</span>
@@ -723,7 +719,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
           {/* CONTENIDO DE CADA TAB */}
           <div className="space-y-6">
-            
+
             {/* TAB CONTENIDO: administrador de estructura del curso */}
             {activeTab === "content" && (
               <CourseStructureManager
@@ -752,13 +748,13 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
             {activeTab === "settings" && isTeacher && (
               <div className="space-y-6 w-full">
                 <div className="max-w-3xl mx-auto px-4 sm:px-0">
-                  
+
                   {/* SECCIÓN 1: INFORMACIÓN GENERAL */}
                   <div className="card bg-base-100 border border-base-300 mb-6">
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Información General</h2>
                       <form onSubmit={handleSaveGeneralInfo} className="space-y-4 sm:space-y-6">
-                        
+
                         {/* Campo: Título del curso */}
                         <div className="form-control flex flex-col items-start">
                           <label htmlFor="course-title" className="label p-0">
@@ -854,60 +850,60 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Configuración de Visualización</h2>
                       <div className="space-y-4">
-                        
+
                         {/* Toggle: Mostrar participantes */}
-                        <div className="form-control">
-                          <label className="cursor-pointer label flex-row items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <span className="label-text font-medium block">Mostrar participantes en la barra horizontal</span>
-                              <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-                                Muestra la lista de participantes en la barra de navegación superior
-                              </p>
-                            </div>
-                            <input
-                              type="checkbox"
-                              className="toggle toggle-primary flex-shrink-0"
-                              checked={showParticipants}
-                              onChange={(e) => setShowParticipants(e.target.checked)}
-                            />
-                          </label>
-                        </div>
-                        
+<div className="form-control w-full">
+  <label className="cursor-pointer label flex-row items-center justify-between gap-3 w-full">
+    <div className="flex-1">
+      <span className="label-text font-medium block">Mostrar participantes en la barra horizontal</span>
+      <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
+        Muestra la lista de participantes en la barra de navegación superior
+      </p>
+    </div>
+    <input
+      type="checkbox"
+      className="toggle toggle-primary flex-shrink-0"
+      checked={showParticipants}
+      onChange={(e) => setShowParticipants(e.target.checked)}
+    />
+  </label>
+</div>
+
                         {/* Toggle: Permitir comentarios */}
-                        <div className="form-control">
-                          <label className="cursor-pointer label flex-row items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <span className="label-text font-medium block">Permitir comentarios en el contenido</span>
-                              <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-                                Los estudiantes pueden comentar en las lecciones y tareas
-                              </p>
-                            </div>
-                            <input
-                              type="checkbox"
-                              className="toggle toggle-primary flex-shrink-0"
-                              checked={allowComments}
-                              onChange={(e) => setAllowComments(e.target.checked)}
-                            />
-                          </label>
-                        </div>
-                        
-                        {/* Toggle: Notificaciones por email */}
-                        <div className="form-control">
-                          <label className="cursor-pointer label flex-row items-center justify-between gap-3">
-                            <div className="flex-1">
-                              <span className="label-text font-medium block">Notificar nuevas tareas por email</span>
-                              <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-                                Envía notificaciones por correo cuando se crean nuevas tareas
-                              </p>
-                            </div>
-                            <input
-                              type="checkbox"
-                              className="toggle toggle-primary flex-shrink-0"
-                              checked={emailNotifications}
-                              onChange={(e) => setEmailNotifications(e.target.checked)}
-                            />
-                          </label>
-                        </div>
+<div className="form-control w-full">
+  <label className="cursor-pointer label flex-row items-center justify-between gap-3 w-full">
+    <div className="flex-1">
+      <span className="label-text font-medium block">Permitir comentarios en el contenido</span>
+      <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
+        Los estudiantes pueden comentar en las lecciones y tareas
+      </p>
+    </div>
+    <input
+      type="checkbox"
+      className="toggle toggle-primary flex-shrink-0"
+      checked={allowComments}
+      onChange={(e) => setAllowComments(e.target.checked)}
+    />
+  </label>
+</div>
+
+                       {/* Toggle: Notificaciones por email */}
+<div className="form-control w-full">
+  <label className="cursor-pointer label flex-row items-center justify-between gap-3 w-full">
+    <div className="flex-1">
+      <span className="label-text font-medium block">Notificar nuevas tareas por email</span>
+      <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
+        Envía notificaciones por correo cuando se crean nuevas tareas
+      </p>
+    </div>
+    <input
+      type="checkbox"
+      className="toggle toggle-primary flex-shrink-0"
+      checked={emailNotifications}
+      onChange={(e) => setEmailNotifications(e.target.checked)}
+    />
+  </label>
+</div>
                       </div>
                     </div>
                   </div>
@@ -917,7 +913,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Gestión de Participantes</h2>
                       <div className="space-y-6">
-                        
+
                         {/* Invitar por email */}
                         <div className="form-control">
                           <label htmlFor="invite-email" className="label">
@@ -953,19 +949,21 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                   </div>
 
                   {/* SECCIÓN 4: ZONA DE PELIGRO (acciones críticas) */}
-                  <div className="border-2 border-red-200 dark:border-red-800/50 rounded-xl overflow-hidden shadow-sm">
-                    <div className="bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-950/20 dark:to-red-950/10 px-6 py-4 border-b-2 border-red-200 dark:border-red-800/30">
-                      <div className="flex items-center gap-2">
-                        <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                        <h2 className="font-bold text-red-700 dark:text-red-400 text-lg">Zona de Peligro</h2>
-                      </div>
-                      <p className="text-sm text-red-600/70 dark:text-red-400/70 mt-1">
-                        Las siguientes acciones son irreversibles o pueden afectar significativamente el curso
-                      </p>
-                    </div>
+                 <div className="border-2 border-red-300 rounded-xl overflow-hidden shadow-sm">
+  {/* Eliminados los 'dark:' del fondo para obligar a que sea rojo claro siempre */}
+  <div className="bg-red-200 px-6 py-4 border-b-2 border-red-300">
+    <div className="flex items-center gap-2">
+      <AlertTriangle className="w-5 h-5 text-red-700" />
+      <h2 className="font-bold text-black text-lg">Zona de Peligro</h2>
+    </div>
+    <p className="text-sm text-black mt-1">
+      Las siguientes acciones son irreversibles o pueden afectar significativamente el curso
+    </p>
+  </div>
+
 
                     <div className="divide-y divide-red-100 dark:divide-red-800/20">
-                      
+
                       {/* Acción 1: Cambiar visibilidad */}
                       <div className="px-6 py-5 hover:bg-red-50/30 dark:hover:bg-red-950/5 transition-colors">
                         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
@@ -985,7 +983,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                           <button
                             onClick={() => setShowVisibilityModal(true)}
-                            className="btn btn-md btn-outline w-full lg:w-44 gap-2"
+                            className="btn btn-md btn-outline w-full lg:w-48 gap-2"
                             type="button"
                           >
                             <Eye size={16} />
@@ -1011,7 +1009,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                           <button
                             onClick={() => setShowTransferModal(true)}
-                            className="btn btn-md btn-outline w-full lg:w-44 gap-2"
+                            className="btn btn-md btn-outline w-full lg:w-48 gap-2"
                             type="button"
                           >
                             <UserPlus size={16} />
@@ -1037,7 +1035,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                           <button
                             onClick={() => setShowArchiveModal(true)}
-                            className="btn btn-md btn-outline btn-warning w-full lg:w-44 gap-2"
+                            className="btn btn-md btn-outline btn-warning w-full lg:w-48 gap-2"
                             disabled={status === "archived"}
                             type="button"
                           >
@@ -1064,7 +1062,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </div>
                           <button
                             onClick={() => setShowDeleteModal(true)}
-                            className="btn btn-md btn-error w-full lg:w-44 gap-2"
+                            className="btn btn-md btn-error w-full lg:w-48 gap-2"
                             type="button"
                           >
                             <Trash2 size={16} />
