@@ -12,8 +12,10 @@ export default function CoursePatternPicker({ selectedId, onChange }: CoursePatt
   const selected = getPatternById(selectedId);
 
   return (
-    <div className="space-y-3">
-      <span className="label-text font-medium text-base">Imagen del curso</span>
+    <div className="form-control flex flex-col items-start w-full space-y-3">
+      <label className="label p-0">
+        <span className="label-text font-medium mb-2">Imagen del curso</span>
+      </label>
 
       {/* Vista previa del patrón actualmente seleccionado */}
       <div
@@ -23,7 +25,7 @@ export default function CoursePatternPicker({ selectedId, onChange }: CoursePatt
       />
 
       {/* Rejilla de swatches — hover y selected comparten el mismo estilo visual */}
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-6 gap-2 w-full">
         {COURSE_PATTERNS.map((pattern) => {
           const isSelected = pattern.id === selectedId;
           return (

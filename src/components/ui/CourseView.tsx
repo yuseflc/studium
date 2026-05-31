@@ -768,7 +768,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                             type="text"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="input input-bordered mt-2 w-full"
+                            className="input input-bordered mt-2 w-full focus:border-warning focus:outline-none transition-all"
                             placeholder="Ej: Desarrollo Web Avanzado"
                             required
                           />
@@ -781,7 +781,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                           </label>
                           <textarea
                             id="course-description"
-                            className="textarea textarea-bordered h-24 mt-2 w-full"
+                            className="textarea textarea-bordered h-36 mt-2 w-full resize-none focus:border-warning focus:outline-none transition-all"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Describe el contenido y objetivos del curso..."
