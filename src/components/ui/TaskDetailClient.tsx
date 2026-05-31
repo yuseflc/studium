@@ -1,13 +1,30 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2 } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2, ChevronLeft, ChevronRight, Save, MessageSquareText, Clock3, BadgeInfo, Files } from 'lucide-react';
 import Link from 'next/link';
 import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
 import { Modal } from '@/components/ui/modals/Modal';
 import { submitTask, deleteSubmission, deleteTask } from '@/app/actions/taskActions';
+import { saveStudentTaskGrade } from '@/app/actions/participantActions';
 import { TASK_SUBMISSION_MAX_FILE_SIZE_BYTES, TASK_SUBMISSION_MAX_FILE_SIZE_LABEL } from '@/lib/upload-limits';
+
+interface TeacherSubmissionView {
+  _id: string;
+  taskId: string;
+  studentId: string;
+  studentName: string;
+  studentEmail: string;
+  studentAvatar?: string;
+  content: string;
+  files: string[];
+  grade?: number;
+  feedback?: string;
+  submissionStatus: string;
+  submittedAt?: string;
+  gradedAt?: string;
+}
 
 interface TaskDetailClientProps {
   taskInfo: {
@@ -27,6 +44,7 @@ interface TaskDetailClientProps {
   deliveredCount?: number;
   totalStudents?: number;
   editTaskHref?: string;
+  teacherSubmissions?: TeacherSubmissionView[];
   existingSubmission?: {
     content: string;
     files: string[];
@@ -42,7 +60,7 @@ interface TaskDetailClientProps {
  * entrega a la derecha.
  *
 */
-export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = false, deliveredCount = 0, totalStudents = 0, editTaskHref, existingSubmission }: TaskDetailClientProps) {
+export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = false, deliveredCount = 0, totalStudents = 0, editTaskHref, teacherSubmissions = [], existingSubmission }: TaskDetailClientProps) {
   const router = useRouter();
   // Estado local del componente
   const [submissionText, setSubmissionText] = useState(existingSubmission?.content || '');
@@ -53,6 +71,51 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [taskDeleteError, setTaskDeleteError] = useState<string | null>(null);
+  const [reviewMode, setReviewMode] = useState(false);
+  const [reviewSubmissions, setReviewSubmissions] = useState<TeacherSubmissionView[]>(teacherSubmissions);
+  const [activeSubmissionIndex, setActiveSubmissionIndex] = useState(0);
+  const [reviewGrade, setReviewGrade] = useState('');
+  const [reviewFeedback, setReviewFeedback] = useState('');
+  const [isReviewSaving, setIsReviewSaving] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  useEffect(() => {
+    if (!isTeacherView) {
+      setReviewMode(false);
+      return;
+    }
+
+    setReviewSubmissions(teacherSubmissions);
+  }, [isTeacherView, teacherSubmissions]);
+
+  useEffect(() => {
+    if (!reviewSubmissions.length) {
+      setActiveSubmissionIndex(0);
+      setReviewGrade('');
+      setReviewFeedback('');
+      return;
+    }
+
+    if (activeSubmissionIndex >= reviewSubmissions.length) {
+      setActiveSubmissionIndex(reviewSubmissions.length - 1);
+    }
+  }, [activeSubmissionIndex, reviewSubmissions.length]);
+
+  const activeSubmission = useMemo<TeacherSubmissionView | null>(
+    () => reviewSubmissions[activeSubmissionIndex] || null,
+    [reviewSubmissions, activeSubmissionIndex]
+  );
+
+  useEffect(() => {
+    if (!activeSubmission) {
+      setReviewGrade('');
+      setReviewFeedback('');
+      return;
+    }
+
+    setReviewGrade(activeSubmission.grade !== undefined && activeSubmission.grade !== null ? String(activeSubmission.grade) : '');
+    setReviewFeedback(activeSubmission.feedback || '');
+  }, [activeSubmission]);
 
   const hasDueDate = !!taskInfo.dueDate;
   const hasFlexibleDeadline = !!taskInfo.isOptional || !!taskInfo.allowLateSubmission || !hasDueDate;
@@ -146,8 +209,70 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
     }
   };
 
+  const handlePreviousSubmission = () => {
+    if (!reviewSubmissions.length) return;
+    setActiveSubmissionIndex((current) => (current - 1 + reviewSubmissions.length) % reviewSubmissions.length);
+  };
+
+  const handleNextSubmission = () => {
+    if (!reviewSubmissions.length) return;
+    setActiveSubmissionIndex((current) => (current + 1) % reviewSubmissions.length);
+  };
+
+  const handleSaveReview = async () => {
+    if (!activeSubmission || !taskInfo._id) return;
+
+    const parsedGrade = reviewGrade.trim() === '' ? 0 : Number(reviewGrade);
+
+    if (Number.isNaN(parsedGrade) || parsedGrade < 0 || parsedGrade > 10) {
+      setReviewMessage({ type: 'error', text: 'La nota debe estar entre 0 y 10.' });
+      return;
+    }
+
+    setIsReviewSaving(true);
+    setReviewMessage(null);
+
+    try {
+      const result = await saveStudentTaskGrade(taskInfo._id, activeSubmission.studentId, parsedGrade, reviewFeedback);
+
+      if (!result.success) {
+        setReviewMessage({ type: 'error', text: result.message || 'No se pudo guardar la revisión.' });
+        return;
+      }
+
+      setReviewSubmissions((current) => current.map((submission) => (
+        submission._id === activeSubmission._id
+          ? {
+              ...submission,
+              grade: parsedGrade,
+              feedback: reviewFeedback.trim(),
+              gradedAt: new Date().toISOString(),
+              submissionStatus: 'submitted',
+            }
+          : submission
+      )));
+
+      setReviewMessage({ type: 'success', text: 'Revisión guardada y sincronizada con calificaciones.' });
+      router.refresh();
+    } catch (error) {
+      setReviewMessage({ type: 'error', text: error instanceof Error ? error.message : 'Error inesperado al guardar la revisión.' });
+    } finally {
+      setIsReviewSaving(false);
+    }
+  };
+
+  const formatSubmissionDate = (value?: string) => {
+    if (!value) return 'Sin fecha de entrega';
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) return 'Sin fecha de entrega';
+    return parsedDate.toLocaleString();
+  };
+
+  const leftColumnClass = isTeacherView && reviewMode ? 'lg:col-span-4' : 'lg:col-span-7';
+  const rightColumnClass = isTeacherView && reviewMode ? 'lg:col-span-8 lg:self-start lg:h-fit' : 'lg:col-span-5';
+
   return (
-    <div className="w-full min-h-[calc(100vh-64px)] bg-base-200/40 p-4 sm:p-6 lg:h-[calc(100vh-64px)] lg:overflow-hidden">
+    <div className="w-full min-h-[calc(100vh-64px)] bg-base-200/40 p-4 sm:p-6">
       <div className="w-full max-w-6xl mx-auto flex flex-col h-full min-h-0 gap-0">
         {/* Barra superior con metadatos de la tarea y navegación */}
         <div className="w-full flex-shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-base-300">
@@ -199,7 +324,7 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
         <div className="w-full flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-6">
           {/* Izquierda: contenido de la tarea. Esta columna está pensada para poder scrollear
               independientemente del panel de entrega. */}
-          <div className="lg:col-span-7 flex flex-col min-h-0 h-full">
+          <div className={`${leftColumnClass} flex flex-col min-h-0 h-full`}>
             <div className="card bg-base-100 shadow-md border border-base-300 h-full flex flex-col overflow-hidden">
               <div className="card-body p-5 sm:p-6 flex flex-col min-h-0 h-full">
                 <div className="flex items-center gap-3 mb-4">
@@ -241,66 +366,233 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
 
           {/* Derecha: panel de entrega. No debe hacer scroll en escritorio; contiene el formulario
               de entrega cuando está pendiente y el resumen cuando ya se entregó. */}
-          <div className="lg:col-span-5 flex flex-col min-h-0 h-full">
+          <div className={`${rightColumnClass} flex flex-col min-h-0 h-full`}>
             <div className="card bg-base-100 shadow-md border border-base-300 h-full flex flex-col overflow-hidden">
-              <div className="card-body p-5 sm:p-6 flex flex-col justify-between h-full min-h-0">
+              <div className={`card-body p-5 sm:p-6 flex flex-col h-full min-h-0 ${isTeacherView && reviewMode ? 'justify-start gap-6' : 'justify-between'}`}>
                 {isTeacherView ? (
-                  <div className="flex h-full flex-col justify-between min-h-0 gap-6">
-                    <div className="space-y-5">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                          <Users size={24} />
-                        </div>
-                        <div>
-                          <h2 className="card-title text-xl font-bold text-base-content">Vista del profesor</h2>
-                          <p className="text-sm text-base-content/60">No se muestra la sección de entrega.</p>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Entregas recibidas</p>
-                          <div className="mt-2 flex items-end gap-2">
-                            <span className="text-4xl font-semibold text-base-content">{deliveredCount} <small className="text-base-content/50 text-xs">/ {totalStudents}</small></span>
-                            <span className="pb-1 text-sm text-base-content/50">alumnos</span>
+                  reviewMode ? (
+                    <div className="flex h-fit flex-col gap-4 pb-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                            <MessageSquareText size={24} />
+                          </div>
+                          <div>
+                            <h2 className="card-title text-xl font-bold text-base-content">Revisión de entregas</h2>
+                            <p className="text-sm text-base-content/60">
+                              {reviewSubmissions.length > 0
+                                ? `Entrega ${activeSubmissionIndex + 1} de ${reviewSubmissions.length}`
+                                : 'Sin entregas para revisar'}
+                            </p>
                           </div>
                         </div>
 
-                        <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
-                          <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Configuración</p>
-                          <p className="mt-2 text-sm font-medium text-base-content">
-                            {taskInfo.isOptional
-                              ? "Entrega opcional"
-                              : taskInfo.allowLateSubmission
-                                ? "Acepta entregas tardías"
-                                : "Plazo cerrado"}
-                          </p>
+                        <button
+                          type="button"
+                          onClick={() => setReviewMode(false)}
+                          className="btn btn-ghost btn-sm gap-2"
+                        >
+                          <ArrowLeft size={16} />
+                          Volver
+                        </button>
+                      </div>
+
+                      {reviewSubmissions.length > 0 && activeSubmission ? (
+                        <div className="w-full rounded-3xl border border-base-300 bg-base-200/25 p-4 space-y-4">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-lg font-bold text-base-content truncate">{activeSubmission.studentName}</h3>
+                                <span className="badge badge-outline badge-sm">{activeSubmission.studentEmail || 'Sin email'}</span>
+                              </div>
+                              <p className="text-xs text-base-content/50">Vista individual sincronizada con calificaciones</p>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <button type="button" className="btn btn-sm btn-circle btn-ghost" onClick={handlePreviousSubmission} disabled={reviewSubmissions.length <= 1} aria-label="Entrega anterior">
+                                <ChevronLeft size={16} />
+                              </button>
+                              <button type="button" className="btn btn-sm btn-circle btn-ghost" onClick={handleNextSubmission} disabled={reviewSubmissions.length <= 1} aria-label="Entrega siguiente">
+                                <ChevronRight size={16} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-base-300 bg-base-100 p-4">
+                              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40"><Clock3 size={12} /> Hora de entrega</p>
+                              <p className="mt-2 text-sm font-semibold text-base-content">{formatSubmissionDate(activeSubmission.submittedAt)}</p>
+                            </div>
+                            <div className="rounded-2xl border border-base-300 bg-base-100 p-4">
+                              <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40"><BadgeInfo size={12} /> Estado / nota</p>
+                              <p className="mt-2 text-sm font-semibold text-base-content">
+                                {activeSubmission.grade !== undefined && activeSubmission.grade !== null ? `${activeSubmission.grade}/10` : 'Sin calificar'}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-base-content/40">
+                              <Files size={12} /> Archivos entregados
+                            </div>
+                            {activeSubmission.files.length > 0 ? (
+                              <div className="space-y-2">
+                                {activeSubmission.files.map((file, index) => {
+                                  const fileNameParts = file.split('-');
+                                  const fileName = fileNameParts.length > 2
+                                    ? fileNameParts.slice(2).join('-').split('?')[0]
+                                    : file.split('/').pop()?.split('?')[0] || `archivo_${index + 1}`;
+
+                                  return (
+                                    <a
+                                      key={file}
+                                      href={file}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-3 rounded-xl border border-base-300 bg-base-100 px-3 py-2 transition-colors hover:border-primary/30"
+                                    >
+                                      <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                                        <FileText size={18} />
+                                      </div>
+                                      <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-medium text-base-content">{decodeURIComponent(fileName)}</p>
+                                        <p className="text-[10px] uppercase tracking-wider text-base-content/40">Abrir archivo entregado</p>
+                                      </div>
+                                    </a>
+                                  );
+                                })}
+                              </div>
+                            ) : (
+                              <div className="rounded-xl border border-dashed border-base-300 bg-base-100/80 px-4 py-6 text-center text-sm text-base-content/45">
+                                Sin archivos adjuntos
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-3">
+                            <p className="text-xs font-bold uppercase tracking-[0.24em] text-base-content/40">Respuesta escrita del alumno</p>
+                            <div className="rounded-2xl border border-base-300 bg-base-100 p-4 min-h-28 whitespace-pre-wrap text-sm leading-relaxed text-base-content/85">
+                              {activeSubmission.content?.trim() ? activeSubmission.content : 'Sin respuesta escrita.'}
+                            </div>
+                          </div>
+
+                          <div className="grid w-full gap-4 lg:grid-cols-2">
+                            <label className="form-control w-full">
+                              <span className="label-text font-semibold text-sm">Feedback del profesor</span>
+                              <textarea
+                                value={reviewFeedback}
+                                onChange={(event) => setReviewFeedback(event.target.value)}
+                                className="textarea textarea-bordered mt-2 min-h-36 w-full bg-base-100"
+                                placeholder="Escribe la retroalimentación para esta entrega..."
+                              />
+                            </label>
+                            <label className="form-control w-full max-w-40">
+                              <span className="label-text font-semibold text-sm">Nota</span>
+                              <input
+                                type="number"
+                                min="0"
+                                max="10"
+                                step="0.1"
+                                value={reviewGrade}
+                                onChange={(event) => setReviewGrade(event.target.value)}
+                                className="input input-bordered mt-2 w-full bg-base-100 font-mono"
+                                placeholder="0"
+                              />
+                            </label>
+                          </div>
+
+                          <div className="mt-auto border-t border-base-300 pt-4 space-y-3">
+                            {reviewMessage ? (
+                              <div className={`alert ${reviewMessage.type === 'success' ? 'alert-success' : 'alert-error'} text-sm`}>
+                                <span>{reviewMessage.text}</span>
+                              </div>
+                            ) : null}
+
+                            <button
+                              type="button"
+                              onClick={handleSaveReview}
+                              disabled={isReviewSaving}
+                              className="btn btn-primary w-full gap-2"
+                            >
+                              {isReviewSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                              Guardar revisión
+                            </button>
+                          </div>
                         </div>
+                      ) : (
+                        <div className="w-full rounded-3xl border border-dashed border-base-300 bg-base-200/20 p-6 flex items-center justify-center text-center text-sm text-base-content/50">
+                          Aún no hay entregas para revisar.
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex h-full flex-col justify-between min-h-0 gap-6">
+                      <div className="space-y-5">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                            <Users size={24} />
+                          </div>
+                          <div>
+                            <h2 className="card-title text-xl font-bold text-base-content">Vista del profesor</h2>
+                            <p className="text-sm text-base-content/60">No se muestra la sección de entrega.</p>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Entregas recibidas</p>
+                            <div className="mt-2 flex items-end gap-2">
+                              <span className="text-4xl font-semibold text-base-content">{deliveredCount} <small className="text-base-content/50 text-xs">/ {totalStudents}</small></span>
+                              <span className="pb-1 text-sm text-base-content/50">alumnos</span>
+                            </div>
+                          </div>
+
+                          <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Configuración</p>
+                            <p className="mt-2 text-sm font-medium text-base-content">
+                              {taskInfo.isOptional
+                                ? "Entrega opcional"
+                                : taskInfo.allowLateSubmission
+                                  ? "Acepta entregas tardías"
+                                  : "Plazo cerrado"}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setReviewMode((current) => !current)}
+                          className="btn btn-primary btn-block gap-2"
+                          disabled={!reviewSubmissions.length}
+                        >
+                          <MessageSquareText size={16} />
+                          {reviewMode ? 'Ocultar revisión' : 'Revisar entregas'}
+                        </button>
+                      </div>
+
+                      <div className="space-y-3">
+                        {editTaskHref ? (
+                          <div className="space-y-3">
+                            <Link href={editTaskHref} className="btn btn-primary btn-block gap-2 shadow-lg">
+                              <Edit3 size={16} />
+                              Editar tarea
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => setIsDeleteModalOpen(true)}
+                              className="btn btn-outline btn-error btn-block gap-2"
+                            >
+                              <Trash2 size={16} />
+                              Eliminar tarea
+                            </button>
+                          </div>
+                        ) : null}
+                        <p className="text-center text-xs text-base-content/50">
+                          Si quieres modificar título, fecha, puntos o activación, abre el editor del curso.
+                        </p>
                       </div>
                     </div>
-
-                    <div className="space-y-3">
-                      {editTaskHref ? (
-                        <div className="space-y-3">
-                          <Link href={editTaskHref} className="btn btn-primary btn-block gap-2 shadow-lg">
-                            <Edit3 size={16} />
-                            Editar tarea
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => setIsDeleteModalOpen(true)}
-                            className="btn btn-outline btn-error btn-block gap-2"
-                          >
-                            <Trash2 size={16} />
-                            Eliminar tarea
-                          </button>
-                        </div>
-                      ) : null}
-                      <p className="text-center text-xs text-base-content/50">
-                        Si quieres modificar título, fecha, puntos o activación, abre el editor del curso.
-                      </p>
-                    </div>
-                  </div>
+                  )
                 ) : (
                   <form onSubmit={handleSubmit} className="flex flex-col h-full justify-between min-h-0">
                     <div className="flex flex-col min-h-0">

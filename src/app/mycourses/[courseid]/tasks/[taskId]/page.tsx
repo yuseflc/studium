@@ -6,7 +6,7 @@ import User from '@/models/User';
 import { notFound } from 'next/navigation';
 import mongoose from 'mongoose';
 import { CALIFICACIONES } from '@/seed/data';
-import TaskDetailClient from '@/components/ui/TaskDetailClient';
+import TaskDetailClient from '../../../../../components/ui/TaskDetailClient';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/config/auth.config';
 
@@ -22,6 +22,7 @@ export default async function TaskDetailPage({
   
   let taskInfo: any = null;
   let existingSubmission: any = null;
+  let teacherSubmissions: any[] = [];
 
   await connectDB();
 
@@ -44,6 +45,37 @@ export default async function TaskDetailPage({
           taskId: taskInfo._id, 
           studentId: currentUser._id 
         }).lean();
+    }
+
+    if (taskInfo && isTeacherView) {
+      const rawTeacherSubmissions = await Submission.find({
+        taskId: taskInfo._id,
+        submissionStatus: { $in: ["submitted", "late"] },
+      })
+        .populate({
+          path: 'studentId',
+          select: 'firstName profile.lastName profile.profilePicture email',
+        })
+        .sort({ submittedAt: -1, createdAt: -1 })
+        .lean();
+
+      teacherSubmissions = rawTeacherSubmissions.map((submission: any) => ({
+        _id: String(submission._id),
+        taskId: String(submission.taskId),
+        studentId: String(submission.studentId?._id || submission.studentId),
+        studentName: [submission.studentId?.firstName, submission.studentId?.profile?.lastName]
+          .filter(Boolean)
+          .join(' ') || submission.studentId?.email || 'Estudiante',
+        studentEmail: submission.studentId?.email || '',
+        studentAvatar: submission.studentId?.profile?.profilePicture || '',
+        content: submission.content || '',
+        files: Array.isArray(submission.files) ? submission.files : [],
+        grade: submission.grade,
+        feedback: submission.feedback || '',
+        submissionStatus: submission.submissionStatus,
+        submittedAt: submission.submittedAt ? String(submission.submittedAt) : undefined,
+        gradedAt: submission.gradedAt ? String(submission.gradedAt) : undefined,
+      }));
     }
   } else {
     // Fallback temporal para las tareas que vienen de CALIFICACIONES u otras pruebas
@@ -96,6 +128,7 @@ export default async function TaskDetailPage({
       totalStudents={course ? course.enrolledStudents?.length || 0 : 0}
       editTaskHref={`/mycourses/${courseid}/tasks/${taskId}/edit`}
       existingSubmission={serializedSubmission}
+      teacherSubmissions={teacherSubmissions}
     />
   );
 }
