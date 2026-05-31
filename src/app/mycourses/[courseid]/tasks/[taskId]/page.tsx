@@ -29,7 +29,7 @@ export default async function TaskDetailPage({
     ? await User.findOne({ email: session.user.email }).lean()
     : null;
 
-  const course = await Course.findById(courseid).select('ownerId teachers').lean();
+  const course = await Course.findById(courseid).select('ownerId teachers enrolledStudents').lean();
   const isTeacherView = !!currentUser && !!course && (
     course.ownerId?.toString() === currentUser._id.toString() ||
     Array.isArray(course.teachers) && course.teachers.some((teacherId: any) => teacherId.toString() === currentUser._id.toString())
@@ -93,6 +93,7 @@ export default async function TaskDetailPage({
       courseid={courseid} 
       isTeacherView={isTeacherView}
       deliveredCount={deliveredCount}
+      totalStudents={course ? course.enrolledStudents?.length || 0 : 0}
       editTaskHref={`/mycourses/${courseid}/tasks/${taskId}/edit`}
       existingSubmission={serializedSubmission}
     />

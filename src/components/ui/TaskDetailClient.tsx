@@ -25,6 +25,7 @@ interface TaskDetailClientProps {
   courseid: string;
   isTeacherView?: boolean;
   deliveredCount?: number;
+  totalStudents?: number;
   editTaskHref?: string;
   existingSubmission?: {
     content: string;
@@ -41,7 +42,7 @@ interface TaskDetailClientProps {
  * entrega a la derecha.
  *
 */
-export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = false, deliveredCount = 0, editTaskHref, existingSubmission }: TaskDetailClientProps) {
+export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = false, deliveredCount = 0, totalStudents = 0, editTaskHref, existingSubmission }: TaskDetailClientProps) {
   const router = useRouter();
   // Estado local del componente
   const [submissionText, setSubmissionText] = useState(existingSubmission?.content || '');
@@ -260,7 +261,7 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                         <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
                           <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Entregas recibidas</p>
                           <div className="mt-2 flex items-end gap-2">
-                            <span className="text-4xl font-semibold text-base-content">{deliveredCount}</span>
+                            <span className="text-4xl font-semibold text-base-content">{deliveredCount} <small className="text-base-content/50 text-xs">/ {totalStudents}</small></span>
                             <span className="pb-1 text-sm text-base-content/50">alumnos</span>
                           </div>
                         </div>
