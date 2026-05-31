@@ -1,9 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, Check, FileText, Link2, ShieldCheck, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, FileText, Link2, ShieldCheck, Sparkles, Upload, X } from "lucide-react";
 import { createResource, updateResource } from "@/app/actions/resourceActions";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 interface ResourceCreationFormProps {
   mode?: "create" | "edit";
@@ -46,6 +47,7 @@ export default function ResourceCreationForm({
   initialResourceUrl = "",
 }: ResourceCreationFormProps) {
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState(initialTitle);
   const [description, setDescription] = useState(initialDescription);
   const [content, setContent] = useState(initialContent);
@@ -56,12 +58,82 @@ export default function ResourceCreationForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [createdResourceId, setCreatedResourceId] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  
+  // Hook para carga de archivos a R2
+  const fileUpload = useFileUpload({ courseId: courseId || '', unitId: unitId || '' });
 
   const selectedUnitTitle = useMemo(() => {
     return units.find((unit) => unit._id === unitId)?.title || "Selecciona una unidad";
   }, [unitId, units]);
 
   const isEditMode = mode === "edit";
+
+  // Manejador para eventos de arrastre
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  // Manejador para el evento drop
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (!courseId || !unitId || resourceMode !== 'file') return;
+
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  // Manejador para selección de archivo
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!courseId || !unitId) return;
+    const files = e.currentTarget.files;
+    if (files && files.length > 0) {
+      handleFileUpload(files[0]);
+    }
+  };
+
+  // Función principal de carga de archivo
+  const handleFileUpload = async (file: File) => {
+    if (!courseId || !unitId) {
+      setError('Curso y unidad son requeridos para subir archivos');
+      return;
+    }
+
+    setError(null);
+    const result = await fileUpload.upload(file);
+    if (result.success && result.url) {
+      setResourceUrl(result.url);
+      setUploadedFileName(result.fileName || file.name);
+      // Auto-llenar el título con el nombre del archivo si no hay título
+      if (!title) {
+        setTitle(file.name.replace(/\.[^.]+$/, ''));
+      }
+    } else {
+      setError(result.error || 'Error al subir el archivo');
+    }
+  };
+
+  // Limpiar archivo cargado
+  const clearFileUpload = () => {
+    setResourceUrl('');
+    setUploadedFileName(null);
+    fileUpload.resetProgress();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -330,19 +402,97 @@ export default function ResourceCreationForm({
                 </div>
 
                 {resourceMode !== "text" ? (
-                  <label className="form-control gap-2">
-                    <span className="label-text font-semibold text-base-content/80">
-                      {resourceMode === "file" ? "URL del archivo" : "URL del enlace"}
-                    </span>
-                    <input
-                      value={resourceUrl}
-                      onChange={(event) => setResourceUrl(event.target.value)}
-                      className="input input-bordered w-full border-base-300 bg-base-100"
-                      placeholder={resourceMode === "file" ? "https://.../archivo.pdf" : "https://..."}
-                      disabled={isSubmitting}
-                      required
-                    />
-                  </label>
+                  <>
+                    {resourceMode === "file" ? (
+                      // Zona de carga de archivo con drag-and-drop
+                      <div className="form-control gap-2">
+                        <span className="label-text font-semibold text-base-content/80">Subir archivo</span>
+                        
+                        <div
+                          onDragEnter={handleDrag}
+                          onDragLeave={handleDrag}
+                          onDragOver={handleDrag}
+                          onDrop={handleDrop}
+                          onClick={() => fileInputRef.current?.click()}
+                          className={`
+                            border-2 border-dashed rounded-lg p-6 text-center cursor-pointer
+                            transition-colors duration-200
+                            ${dragActive 
+                              ? 'border-primary bg-primary/10' 
+                              : 'border-base-300 bg-base-100 hover:border-primary/50'
+                            }
+                            ${fileUpload.isLoading ? 'opacity-60 cursor-not-allowed' : ''}
+                          `}
+                        >
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            onChange={handleFileChange}
+                            className="hidden"
+                            disabled={fileUpload.isLoading}
+                            accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.jpg,.jpeg,.png,.gif,.webp,.mp4,.webm,.mp3,.wav,.zip"
+                          />
+                          
+                          {!resourceUrl ? (
+                            <>
+                              <Upload className="w-8 h-8 mx-auto mb-2 text-base-content/60" />
+                              <p className="text-sm font-medium">
+                                Arrastra un archivo aquí o haz clic para seleccionar
+                              </p>
+                              <p className="text-xs text-base-content/50 mt-1">
+                                Máximo 50MB • Formatos: PDF, DOC, XLS, PPT, JPG, PNG, MP4, MP3, ZIP
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <p className="text-sm font-medium text-success">✓ Archivo cargado</p>
+                              <p className="text-xs text-base-content/60 mt-1">{uploadedFileName}</p>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Barra de progreso */}
+                        {fileUpload.isLoading && (
+                          <div className="mt-3">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-xs font-medium">Cargando...</span>
+                              <span className="text-xs font-medium">{fileUpload.progress.percentage}%</span>
+                            </div>
+                            <progress
+                              className="progress progress-primary w-full"
+                              value={fileUpload.progress.percentage}
+                              max="100"
+                            />
+                          </div>
+                        )}
+
+                        {/* Botón para cambiar archivo */}
+                        {resourceUrl && !fileUpload.isLoading && (
+                          <button
+                            type="button"
+                            onClick={clearFileUpload}
+                            className="btn btn-sm btn-outline w-full"
+                          >
+                            <X className="w-4 h-4" />
+                            Cambiar archivo
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      // Campo de URL para enlaces
+                      <label className="form-control gap-2">
+                        <span className="label-text font-semibold text-base-content/80">URL del enlace</span>
+                        <input
+                          value={resourceUrl}
+                          onChange={(event) => setResourceUrl(event.target.value)}
+                          className="input input-bordered w-full border-base-300 bg-base-100"
+                          placeholder="https://..."
+                          disabled={isSubmitting}
+                          required
+                        />
+                      </label>
+                    )}
+                  </>
                 ) : null}
 
                 {resourceMode === "text" ? (
