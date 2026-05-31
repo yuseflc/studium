@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
+import { deleteFromR2 } from "@/lib/r2";
 import Course from "@/models/Course";
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
@@ -32,6 +33,7 @@ export interface UpdateResourceActionInput {
   url?: string;
   description?: string;
   content?: string;
+  previousUrl?: string;
 }
 
 export interface ResourceActionResult {
@@ -113,7 +115,7 @@ export async function createResource(input: CreateResourceActionInput): Promise<
     }
 
     // Resolve unit: prefer explicit unitId
-    let unit: any = null;
+    let unit: { _id: mongoose.Types.ObjectId; courseId: mongoose.Types.ObjectId } | null = null;
     if (input.unitId) {
       unit = await Unit.findById(input.unitId);
       if (!unit) {
@@ -232,6 +234,8 @@ export async function updateResource(
       return { success: false, error: "Recurso no encontrado" };
     }
 
+    const previousUrl = input.previousUrl?.trim() || resource.url?.trim() || undefined;
+
     const course = await Course.findById(resource.courseId);
     if (!course) {
       return { success: false, error: "Curso no encontrado" };
@@ -252,7 +256,9 @@ export async function updateResource(
     if (data.type !== undefined) {
       resource.type = data.type;
     }
-    if (data.url !== undefined) {
+    if (data.type === "text" && data.url === undefined) {
+      resource.url = undefined;
+    } else if (data.url !== undefined) {
       resource.url = data.url;
     }
     if (data.description !== undefined) {
@@ -264,6 +270,17 @@ export async function updateResource(
 
     resource.updatedAt = new Date();
     await resource.save();
+
+    if (previousUrl && previousUrl !== resource.url) {
+      try {
+        await deleteFromR2(previousUrl);
+      } catch (attachmentError) {
+        LOGGER.error(
+          { resourceId, previousUrl, error: attachmentError },
+          "Error deleting replaced resource attachment from R2"
+        );
+      }
+    }
 
     return { success: true, resource: serializeResource(resource) };
   } catch (error) {

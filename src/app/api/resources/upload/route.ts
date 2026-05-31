@@ -121,7 +121,11 @@ export const POST = withErrorHandling(
     try {
       formData = await request.formData();
     } catch (error) {
-      logError('Error al parsear FormData', { error: String(error), requestId });
+      logError(
+        'Error al parsear FormData',
+        error instanceof Error ? error : new Error(String(error)),
+        { requestId }
+      );
       return validationErrorResponse(
         { file: ['No se pudo procesar el formulario'] },
         requestId
@@ -286,13 +290,16 @@ export const POST = withErrorHandling(
       const errorMessage =
         error instanceof Error ? error.message : 'Error desconocido al subir a R2';
 
-      logError('Error al subir archivo a R2', {
-        error: String(error),
-        fileName: file!.name,
-        courseId,
-        unitId,
-        requestId,
-      });
+      logError(
+        'Error al subir archivo a R2',
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          fileName: file!.name,
+          courseId,
+          unitId,
+          requestId,
+        }
+      );
 
       return validationErrorResponse(
         { file: [errorMessage] },

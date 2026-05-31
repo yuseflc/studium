@@ -59,7 +59,7 @@ export default function ResourceCreationForm({
   const [success, setSuccess] = useState(false);
   const [createdResourceId, setCreatedResourceId] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
-  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(() => getFileNameFromUrl(initialResourceUrl));
   
   // Hook para carga de archivos a R2
   const fileUpload = useFileUpload({ courseId: courseId || '', unitId: unitId || '' });
@@ -69,6 +69,19 @@ export default function ResourceCreationForm({
   }, [unitId, units]);
 
   const isEditMode = mode === "edit";
+
+  function getFileNameFromUrl(fileUrl: string): string | null {
+    if (!fileUrl) return null;
+
+    try {
+      const parsedUrl = new URL(fileUrl);
+      const fileName = parsedUrl.pathname.split("/").filter(Boolean).pop();
+      return fileName ? decodeURIComponent(fileName) : null;
+    } catch {
+      const fileName = fileUrl.split("/").filter(Boolean).pop();
+      return fileName ? decodeURIComponent(fileName) : null;
+    }
+  }
 
   // Manejador para eventos de arrastre
   const handleDrag = (e: React.DragEvent) => {
@@ -174,6 +187,7 @@ export default function ResourceCreationForm({
           content: resourceMode === "text" ? content.trim() : undefined,
           type: resourceMode,
           url: resourceMode === "text" ? undefined : resourceUrl.trim() || undefined,
+          previousUrl: initialResourceUrl || undefined,
         });
 
         if (!result.success || !result.resource) {
@@ -222,6 +236,7 @@ export default function ResourceCreationForm({
   const headerTag = isEditMode ? "Editar recurso" : "Nuevo recurso";
   const backButtonHref = backHref || `/mycourses/${courseId}`;
   const backButtonLabel = backLabel || "Volver al curso";
+  const currentFileName = uploadedFileName || getFileNameFromUrl(resourceUrl);
 
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-base-200/40">
@@ -446,7 +461,12 @@ export default function ResourceCreationForm({
                           ) : (
                             <>
                               <p className="text-sm font-medium text-success">✓ Archivo cargado</p>
-                              <p className="text-xs text-base-content/60 mt-1">{uploadedFileName}</p>
+                              <p className="text-xs text-base-content/60 mt-1">{currentFileName}</p>
+                              {isEditMode ? (
+                                <p className="mt-2 text-xs text-base-content/45">
+                                  Si guardas cambios con otro archivo, el adjunto anterior se eliminará de R2.
+                                </p>
+                              ) : null}
                             </>
                           )}
                         </div>
@@ -471,10 +491,10 @@ export default function ResourceCreationForm({
                           <button
                             type="button"
                             onClick={clearFileUpload}
-                            className="btn btn-sm btn-outline w-full"
+                            className="btn btn-sm btn-outline w-full mt-3"
                           >
                             <X className="w-4 h-4" />
-                            Cambiar archivo
+                            {isEditMode ? "Quitar archivo actual" : "Cambiar archivo"}
                           </button>
                         )}
                       </div>

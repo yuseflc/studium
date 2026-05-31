@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 type R2Config = {
   endpoint: string;
@@ -25,7 +25,12 @@ function getR2Config(): R2Config {
     throw new Error(`Faltan variables de entorno de R2: ${missing.join(", ")}`);
   }
 
-  return { endpoint, accessKeyId, secretAccessKey, bucketName };
+  return {
+    endpoint: endpoint!,
+    accessKeyId: accessKeyId!,
+    secretAccessKey: secretAccessKey!,
+    bucketName: bucketName!,
+  };
 }
 
 function getR2Client(config: R2Config): S3Client {
@@ -41,6 +46,37 @@ function getR2Client(config: R2Config): S3Client {
   });
 
   return cachedR2Client;
+}
+
+function getR2ObjectKey(fileUrlOrKey: string, baseUrl: string): string {
+  const trimmedValue = fileUrlOrKey.trim().replace(/^\/+/, "");
+
+  if (!trimmedValue) {
+    throw new Error("La clave del objeto R2 es requerida");
+  }
+
+  if (!baseUrl) {
+    return trimmedValue;
+  }
+
+  const normalizedBaseUrl = baseUrl.replace(/\/+$/, "");
+
+  if (trimmedValue.startsWith(`${normalizedBaseUrl}/`)) {
+    return trimmedValue.slice(normalizedBaseUrl.length + 1);
+  }
+
+  try {
+    const parsedUrl = new URL(trimmedValue);
+    const baseOrigin = new URL(normalizedBaseUrl).origin;
+
+    if (parsedUrl.origin === baseOrigin) {
+      return parsedUrl.pathname.replace(/^\/+/, "");
+    }
+  } catch {
+    // Si no es una URL válida, asumimos que ya es la clave del objeto.
+  }
+
+  return trimmedValue;
 }
 
 /**
@@ -84,5 +120,24 @@ export async function uploadToR2(
     console.error("Error al subir a R2:", error);
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(`No se pudo subir el archivo a R2: ${message}`);
+  }
+}
+
+export async function deleteFromR2(fileUrlOrKey: string) {
+  const config = getR2Config();
+  const r2Client = getR2Client(config);
+  const objectKey = getR2ObjectKey(fileUrlOrKey, process.env.NEXT_PUBLIC_R2_PUBLIC_URL || "");
+
+  const command = new DeleteObjectCommand({
+    Bucket: config.bucketName,
+    Key: objectKey,
+  });
+
+  try {
+    await r2Client.send(command);
+  } catch (error) {
+    console.error("Error al eliminar desde R2:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`No se pudo eliminar el archivo de R2: ${message}`);
   }
 }

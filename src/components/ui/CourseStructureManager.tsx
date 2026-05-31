@@ -308,12 +308,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
   const openEditResource = (subjectId: string, unitId: string, resource: CourseResourceItem) => {
     if (!canEdit) return;
-    resetForm();
-    setTitle(resource.title);
-    setDescription(resource.description || "");
-    setResourceType(resource.type);
-    setResourceUrl(resource.url || "");
-    setEditor({ kind: "resource", mode: "edit", subjectId, unitId, resourceId: resource._id });
+    router.push(`/mycourses/${courseId}/resources/${resource._id}/edit`);
   };
 
   const openCreateTask = (subject: CourseSubjectItem, taskType: TaskDraftType, unitId?: string) => {
@@ -341,7 +336,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
       kind: "task",
       mode: "edit",
       subjectId,
-      unitId: (task as any).unitId,
+      unitId: task.unitId,
       taskId: task._id,
       taskType: task.type === "quiz" ? "quiz" : "assignment",
     });

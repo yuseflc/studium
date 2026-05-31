@@ -30,3 +30,38 @@ export const NOTIFICACIONES = [
   }
 ];
 
+export const CALIFICACIONES = [
+  {
+    _id: "calificacion-1",
+    taskTitle: "Entrega de Flexbox y Grid",
+    title: "Entrega de Flexbox y Grid",
+    category: "CSS",
+    status: "graded",
+    score: 9.2,
+    maxScore: 10,
+    feedback: "Buen uso de grid y estructura limpia.",
+    avatar: "https://i.pravatar.cc/150?u=estudiante-1",
+    studentName: "Laura Gómez",
+    submittedAt: new Date().toISOString(),
+    description: "Diseño de una landing responsive con Flexbox y CSS Grid.",
+    dueDate: new Date().toISOString(),
+    isSubmitted: true,
+  },
+  {
+    _id: "calificacion-2",
+    taskTitle: "API REST básica",
+    title: "API REST básica",
+    category: "Backend",
+    status: "pending",
+    score: 0,
+    maxScore: 10,
+    feedback: "Pendiente de revisión.",
+    avatar: "https://i.pravatar.cc/150?u=estudiante-2",
+    studentName: "Carlos Ruiz",
+    submittedAt: new Date().toISOString(),
+    description: "Implementación de endpoints CRUD.",
+    dueDate: new Date().toISOString(),
+    isSubmitted: false,
+  },
+];
+

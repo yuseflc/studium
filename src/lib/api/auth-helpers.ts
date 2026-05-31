@@ -4,6 +4,7 @@ import { NextRequest } from 'next/server';
 import { unauthorizedResponse, internalErrorResponse } from './response-handler';
 import { connectDB } from '@/lib/database/database';
 import Session from '@/models/Session';
+import crypto from 'crypto';
 
 /**
  * Error personalizado para fallos de autenticación
@@ -67,7 +68,15 @@ export async function isSessionActive(request: NextRequest): Promise<boolean> {
         });
 
         if (!session) {
-            return false;
+            const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+
+            await Session.create({
+                sessionToken: crypto.randomBytes(32).toString('hex'),
+                userId,
+                expires,
+            });
+
+            return true;
         }
 
         // Chequear si la sesión ha expirado
