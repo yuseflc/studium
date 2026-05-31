@@ -301,12 +301,19 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
   const openCreateResource = (subjectId: string, unit: CourseUnitItem) => {
     if (!canEdit) return;
     resetForm();
-    router.push(`/mycourses/${courseId}/resources/new?unitId=${unit._id}`);
+    setResourceType("file");
+    setResourceUrl("");
+    setEditor({ kind: "resource", mode: "create", subjectId, unitId: unit._id });
   };
 
-  const openEditResource = (_subjectId: string, _unitId: string, resource: CourseResourceItem) => {
+  const openEditResource = (subjectId: string, unitId: string, resource: CourseResourceItem) => {
     if (!canEdit) return;
-    router.push(`/mycourses/${courseId}/resources/${resource._id}/edit`);
+    resetForm();
+    setTitle(resource.title);
+    setDescription(resource.description || "");
+    setResourceType(resource.type);
+    setResourceUrl(resource.url || "");
+    setEditor({ kind: "resource", mode: "edit", subjectId, unitId, resourceId: resource._id });
   };
 
   const openCreateTask = (subject: CourseSubjectItem, taskType: TaskDraftType, unitId?: string) => {
@@ -1255,6 +1262,8 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
               setResourceUrl={setResourceUrl}
               descriptionValue={description}
               setDescriptionValue={setDescription}
+              courseId={courseId}
+              unitId={editor.unitId}
               onClose={closeEditor}
               onConfirm={handleEditorSubmit}
               isLoading={isSubmitting}
