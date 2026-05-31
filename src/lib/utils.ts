@@ -1,3 +1,8 @@
+/* Archivo: src\lib\utils.ts
+  Descripción: Utilidades y helpers compartidos (formatos, parsing, utilidades pequeñas). */
+
+// Utilidades pequeñas y genéricas usadas a lo largo de la app (clase, truncado)
+// Utilidades genéricas: helpers de clases CSS, truncamiento y utilidades pequeñas
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 

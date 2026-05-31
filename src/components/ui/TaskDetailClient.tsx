@@ -1,4 +1,5 @@
-"use client";
+/* Archivo: src\components\ui\TaskDetailClient.tsx
+  Descripción: Componente cliente que muestra detalles de una tarea y su entregable. */
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -669,6 +670,7 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                               <input
                                 type="file"
                                 name="file"
+                                aria-label="Adjuntar archivo"
                                 className="file-input file-input-bordered file-input-primary w-full text-sm bg-base-100 text-base-content"
                                 onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
                                 disabled={isSubmitting}

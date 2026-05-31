@@ -1,3 +1,7 @@
+/* Archivo: src\config\auth.config.ts
+    Descripción: Configuración de autenticación (NextAuth): providers, callbacks y opciones generales. */
+
+// Configuración de NextAuth: proveedores, callbacks y aumento de tipos de sesión
 import { type NextAuthOptions, type DefaultSession } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'

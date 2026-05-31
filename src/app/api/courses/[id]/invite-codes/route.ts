@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\courses\[id]\invite-codes\route.ts
+  Descripción: Endpoint para listar y crear códigos de invitación para un curso. */
+
+// API: Generación y listado de códigos de invitación para un curso específico
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandlingParams } from '@/lib/api/middleware';
 import {

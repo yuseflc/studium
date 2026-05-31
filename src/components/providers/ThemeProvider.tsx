@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\providers\ThemeProvider.tsx
+    Descripción: Proveedor que gestiona el tema (claro/oscuro) y proporciona contexto a la UI. */
 
+"use client";
+// Provider de tema que expone `useTheme` para cambiar el tema de la UI
 import { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'default' | 'light' | 'dark' | 'cupcake' | 'bumblebee' | 'retro';

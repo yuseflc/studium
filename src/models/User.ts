@@ -1,3 +1,8 @@
+/* Archivo: src\models\User.ts
+  Descripción: Modelo de datos `User` (esquema Mongoose) con campos básicos y métodos relacionados. */
+
+// Modelo User: esquema Mongoose y tipos para usuarios de la aplicación
+// Incluye roles, perfiles y utilidades como comparación de contraseña
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 

@@ -1,3 +1,6 @@
+/* Archivo: src\lib\api\course-helpers.ts
+  Descripción: Helpers para operaciones de cursos (consulta, actualización, permisos). */
+
 /**
  * MongoDB Query Helpers para la estructura normalizada de cursos
  * Proporciona funciones para queries comunes contra Unit y Resource

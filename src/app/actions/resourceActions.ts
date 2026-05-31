@@ -1,5 +1,11 @@
-"use server";
+/* Archivo: src\app\actions\resourceActions.ts
+  Descripción: Acciones para subir, listar y eliminar recursos asociados a cursos. */
 
+"use server";
+// Server Action: operaciones sobre recursos (archivos/enlaces) del curso
+// Maneja subida, asociación y permisos
+
+// Server Actions: gestión de recursos del curso (subir, editar, eliminar)
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";

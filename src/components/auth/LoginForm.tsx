@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\auth\LoginForm.tsx
+  Descripción: Formulario de inicio de sesión (email/contraseña) con manejo de errores y submit. */
 
+"use client";
+// Formulario de login con soporte para proveedores externos y redirección
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';

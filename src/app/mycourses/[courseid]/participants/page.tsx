@@ -1,3 +1,6 @@
+/* Archivo: src\app\mycourses\[courseid]\participants\page.tsx
+  Descripción: Página de gestión de participantes: lista, invitaciones y permisos. */
+
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/config/auth.config';
 import { connectDB } from '@/lib/database/database';

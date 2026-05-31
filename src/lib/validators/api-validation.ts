@@ -1,3 +1,7 @@
+/* Archivo: src\lib\validators\api-validation.ts
+    Descripción: Validaciones específicas para peticiones API: parámetros, cuerpos y consultas. */
+
+// Helpers para validar requests en las rutas API usando Zod
 import { ZodSchema } from 'zod';
 import { NextRequest } from 'next/server';
 import { logInfo } from '@/config/logger';

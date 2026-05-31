@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\units\[id]\route.ts
+  Descripción: Endpoint API para operaciones sobre una unidad específica (obtener, actualizar, eliminar). */
+
+// API: Operaciones sobre una unidad específica (GET, PATCH, DELETE)
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Unit from '@/models/Unit';

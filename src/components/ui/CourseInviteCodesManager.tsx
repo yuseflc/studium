@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\CourseInviteCodesManager.tsx
+  Descripción: Administrador UI para crear y revocar códigos de invitación del curso. */
 
+"use client";
+// Gestión de códigos de invitación para cursos (generar, desactivar, listar)
 import { useState, useEffect } from 'react';
 import { generateInviteCode, deactivateInviteCode, listInviteCodes } from '@/app/actions/courseActions';
 import { IconCopy, IconTrash, IconLoader, IconPlus, IconCheck, IconInfoCircle } from '@tabler/icons-react';

@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\grades\TeacherGradesView.tsx
+    Descripción: Vista para profesorado: revisar y editar calificaciones y feedback de estudiantes. */
 
+"use client";
+// Vista de profesor: listar estudiantes y abrir grading individual por alumno
 import React, { useState, useEffect } from "react";
 import { GraduationCap } from "lucide-react";
 import IndividualStudentGradingView from "./IndividualStudentGradingView";

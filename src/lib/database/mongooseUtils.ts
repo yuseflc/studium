@@ -1,8 +1,12 @@
+/* Archivo: src\lib\database\mongooseUtils.ts
+  Descripción: Helpers y utilidades para trabajar con Mongoose (conexiones, modelos, util). */
+
 /**
  * Funciones Utilitarias de MongoDB/Mongoose para Consultas Optimizadas
  * Use estas funciones para garantizar consultas eficientes a la base de datos con índices adecuados
  */
 
+// Utilidades Mongoose: consultas comunes y wrappers para Submission/Task/Course
 import User from '@/models/User';
 import Course from '@/models/Course';
 import Task from '@/models/Task';

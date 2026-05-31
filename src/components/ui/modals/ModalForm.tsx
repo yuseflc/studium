@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\modals\ModalForm.tsx
+    Descripción: Wrapper de formulario usado dentro de modales para accesibilidad y manejo. */
 
+"use client";
+// ModalForm: envoltorio para formularios dentro de un Modal con estados integrados
 import React from 'react';
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import { Modal, ModalProps } from './Modal';

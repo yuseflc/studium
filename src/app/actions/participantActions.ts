@@ -1,3 +1,6 @@
+/* Archivo: src\app\actions\participantActions.ts
+  Descripción: Acciones para gestionar participantes del curso (invitar, listar, eliminar). */
+
 'use server';
 
 /**
@@ -12,6 +15,7 @@
  * Seguridad: todas las acciones verifican sesión y permisos RBAC.
  */
 
+// Server Actions: helpers para gestionar entregas y calificaciones de participantes
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/config/auth.config';
 import { connectDB } from '@/lib/database/database';

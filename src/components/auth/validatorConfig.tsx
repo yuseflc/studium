@@ -1,3 +1,7 @@
+/* Archivo: src\components\auth\validatorConfig.tsx
+    Descripción: Configuración de validadores y esquemas para formularios de autenticación (signup/login). */
+
+// Resumen de reglas de validación para campos de autenticación
 /**
  * Configuración de validadores para el formulario de signup
  * Centraliza las reglas de validación y mensajes

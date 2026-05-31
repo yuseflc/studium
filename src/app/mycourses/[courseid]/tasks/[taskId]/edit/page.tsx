@@ -1,3 +1,6 @@
+/* Archivo: src\app\mycourses\[courseid]\tasks\[taskId]\edit\page.tsx
+  Descripción: Página para editar una tarea existente del curso (formulario y guardado). */
+
 import { getServerSession } from "next-auth/next";
 import { notFound, redirect } from "next/navigation";
 import mongoose from "mongoose";

@@ -1,3 +1,6 @@
+/* Archivo: src\lib\clientValidation.ts
+  Descripción: Validaciones del lado cliente para formularios y entradas de usuario (limpieza y reglas). */
+
 /**
  * Validación en cliente usando Zod
  * Pre-valida campos antes de enviar al servidor

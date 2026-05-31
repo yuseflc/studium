@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseTaskModal.tsx
+    Descripción: Modal para crear o editar una tarea dentro del contexto del curso. */
+
+// Modal: CourseTaskModal — crear/editar tareas específicas del curso
 'use client';
 
 import React from 'react';

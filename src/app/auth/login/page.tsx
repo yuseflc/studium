@@ -1,3 +1,6 @@
+/* Archivo: src\app\auth\login\page.tsx
+  Descripción: Página de acceso (login) que incluye el formulario y enlaces auxiliares. */
+
 import { Suspense } from 'react';
 import LoginForm from '@/components/auth/LoginForm';
 

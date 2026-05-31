@@ -1,3 +1,8 @@
+/* Archivo: src\proxy.ts
+    Descripción: Proxy utilizado en desarrollo para redirigir peticiones a servicios externos o al backend. */
+
+// Middleware de proxy que aplica autenticación mediante next-auth
+// Controla rutas protegidas y permite extender reglas por rol
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 

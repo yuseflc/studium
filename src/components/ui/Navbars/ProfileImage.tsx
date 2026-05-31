@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\Navbars\ProfileImage.tsx
+    Descripción: Componente que muestra la imagen de perfil del usuario con fallback. */
+
+// Componente: ProfileImage — muestra avatar del usuario con fallback y manejo de carga
 "use client";
 
 import { useState, useEffect } from 'react';

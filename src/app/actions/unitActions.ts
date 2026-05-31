@@ -1,5 +1,11 @@
-"use server";
+/* Archivo: src\app\actions\unitActions.ts
+  Descripción: Acciones del lado del cliente/servidor para gestionar unidades (CRUD y helpers). */
 
+"use server";
+// Server Action: helpers para operaciones CRUD sobre unidades (Unit)
+// Valida permisos y revalida paths cuando es necesario
+
+// Server Action: operaciones CRUD y reordenación de unidades de curso (requiere DB)
 import mongoose from "mongoose";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";

@@ -1,3 +1,7 @@
+/* Archivo: src\lib\api\middleware.ts
+    Descripción: Middlewares para las rutas API: autenticación, validación y manejo de errores. */
+
+// Middleware HTTP reutilizable para rutas API: autenticación y manejo de errores
 import { NextRequest, NextResponse } from 'next/server';
 import { internalErrorResponse, unauthorizedResponse } from './response-handler';
 import { logError } from '@/config/logger';

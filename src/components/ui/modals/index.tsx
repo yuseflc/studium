@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\index.tsx
+   Descripción: Reexporta los componentes de modal usados en la UI (FeedbackModal, CourseDeleteModal, etc.). */
+
+// Re-exports de modales: centraliza los exports públicos del directorio modals
 export * from './Modal';
 export * from './ModalDanger';
 export * from './ModalAdvise';

@@ -1,3 +1,8 @@
+/* Archivo: src\components\ui\button.tsx
+  Descripción: Componente `Button` estilizado reutilizable para acciones en la UI. */
+
+// Botón reutilizable con variantes y slots para iconos/labels
+// Botón estilizado reutilizable con variantes y slot para iconos
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"

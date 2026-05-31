@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\features.tsx
+  Descripción: Componentes y utilidades para mostrar listas de características en la UI. */
+
 'use client'
 
 import * as React from 'react'

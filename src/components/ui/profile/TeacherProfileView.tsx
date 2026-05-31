@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\profile\TeacherProfileView.tsx
+  Descripción: Vista del perfil docente con información y controles específicos. */
+
 'use client';
 
 import { useState, useEffect } from 'react';

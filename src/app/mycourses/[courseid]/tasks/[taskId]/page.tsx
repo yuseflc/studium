@@ -1,3 +1,7 @@
+/* Archivo: src\app\mycourses\[courseid]\tasks\[taskId]\page.tsx
+  Descripción: Página de detalle de una tarea dentro del curso: instrucciones y entregas. */
+
+// Página server: detalle de tarea dentro de un curso (muestra entregas y calificaciones)
 import { connectDB } from '@/lib/database/database';
 import Course from '@/models/Course';
 import Task from '@/models/Task';

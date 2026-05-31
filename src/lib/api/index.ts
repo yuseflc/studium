@@ -1,3 +1,6 @@
+/* Archivo: src\lib\api\index.ts
+    Descripción: Punto central de helpers para llamadas API (cliente/servidor) y utilidades comunes. */
+
 /**
  * Exports centralizados para utilidades de API
  *

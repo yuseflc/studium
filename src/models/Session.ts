@@ -1,3 +1,7 @@
+/* Archivo: src\models\Session.ts
+    Descripción: Modelo `Session` para sesiones de usuario o eventos de autenticación. */
+
+// Modelo Session: almacena sesiones activas usadas por next-auth/local session store
 import mongoose from "mongoose";
 
 interface ISession {

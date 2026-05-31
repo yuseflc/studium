@@ -1,3 +1,6 @@
+/* Archivo: src\app\mycourses\[courseid]\exams\[examId]\page.tsx
+  Descripción: Página que muestra un examen del curso (instrucciones y estado). */
+
 import { connectDB } from '@/lib/database/database';
 import Task from '@/models/Task';
 import { notFound } from 'next/navigation';

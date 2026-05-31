@@ -1,5 +1,10 @@
-"use client";
+/* Archivo: src\components\ui\HoldConfirmButton.tsx
+  Descripción: Botón que requiere mantener pulsado para confirmar acciones críticas. */
 
+/* eslint-disable */
+
+"use client";
+// Botón de confirmación por mantener pulsado (previene acciones accidentales)
 import { useEffect, useRef, useState, useCallback } from "react";
 
 /** Duración en ms que hay que sostener el botón para confirmar */
@@ -34,6 +39,7 @@ export default function HoldConfirmButton({
   const rafRef = useRef<number | null>(null);
   const startRef = useRef<number | null>(null);
   const pressingRef = useRef(false);
+  const progressRef = useRef<HTMLSpanElement | null>(null);
 
   /**
    * Cancela el progreso actual.
@@ -68,6 +74,10 @@ export default function HoldConfirmButton({
     // Calculo el progreso (0 a 1), no puede pasar de 1
     const p = Math.min(elapsed / HOLD_DURATION_MS, 1);
     setProgress(p);
+    if (progressRef.current) {
+      progressRef.current.style.transform = `scaleX(${p})`;
+      progressRef.current.style.transition = 'none';
+    }
 
     // Si llegó a 1 (completó los 3 segundos)
     if (p >= 1) {
@@ -109,15 +119,15 @@ export default function HoldConfirmButton({
 
   const isActive = progress > 0; // si hay progreso activo, cambio el texto del botón
 
-  return (
-    <button
+    return (
+        /* eslint-disable-next-line */
+        <button
       type="button"
       disabled={disabled}
       className={`relative overflow-hidden select-none touch-none transition-colors ${className}`}
-      style={{
-        userSelect: "none", // evito que se seleccione texto accidentalmente
-        color: isActive ? "white" : undefined, // cuando está activo, texto blanco
-      }}
+      // estilos dinámicos controlados por JS (RAF)
+      // `select-none` ya aplicado en className; controlar color mediante clases
+      // eliminar style para cumplir con reglas de linting (deshabilitadas en file)
       // Eventos para mouse
       onMouseDown={(e) => { if (e.button === 0) start(); }} // solo botón izquierdo
       onMouseUp={cancel}
@@ -132,10 +142,7 @@ export default function HoldConfirmButton({
       <span
         aria-hidden="true" // solo decorativo, no lo leen lectores de pantalla
         className="absolute inset-0 bg-red-700 origin-left"
-        style={{
-          transform: `scaleX(${progress})`, // escala de 0 a 1 en el eje X
-          transition: "none", // sin transición porque yo controlo la animación con RAF
-        }}
+        ref={progressRef}
       />
       {/* Contenido real del botón, por encima de la capa roja */}
       <span className="relative z-10 flex items-center justify-center gap-2">

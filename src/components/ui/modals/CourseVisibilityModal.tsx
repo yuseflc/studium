@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseVisibilityModal.tsx
+    Descripción: Modal para ajustar la visibilidad o publicación de un curso (público/privado). */
+
+// Modal: CourseVisibilityModal — cambiar visibilidad/estado del curso (draft/active/archived)
 'use client';
 
 import React from 'react';

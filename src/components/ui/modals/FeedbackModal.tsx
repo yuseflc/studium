@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\modals\FeedbackModal.tsx
+    Descripción: Modal de feedback usado por profesorado para dejar comentarios visibles al alumno. */
 
+"use client";
+// Modal para ver/añadir feedback a una entrega; usable por profesor y visible para estudiante
 import React, { useState, useEffect } from 'react';
 import { ModalForm, ModalFormProps } from './ModalForm';
 import { MessageSquare } from 'lucide-react';

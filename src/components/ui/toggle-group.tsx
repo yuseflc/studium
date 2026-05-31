@@ -1,4 +1,9 @@
+/* Archivo: src\components\ui\toggle-group.tsx
+  Descripción: Grupo de toggles para selección mutua o múltiple de opciones. */
+
 "use client"
+// Grupo de toggles reutilizable (Radix ToggleGroup)
+// Usado en controles donde se permiten selecciones múltiples/únicas
 
 import * as React from "react"
 import * as ToggleGroupPrimitive from "@radix-ui/react-toggle-group"

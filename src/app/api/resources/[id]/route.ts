@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\resources\[id]\route.ts
+  Descripción: Endpoint para acceder, actualizar o eliminar un recurso por su id. */
+
+// API: Operaciones sobre un recurso específico (GET, PATCH, DELETE)
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Resource from '@/models/Resource';

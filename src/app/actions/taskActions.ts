@@ -1,5 +1,11 @@
-"use server";
+/* Archivo: src\app\actions\taskActions.ts
+  Descripción: Acciones para crear, actualizar y obtener tareas (helpers usados por UI). */
 
+"use server";
+// Server Action: gestión de tareas (crear, actualizar, eliminar)
+// Encargado de validar sesión y revalidar caché cuando sea necesario
+
+// Server Actions para crear/actualizar/eliminar tareas y gestionar entregas
 import { getServerSession } from "next-auth/next";
 import mongoose from "mongoose";
 import { authOptions } from "@/config/auth.config";

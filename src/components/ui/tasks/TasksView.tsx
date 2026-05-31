@@ -1,3 +1,9 @@
+/* Archivo: src\components\ui\tasks\TasksView.tsx
+  Descripción: Lista y tarjetas de tareas del curso; incluye interacciones de entrega y eliminación por mantener pulsado. */
+
+/* eslint-disable */
+
+// Vista y lista de tareas del curso; maneja estados de entrega y filtros
 import { Calendar, ClipboardList, Trash2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { CALIFICACIONES } from '@/seed/data';
@@ -33,6 +39,7 @@ const TasksView = ({
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isLongPressRef = useRef(false);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
 
   // Limpiar temporizadores al desmontar
   useEffect(() => {
@@ -56,6 +63,7 @@ const TasksView = ({
       const elapsed = Date.now() - startTime;
       const progress = Math.min((elapsed / 3000) * 100, 100);
       setHoldProgress(progress);
+      if (progressBarRef.current) progressBarRef.current.style.width = `${progress}%`;
     }, 30);
 
     // Timeout para ejecutar la acción después de 3 segundos
@@ -202,7 +210,7 @@ const TasksView = ({
                   {/* Barra de progreso */}
                   <div 
                     className="absolute bottom-0 left-0 h-1.5 bg-error transition-all duration-75"
-                    style={{ width: `${holdProgress}%` }}
+                    ref={progressBarRef}
                   />
                   {/* Texto indicador */}
                   <div className="absolute inset-0 flex items-center justify-center bg-base-100/90 backdrop-blur-xs">

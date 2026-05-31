@@ -1,3 +1,7 @@
+/* Archivo: src\models\Resource.ts
+  Descripción: Modelo `Resource` que representa archivos o enlaces adjuntos a un curso. */
+
+// Modelo Resource: metadatos y relación de recursos (archivos, enlaces) por unidad
 import mongoose from "mongoose";
 
 export interface IResource {

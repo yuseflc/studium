@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\tasks\route.ts
+  Descripción: Endpoint API para listar y crear tareas (búsqueda y paginación). */
+
+// API: Endpoints para tareas (listar, crear y operaciones relacionadas)
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Task from '@/models/Task';

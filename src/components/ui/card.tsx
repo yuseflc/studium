@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\card.tsx
+  Descripción: Componente UI `Card` reutilizable para presentar contenido en tarjetas. */
+
+// Componente Card genérico para envolver contenido con estilos consistentes
 import * as React from "react"
 
 import { cn } from "@/lib/utils"

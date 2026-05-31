@@ -1,3 +1,6 @@
+/* Archivo: src\app\legal\tos\page.tsx
+    Descripción: Página de Términos de Servicio (TOS) con contenido legal estático. */
+
 import LegalDocument, { type LegalSection, type SummaryItem } from '@/components/sections/LegalDocument'
 
 const summary: SummaryItem[] = [

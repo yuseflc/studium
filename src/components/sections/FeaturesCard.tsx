@@ -1,3 +1,6 @@
+/* Archivo: src\components\sections\FeaturesCard.tsx
+    Descripción: Tarjeta descriptiva para una característica (ícono, título, descripción). */
+
 'use client'
 
 import * as React from 'react'

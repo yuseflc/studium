@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\tasks\TaskCreationForm.tsx
+  Descripción: Formulario reutilizable para crear o editar una tarea (campos y validación). */
 
+"use client";
+// Formulario de creación/edición de tareas (cliente)
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, AlertTriangle, BarChart3, BookOpen, Calendar, Check, ClipboardCheck, FileText, Search, SlidersHorizontal, Users } from "lucide-react";

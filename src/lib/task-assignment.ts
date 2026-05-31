@@ -1,3 +1,8 @@
+/* Archivo: src\lib\task-assignment.ts
+  Descripción: Lógica para asignación de tareas a participantes (reglas y utilidades). */
+
+// Helpers para asignación automática de tareas y lógica relacionada
+// Contiene rutinas que migran/reenlazan tareas entre cursos y unidades
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";

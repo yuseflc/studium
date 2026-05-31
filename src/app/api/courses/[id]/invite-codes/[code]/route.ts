@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\courses\[id]\invite-codes\[code]\route.ts
+  Descripción: Endpoint para gestionar un código de invitación específico del curso. */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandlingParams } from '@/lib/api/middleware';
 import {

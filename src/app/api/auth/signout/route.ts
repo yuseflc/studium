@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\auth\signout\route.ts
+    Descripción: Endpoint alternativo para cerrar sesión y limpiar cookies/estado. */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Session from '@/models/Session';

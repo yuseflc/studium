@@ -1,3 +1,8 @@
+/* Archivo: src\components\ui\CourseFAB.tsx
+  Descripción: Botón de acción flotante para el curso (acciones rápidas: crear tarea, invitar, etc.). */
+
+// Floating Action Button para acciones rápidas dentro de un curso (crear tarea, subir)
+// Proporciona accesos rápidos y modal de creación (task/resource/unit)
 import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X, BookOpen } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';

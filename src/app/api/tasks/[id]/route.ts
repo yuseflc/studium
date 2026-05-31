@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\tasks\[id]\route.ts
+  Descripción: Endpoint API para gestionar una tarea específica (consultar, actualizar, borrar). */
+
+// API: Operaciones sobre una tarea específica (GET, PATCH, DELETE)
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Task from '@/models/Task';

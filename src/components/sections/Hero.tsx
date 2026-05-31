@@ -1,3 +1,7 @@
+/* Archivo: src\components\sections\Hero.tsx
+    Descripción: Sección Hero usada en la página de inicio con título y CTA principal. */
+
+// Sección Hero de la landing: encabezado principal y llamada a la acción
 const Hero = () => {
     return (
         <div id="top" className="hero min-h-screen bg-base-200">

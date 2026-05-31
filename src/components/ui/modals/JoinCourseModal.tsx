@@ -1,4 +1,9 @@
-'use client';
+/* Archivo: src\components\ui\JoinCourseButton.tsx
+  Descripción: Botón que abre el modal para unirse a un curso (o acción directa). */
+
+"use client";
+// Botón que abre el modal para unirse a un curso por código
+// Controla estado y muestra feedback de acción
 
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';

@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\participants\ParticipantsSkeleton.tsx
+  Descripción: Esqueleto (skeleton) para la lista de participantes mientras carga. */
+
 'use client';
 
 /**

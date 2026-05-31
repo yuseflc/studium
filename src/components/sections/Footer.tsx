@@ -1,3 +1,7 @@
+/* Archivo: src\components\sections\Footer.tsx
+    Descripción: Componente Footer con enlaces y copyright del sitio. */
+
+// Pie de página reutilizable del sitio público
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
 

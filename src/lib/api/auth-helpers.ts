@@ -1,3 +1,7 @@
+/* Archivo: src\lib\api\auth-helpers.ts
+    Descripción: Helpers para autenticación y verificación de sesiones en rutas API. */
+
+// Helpers de autenticación para rutas API (session + roles)
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/config/auth.config';
 import { NextRequest } from 'next/server';

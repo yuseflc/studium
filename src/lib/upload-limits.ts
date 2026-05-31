@@ -1,3 +1,8 @@
+/* Archivo: src\lib\upload-limits.ts
+	Descripción: Constantes y lógica para límites de subida de archivos (valor por defecto y fallback). */
+
+// Límites de subida de archivos para entregas de tareas
+// Exporta un valor seguro y una etiqueta legible para UI
 const taskSubmissionMaxFileSizeBytes = Number(
 	process.env.NEXT_PUBLIC_TASK_SUBMISSION_MAX_FILE_SIZE_BYTES
 );

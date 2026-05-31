@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\CourseStructureManager.tsx
+  Descripción: Herramientas UI para gestionar la estructura del curso (unidades y tareas). */
 
+"use client";
+// Administrador de estructura del curso: mover/crear/eliminar unidades y temas
 import { useEffect, useMemo, useRef, useState, useCallback, type Dispatch, type FormEvent, type SetStateAction } from "react";
 import HoldConfirmButton from "@/components/ui/HoldConfirmButton";
 

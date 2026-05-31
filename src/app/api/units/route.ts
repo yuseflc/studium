@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\units\route.ts
+  Descripción: Endpoint API para listar y crear unidades dentro de un curso (GET, POST). */
+
+// API: Endpoints para unidades del curso (listar, crear)
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Unit from '@/models/Unit';

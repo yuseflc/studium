@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseMenuDeleteModal.tsx
+    Descripción: Modal de confirmación para eliminar ítems del menú del curso. */
+
+// Modal: CourseMenuDeleteModal — confirmación de borrado desde el menú del curso
 'use client';
 
 import React from 'react';

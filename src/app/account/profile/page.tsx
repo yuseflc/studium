@@ -1,3 +1,6 @@
+/* Archivo: src\app\account\profile\page.tsx
+  Descripción: Página de perfil del usuario: visualiza y edita información personal y settings. */
+
 /**
  * account/profile/page.tsx
  *
@@ -15,6 +18,7 @@
  * - Perfil no existente → 404
  */
 
+// Página SSR de perfil de usuario: control de acceso, carga de datos y renderizado del perfil
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";

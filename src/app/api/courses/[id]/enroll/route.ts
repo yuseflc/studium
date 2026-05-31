@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\courses\[id]\enroll\route.ts
+  Descripción: Endpoint para inscribir a un usuario en un curso (matrícula/enroll). */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Course from '@/models/Course';

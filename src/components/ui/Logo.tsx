@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\Logo.tsx
+    Descripción: Componente `Logo` con SVG usado en la cabecera y en el footer. */
+
+// Componente: Logo — renderiza el logotipo y adapta la imagen según el tema
 'use client';
 
 import { useTheme } from "@/components/providers/ThemeProvider";

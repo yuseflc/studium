@@ -1,3 +1,7 @@
+/* Archivo: src\app\layout.tsx
+  Descripción: Layout global de la aplicación: providers, cabecera y pie de página. */
+
+// RootLayout: capa raíz de la app que incluye fuentes, CSS global y providers (Theme + Session)
 import type { Metadata } from "next";
 import { manrope, googleSans } from "@/config/fonts";
 import "./globals.css";

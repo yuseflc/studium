@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\participants\ParticipantsTable.tsx
+  Descripción: Tabla interactiva que lista participantes del curso y sus roles. */
+
 'use client';
 
 import { useState } from 'react';

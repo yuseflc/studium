@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\courses\[id]\route.ts
+  Descripción: Endpoint para obtener, actualizar o eliminar un curso por su id. */
+
+// API: Operaciones sobre un curso específico (GET, PATCH, etc.)
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Course from '@/models/Course';

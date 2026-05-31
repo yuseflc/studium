@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseUnitModal.tsx
+    Descripción: Modal para crear o editar una unidad dentro de un curso. */
+
+// Modal: CourseUnitModal — crear/editar unidades del curso (contenido y orden)
 'use client';
 
 import React from 'react';

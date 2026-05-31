@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\auth\LinkForm.tsx
+  Descripción: Formulario para solicitar enlace mágico (magic link) enviado por email. */
 
+"use client";
+// Variante de formulario que permite login mediante enlaces magic links o proveedores
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';

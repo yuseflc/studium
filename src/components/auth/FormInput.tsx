@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\auth\FormInput.tsx
+  Descripción: Componente de input reutilizable con label, errores y estilos para formularios. */
 
+"use client";
+// Componente de formulario reutilizable (input) con soporte de errores visuales
 import React from 'react';
 
 interface FormInputProps {

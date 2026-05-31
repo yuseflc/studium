@@ -1,3 +1,6 @@
+/* Archivo: src\app\mycourses\[courseid]\tasks\new\page.tsx
+  Descripción: Página para crear una nueva tarea en el curso (formulario de creación). */
+
 import { getServerSession } from "next-auth/next";
 import { notFound, redirect } from "next/navigation";
 import { authOptions } from "@/config/auth.config";

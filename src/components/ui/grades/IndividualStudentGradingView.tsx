@@ -1,21 +1,16 @@
-"use client";
+/* Archivo: src\components\ui\grades\IndividualStudentGradingView.tsx
+    Descripción: Vista para que el profesor califique a un estudiante individualmente. */
 
+"use client";
+// Interfaz de calificación individual: editar notas y feedback de un estudiante
 import React, { useState, useEffect, useRef } from "react";
 import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare } from "lucide-react";
 import { saveStudentTaskGrade } from "@/app/actions/participantActions";
 import { FeedbackModal } from "@/components/ui/modals/FeedbackModal";
-
-// Task puede venir con _id o id, normalizamos a _id
-interface Task {
-    _id?: string;
-    title: string;
-}
-
-interface Subject {
-    _id: string;
-    title: string;
-    tasks?: Task[];
-}
+// Tipos mínimos locales para evitar problemas de resolución de módulos
+type Task = { _id?: string; id?: string; title: string };
+type Subject = { _id: string; title: string; tasks?: Task[] };
+type Submission = { _id?: string; taskId: string; grade?: number | null; feedback?: string | null };
 
 interface IndividualStudentGradingViewProps {
     student: {
@@ -26,7 +21,7 @@ interface IndividualStudentGradingViewProps {
     };
     subjects: Subject[];
     courseId: string;
-    initialSubmissions: any[];
+    initialSubmissions: Submission[];
     onBack: () => void;
     onGradesSaved?: () => Promise<void>; // [SSR] Callback para refrescar datos al guardar
 }
@@ -43,7 +38,7 @@ export default function IndividualStudentGradingView({
         Object.fromEntries((subjects || []).map(s => [s._id, true]))
     );
     
-    // Estado local para almacenar calificaciones y feedback editados
+    // Estado local para almacenar calificaciones y feedback editados (incluye taskId)
     const [gradesState, setGradesState] = useState<Record<string, { grade: string; feedback: string; taskId: string }>>({});
     const [originalGrades, setOriginalGrades] = useState<Record<string, { grade: string; feedback: string; taskId: string }>>({});
     
@@ -64,7 +59,7 @@ export default function IndividualStudentGradingView({
         
         // Asegurar que todas las tareas en los temas tengan un objeto en el estado
         subjects.forEach((subj, subjIndex) => {
-            (subj.tasks || []).forEach((task, taskIndex) => {
+            (subj.tasks || []).forEach((task: Task, taskIndex: number) => {
                 const uniqueKey = `${subjIndex}-${taskIndex}`;
                 // Normalizar: usar _id si existe, sino id, asegurar que es string
                 const taskId = String(task._id || "").trim();
@@ -200,7 +195,7 @@ export default function IndividualStudentGradingView({
                 const current = gradesState[stateKey];
                 
                 // Validar que taskId existe y es válido
-                const taskId = (current.taskId || "").trim();
+                const taskId = String((current as any).taskId || "").trim();
                 if (!taskId) {
                     console.error(`[Save] taskId vacío para stateKey ${stateKey}`, current);
                     return { success: false, message: 'Error: taskId no encontrado' };
@@ -345,7 +340,7 @@ export default function IndividualStudentGradingView({
                                                 </div>
                                             </td>
                                         </tr>
-                                        {isExpanded && subjectTasks.map((task, taskIndex) => {
+                                        {isExpanded && subjectTasks.map((task: Task, taskIndex: number) => {
                                             const stateKey = `${subjectIndex}-${taskIndex}`;
                                             const state = gradesState[stateKey] || { grade: "", feedback: "", taskId: "" };
                                             const gradeVal = parseFloat(state.grade);

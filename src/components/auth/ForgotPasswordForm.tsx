@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\auth\ForgotPasswordForm.tsx
+  Descripción: Formulario para solicitar el reenvío de email de recuperación de contraseña. */
 
+"use client";
+// Formulario para solicitar recuperación de contraseña (envía email de restablecimiento)
 import { useState } from 'react';
 import { IconMail, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import Link from 'next/link';

@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseTransferModal.tsx
+    Descripción: Modal para transferir la propiedad de un curso a otro profesor. */
+
+// Modal: CourseTransferModal — transferir propiedad del curso a otro usuario
 'use client';
 
 import React from 'react';

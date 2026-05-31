@@ -1,3 +1,8 @@
+/* Archivo: src\models\Submission.ts
+  Descripción: Modelo `Submission` que representa la entrega de un estudiante a una tarea, nota y feedback. */
+
+// Modelo Submission: representa entregas de tareas realizadas por estudiantes
+// Incluye metadatos, archivos subidos y calificaciones asociadas
 import mongoose from "mongoose";
 
 // Define la interfaz para las entregas de tareas

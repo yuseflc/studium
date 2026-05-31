@@ -1,3 +1,7 @@
+/* Archivo: src\components\sections\LegalDocument.tsx
+    Descripción: Componente para mostrar documentos legales (TOS, privacidad) con formato. */
+
+// Componente para mostrar documentos legales y su resumen
 import Link from 'next/link'
 
 type SummaryItem = {

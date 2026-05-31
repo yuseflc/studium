@@ -1,5 +1,8 @@
+/* Archivo: src\app\auth\signup\layout.tsx
+  Descripción: Layout específico para las páginas de registro (signup). */
+
 import React from 'react';
-import Navbar from '@/components/ui/navbars/Navbar'; 
+import Navbar from '@/components/ui/Navbars/Navbar'; 
 
 export default function SignUpLayout({
   children,

@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\auth\signup\route.ts
+  Descripción: Endpoint para registrar nuevos usuarios en la plataforma. */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import User from '@/models/User';

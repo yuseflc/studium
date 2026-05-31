@@ -1,3 +1,7 @@
+/* Archivo: src\models\Task.ts
+  Descripción: Modelo `Task` que define tareas/actividades, fechas de entrega y metadatos. */
+
+// Modelo Task: define la estructura de tareas y criterios de evaluación
 import mongoose, { CallbackWithoutResultAndOptionalError } from "mongoose";
 
 // Interfaz para los criterios de evaluación

@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\Navbars\CourseNavbarDrawerContent.tsx
+  Descripción: Contenido interno del drawer del navbar para la vista de curso. */
+
+// Drawer content: lista de elementos del navbar del curso (estructura navegable)
 "use client";
 
 import { useEffect, useMemo, useState } from "react";

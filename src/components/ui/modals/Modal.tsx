@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\modals\Modal.tsx
+    Descripción: Componente base que envuelve el elemento <dialog> nativo y controla su estado. */
 
+"use client";
+// Modal nativo controlado por React (abrir/cerrar vía `isOpen`)
 import React, { useEffect } from 'react';
 import { IconX } from '@tabler/icons-react';
 

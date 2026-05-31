@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\auth\PasswordInput.tsx
+  Descripción: Campo de entrada de contraseña con visibilidad togglable y validaciones. */
 
+"use client";
+// Campo de contraseña con toggle mostrar/ocultar y validación visual
 import React from 'react';
 import { IconEye, IconEyeOff } from '@tabler/icons-react';
 

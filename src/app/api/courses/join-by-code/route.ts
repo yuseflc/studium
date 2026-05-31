@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\courses\join-by-code\route.ts
+  Descripción: Endpoint para unirse a un curso mediante un código de invitación. */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { withErrorHandling } from '@/lib/api/middleware';
 import {

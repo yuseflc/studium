@@ -1,4 +1,8 @@
-'use client';
+/* Archivo: src\components\ThemeSwitcher.tsx
+    Descripción: Selector de tema (claro/oscuro) que integra con el proveedor de tema. */
+
+"use client";
+// Interruptor de tema (claro/oscuro) usado por el layout
 import { useTheme } from "@/components/providers/ThemeProvider";
 import { IconSun, IconMoon } from "@tabler/icons-react";
 

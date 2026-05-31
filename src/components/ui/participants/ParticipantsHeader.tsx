@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\participants\ParticipantsHeader.tsx
+  Descripción: Cabecera de la vista de participantes con controles, búsqueda y filtros. */
+
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';

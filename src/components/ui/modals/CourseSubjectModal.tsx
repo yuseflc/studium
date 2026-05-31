@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseSubjectModal.tsx
+    Descripción: Modal para seleccionar o editar la asignatura principal del curso. */
+
+// Modal: CourseSubjectModal — crear/editar una materia del curso
 'use client';
 
 import React from 'react';

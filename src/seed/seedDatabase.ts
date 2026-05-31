@@ -1,3 +1,8 @@
+/* Archivo: src\seed\seedDatabase.ts
+    Descripción: Script para poblar la base de datos con datos de ejemplo usados en desarrollo. */
+
+// Seed script: crea datos iniciales para desarrollo y pruebas locales
+// Úsalo para poblar la base de datos con usuarios, cursos y entregas
 import User from '@/models/User';
 import Course from '@/models/Course';
 // Subject model deprecated — seed creates Units directly

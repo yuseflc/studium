@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\CourseView.tsx
+  Descripción: Componente principal de la vista de curso: muestra contenido, recursos, tareas y navegación del curso. */
 
+"use client"; 
+// Vista principal de curso: carga estructura, navegación y permisos del usuario
 import { useEffect, useMemo, useState, useRef, useCallback, type Dispatch, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -23,9 +26,9 @@ import {
 } from "lucide-react";
 
 // Componentes internos del curso
-import CourseSidebar from "@/components/ui/navbars/CourseSidebar";
-import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager";
-import CourseParticipants from "./CourseParticipants";
+import CourseSidebar from "@/components/ui/Navbars/CourseSidebar"; 
+import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
+import CourseParticipants from "./CourseParticipants"; 
 import CourseInviteCodesManager from "./CourseInviteCodesManager";
 import GradesView from "./grades/GradesView";
 import CourseFAB from "./CourseFAB";

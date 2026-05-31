@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\signout\route.ts
+    Descripción: Endpoint para cerrar sesión y limpiar la sesión de NextAuth. */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Session from '@/models/Session';

@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseStructureDeleteModal.tsx
+    Descripción: Modal de confirmación para eliminar elementos de la estructura del curso. */
+
+// Modal: CourseStructureDeleteModal — confirmación de borrado para subject/unit/resource/task
 'use client';
 
 import React from 'react';

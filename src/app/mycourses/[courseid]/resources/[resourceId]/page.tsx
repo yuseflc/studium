@@ -1,3 +1,6 @@
+/* Archivo: src\app\mycourses\[courseid]\resources\[resourceId]\page.tsx
+  Descripción: Página para ver o descargar un recurso asociado a un curso. */
+
 import { connectDB } from '@/lib/database/database';
 import Resource from '@/models/Resource';
 import Course from '@/models/Course';

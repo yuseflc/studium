@@ -1,3 +1,7 @@
+/* Archivo: src\models\Course.ts
+  Descripción: Modelo `Course` que define metadatos, unidades, tareas y participantes asociados a un curso. */
+
+// Modelo Course: define cursos, códigos de invitación y metadatos del curso
 import mongoose from "mongoose";
 
 export interface IInviteCode {

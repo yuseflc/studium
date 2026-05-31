@@ -1,30 +1,17 @@
-"use client";
+/* Archivo: src\components\ui\grades\StudentGradesView.tsx
+    Descripción: Vista de estudiante que muestra solo las calificaciones que el profesor ha guardado y feedback asociado. */
 
+"use client";
+// Vista de estudiante: muestra solo las notas que el profesor ha guardado
 import React, { useState } from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+// Tipos mínimos locales para evitar problemas de resolución de módulos
+type Task = { _id?: string; id?: string; title: string };
+type Subject = { _id: string; title: string; tasks?: Task[] };
+type Submission = { _id?: string; taskId: string; grade?: number | null; feedback?: string | null };
 
 // [SSR] Interfaces para entregas reales
-interface Submission {
-    _id: string;
-    taskId: string;
-    studentId: string;
-    grade?: number;
-    feedback?: string;
-    submissionStatus: string;
-    gradedAt?: string;
-}
-
-interface Task {
-    _id?: string;
-    title: string;
-}
-
-interface Subject {
-    _id: string;
-    title: string;
-    tasks?: Task[];
-}
-
+// Reutilizar tipos compartidos
 interface StudentGradesViewProps {
     subjects: Subject[];
     submissions: Submission[]; // Entregas reales del estudiante
@@ -100,7 +87,7 @@ export default function StudentGradesView({
                                                 </div>
                                             </td>
                                         </tr>
-                                        {isExpanded && subjectTasks.map((task) => {
+                                        {isExpanded && subjectTasks.map((task: Task) => {
                                             // [SSR] Obtener datos reales de la entrega
                                             const taskId = task._id;
                                             const grade = getTaskGrade(taskId, submissions);

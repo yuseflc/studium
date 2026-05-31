@@ -1,3 +1,8 @@
+/* Archivo: src\lib\database\database.ts
+  Descripción: Inicializa la conexión a la base de datos y exporta helpers para acceder a ella. */
+
+// Conexión y utilidad para inicializar/reutilizar conexión Mongoose en tiempo de ejecución
+// Conexión a MongoDB: helpers para conectar/desconectar y utilidades de pool
 import mongoose from "mongoose";
 import { LOGGER } from "@/config/logger";
 

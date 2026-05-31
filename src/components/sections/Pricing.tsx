@@ -1,3 +1,7 @@
+/* Archivo: src\components\sections\Pricing.tsx
+    Descripción: Sección de precios y planes mostrada en la página principal. */
+
+// Sección de precios y planes del producto
 export default function Pricing() {
     return (
         <section id="pricing" className="flex flex-col lg:flex-row w-full items-center lg:items-stretch justify-center py-24 bg-base-100 gap-6 px-4">

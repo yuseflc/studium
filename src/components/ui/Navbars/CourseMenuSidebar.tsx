@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\Navbars\CourseMenuSidebar.tsx
+  Descripción: Sidebar con el menú de navegación y accesos rápidos del curso. */
+
 "use client";
 
 /**

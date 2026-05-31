@@ -1,3 +1,7 @@
+/* Archivo: src\lib\api\response-handler.ts
+    Descripción: Normaliza y maneja respuestas y errores para los endpoints API. */
+
+// Helpers para normalizar respuestas HTTP de la API (success/error)
 import { NextResponse } from 'next/server';
 import { ApiSuccessResponse, ApiErrorResponse, ErrorType, HTTP_STATUS } from './types';
 import { logError } from '@/config/logger';

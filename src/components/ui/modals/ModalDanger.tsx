@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\ModalDanger.tsx
+    Descripción: Modal estilizado para advertencias y acciones potencialmente destructivas. */
+
+// Modal: ModalDanger — modal de confirmación/destructivo reutilizable
 'use client';
 
 import React from 'react';

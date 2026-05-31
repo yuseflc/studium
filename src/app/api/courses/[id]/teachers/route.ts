@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\courses\[id]\teachers\route.ts
+  Descripción: Endpoint para gestionar la lista de profesores de un curso (añadir/quitar). */
+
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Course from '@/models/Course';

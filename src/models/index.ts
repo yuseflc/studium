@@ -1,3 +1,8 @@
+/* Archivo: src\models\index.ts
+   Descripción: Reexporta los modelos del sistema para importarlos desde un único punto. */
+
+// Export centralizado de modelos Mongoose usados en la aplicación
+// Reexporta cada modelo para importación cómoda desde otras capas
 // Modelos de la base de datos - exporta los modelos para usarlos en otras partes de la aplicación
 
 export { default as User } from './User';

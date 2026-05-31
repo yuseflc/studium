@@ -1,5 +1,11 @@
-"use server";
+/* Archivo: src\app\actions\courseActions.ts
+  Descripción: Acciones para administrar cursos (crear, actualizar, obtener listado y detalles). */
 
+"use server";
+// Server Action: lógica de alto nivel para cursos (crear, unirse, invitar)
+// Aísla llamadas a base de datos y revalidaciones de rutas
+
+// Server Actions: operaciones sobre cursos (CRUD, invitaciones, inscripciones)
 import { connectDB } from "@/lib/database/database";
 import { revalidatePath } from "next/cache";
 import Course from "@/models/Course";

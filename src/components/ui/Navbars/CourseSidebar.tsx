@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\Navbars\CourseSidebar.tsx
+    Descripción: Sidebar lateral con navegación específica del curso (unidades, recursos). */
+
+// Componente: CourseSidebar — barra lateral que muestra unidades, recursos y navegación del curso
 "use client";
 import { ChevronRight, ClipboardList } from "lucide-react";
 import { motion } from "framer-motion";

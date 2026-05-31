@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseArchiveModal.tsx
+    Descripción: Modal para archivar o restaurar un curso del estado activo. */
+
+// Modal: CourseArchiveModal — confirmar y ejecutar archivado de un curso
 'use client';
 
 import React from 'react';

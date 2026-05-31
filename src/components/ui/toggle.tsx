@@ -1,4 +1,9 @@
+/* Archivo: src\components\ui\toggle.tsx
+  Descripción: Componente `Toggle` para estados binarios (on/off) en la UI. */
+
 "use client"
+// Componente Toggle reutilizable (Radix + cva)
+// Pequeño wrapper estilizable para toggles
 
 import * as React from "react"
 import * as TogglePrimitive from "@radix-ui/react-toggle"

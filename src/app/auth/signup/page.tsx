@@ -1,3 +1,6 @@
+/* Archivo: src\app\auth\signup\page.tsx
+  Descripción: Página de registro que renderiza el formulario de signup y navegación relacionada. */
+
 import { Suspense } from 'react';
 import SignUpForm from "@/components/auth/SignUpForm";
 

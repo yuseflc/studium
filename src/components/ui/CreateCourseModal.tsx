@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\CreateCourseModal.tsx
+  Descripción: Modal con formulario para crear un curso nuevo (campos y envío). */
 
+"use client";
+// Modal para crear cursos (UI y lógica de formulario local)
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { IconPlus, IconBook } from '@tabler/icons-react';

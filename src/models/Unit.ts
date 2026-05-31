@@ -1,3 +1,8 @@
+/* Archivo: src\models\Unit.ts
+  Descripción: Definición del modelo `Unit` que representa una unidad/tema dentro de un curso. */
+
+// Modelo Unit: representa una unidad/tema dentro de un curso
+// Contiene referencias a recursos y tareas asociadas
 import mongoose from "mongoose";
 
 export interface IUnit {

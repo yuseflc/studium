@@ -1,3 +1,6 @@
+/* Archivo: src\app\legal\privacy-policy\page.tsx
+    Descripción: Página de Política de Privacidad con la información de tratamiento de datos. */
+
 import LegalDocument, { type LegalSection, type SummaryItem } from '@/components/sections/LegalDocument'
 
 const summary: SummaryItem[] = [

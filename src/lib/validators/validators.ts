@@ -1,3 +1,7 @@
+/* Archivo: src\lib\validators\validators.ts
+  Descripción: Validadores y esquemas reutilizables para formularios y rutas API. */
+
+// Validadores Zod reutilizables para request bodies y formularios
 import { z } from "zod";
 
 /**

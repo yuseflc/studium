@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\grades\GradesView.tsx
+    Descripción: Vista consolidada de calificaciones, usada por profesores y alumnos según permisos. */
 
+"use client";
+// Punto de entrada para vistas de calificaciones; enruta entre estudiante y profesor
 import { useEffect, useState } from "react";
 import StudentGradesView from "./StudentGradesView";
 import TeacherGradesView from "./TeacherGradesView";
@@ -97,7 +100,7 @@ export default function GradesView({
 
         return (
             <StudentGradesView
-                subjects={subjects}
+                subjects={subjects as any}
                 submissions={studentSubmissions}
             />
         );
@@ -107,7 +110,7 @@ export default function GradesView({
     return (
         <TeacherGradesView
             participants={participants}
-            subjects={subjects}
+            subjects={subjects as any}
             courseId={courseId}
         />
     );

@@ -1,3 +1,6 @@
+/* Archivo: src\app\mycourses\(catalog)\page.tsx
+    Descripción: Página del catálogo de cursos (vista pública o lista interna de cursos). */
+
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";

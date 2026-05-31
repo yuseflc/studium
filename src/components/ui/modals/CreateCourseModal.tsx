@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CreateCourseModalUI.tsx
+    Descripción: UI del formulario `CreateCourseModal`, separada para reutilización. */
+
+// Modal UI: CreateCourseModalUI — formulario interno para la creación de cursos
 'use client';
 
 import React from 'react';

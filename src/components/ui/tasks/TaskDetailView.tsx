@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\tasks\TaskDetailView.tsx
+  Descripción: Vista detallada de una tarea: descripción, entregas, y acciones disponibles. */
 
+"use client";
+// Vista de detalle de tarea (solo cliente): muestra entregas, archivos y acciones
 import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle, AlertCircle, Clock, FileText, Download, Send } from 'lucide-react';

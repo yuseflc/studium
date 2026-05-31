@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\auth\SignUpForm.tsx
+  Descripción: Formulario de registro de usuario con validaciones y envío al backend. */
 
+"use client";
+// Formulario de registro: valida campos localmente y crea cuenta vía API
 import { useState, useEffect } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';

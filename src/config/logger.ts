@@ -1,3 +1,7 @@
+/* Archivo: src\config\logger.ts
+  Descripción: Configuración y helper para logging centralizado en la aplicación. */
+
+// Logger configurable basado en pino; envía logs distintos según NODE_ENV
 import pino from "pino";
 
 const pinoConfig = {

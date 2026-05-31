@@ -1,5 +1,8 @@
-'use client';
+/* Archivo: src\components\ui\CreateTaskModal.tsx
+  Descripción: Modal que contiene el formulario para crear una nueva tarea. */
 
+'use client';
+// Modal para crear tareas: formulario UI y validación mínima antes de enviar
 import { useRef, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
 import { ModalForm } from './modals';
@@ -105,6 +108,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             value={formData.title}
             onChange={handleChange}
             placeholder="Nombre de la tarea"
+            aria-label="Título de la tarea"
             className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             required
             disabled={loading}
@@ -120,6 +124,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             value={formData.description}
             onChange={handleChange}
             placeholder="Descripción de la tarea"
+            aria-label="Descripción de la tarea"
             className="textarea w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             rows={4}
             required
@@ -137,6 +142,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             value={formData.image}
             onChange={handleChange}
             placeholder="https://ejemplo.com/imagen.jpg"
+            aria-label="URL de la imagen"
             className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             disabled={loading}
           />
@@ -151,6 +157,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             type="datetime-local"
             value={formData.dueDate}
             onChange={handleChange}
+            aria-label="Fecha de entrega"
             className="input w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             disabled={loading}
           />
@@ -164,6 +171,7 @@ export default function CreateTaskModal({ courseName }: CreateTaskModalProps) {
             name="priority"
             value={formData.priority}
             onChange={handleChange}
+            aria-label="Prioridad de la tarea"
             className="select w-full border border-base-300 bg-base-100 text-base-content focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all font-medium"
             disabled={loading}
           >

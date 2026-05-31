@@ -1,3 +1,6 @@
+/* Archivo: src\lib\api\types.ts
+    Descripción: Tipos y interfaces compartidas usados por las rutas API y clientes. */
+
 /**
  * Tipos estandarizados para respuestas de API
  */

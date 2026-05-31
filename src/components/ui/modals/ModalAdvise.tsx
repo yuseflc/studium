@@ -1,3 +1,6 @@
+/* Archivo: src\components\ui\modals\ModalAdvise.tsx
+    Descripción: Modal para mostrar consejos, avisos o información contextual al usuario. */
+
 'use client';
 
 import React from 'react';

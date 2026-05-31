@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\modals\CourseResourceModal.tsx
+    Descripción: Modal para subir, editar o vincular recursos en un curso. */
+
+// Modal: CourseResourceModal — crear/editar recursos del curso (link/file/text)
 'use client';
 
 import React, { useRef, useState } from 'react';

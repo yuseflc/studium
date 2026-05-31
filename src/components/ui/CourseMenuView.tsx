@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\CourseMenuView.tsx
+  Descripción: Vista del menú de curso con acciones rápidas (navegación y atajos). */
 
+"use client";
+// Menú de acciones del curso (editar, eliminar, compartir)
 import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";

@@ -1,3 +1,8 @@
+/* Archivo: src\scripts\migrate-subjects.ts
+  Descripción: Script para migrar y normalizar las materias del esquema de datos entre versiones. */
+
+// Script de migración: traslada datos de la colección legacy 'subjects' a la nueva estructura
+// Ejecutar con --dry-run para revisar cambios sin aplicarlos
 import mongoose from "mongoose";
 import Course from "../models/Course";
 import Unit from "../models/Unit";

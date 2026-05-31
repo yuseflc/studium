@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\CourseParticipants.tsx
+    Descripción: Componente que muestra y administra participantes de un curso. */
 
+"use client";
+// Componente que lista participantes del curso y acciones rápidas (perfil, roles)
 import { User } from "lucide-react";
 import Link from "next/link";
 

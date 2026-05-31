@@ -1,3 +1,6 @@
+/* Archivo: src\app\auth\link\page.tsx
+  Descripción: Página que gestiona la autenticación por enlace mágico (magic link) enviada por email. */
+
 import { Suspense } from 'react';
 import LinkForm from '@/components/auth/LinkForm';
 

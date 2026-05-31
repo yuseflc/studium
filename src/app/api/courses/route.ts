@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\courses\route.ts
+  Descripción: Endpoint para listar y crear cursos (búsqueda y filtros). */
+
+// API: Endpoints REST para cursos (listar, crear y operaciones relacionadas)
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Course from '@/models/Course';

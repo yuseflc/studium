@@ -1,3 +1,6 @@
+/* Archivo: src\app\api\auth\session\revoke\route.ts
+  Descripción: Endpoint para revocar o invalidar sesiones de usuario. */
+
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Session from '@/models/Session';

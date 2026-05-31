@@ -1,3 +1,7 @@
+/* Archivo: src\components\ui\Navbars\CourseNavbar.tsx
+    Descripción: Barra de navegación específica del curso con accesos rápidos y acciones de curso. */
+
+// Componente: CourseNavbar — navbar de curso con notificaciones, mensajes y perfil
 import { IconBell, IconMessageCircle, IconX, IconMenu2 } from "@tabler/icons-react";
 import { NOTIFICACIONES, MENSAJES } from "@/seed/data";
 import ThemeSwitcher from "@/components/ThemeSwitcher";

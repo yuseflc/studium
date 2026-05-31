@@ -1,3 +1,7 @@
+/* Archivo: src\app\api\resources\route.ts
+  Descripción: Endpoint para listar recursos y subir nuevos archivos al servidor. */
+
+// API: Endpoints para recursos del curso (listar, subir, meta)
 import { NextRequest } from 'next/server';
 import { connectDB } from '@/lib/database/database';
 import Resource from '@/models/Resource';

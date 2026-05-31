@@ -1,5 +1,8 @@
-"use client";
+/* Archivo: src\components\ui\CourseContent.tsx
+  Descripción: Renderiza el contenido del curso: unidades, recursos y tareas en el orden del temario. */
 
+"use client";
+// Contenido de la unidad / curso: despliegue de recursos y navegación interna
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
