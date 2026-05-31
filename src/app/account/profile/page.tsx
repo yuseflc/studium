@@ -1,18 +1,18 @@
 /**
- * profile/page.tsx
+ * account/profile/page.tsx
  *
  * Página SSR de perfil de usuario.
  *
  * Comportamiento:
- *  - Sin parámetros:   muestra el perfil del usuario autenticado.
- *  - ?id=XXX:          muestra el perfil de otro usuario (solo profesores/admins).
- *  - ?courseId=XXX:    si se proporciona junto con ?id, habilita el panel de gestión
- *                      de calificaciones y eliminación para profesores/admins.
+ * - Sin parámetros:   muestra el perfil del usuario autenticado.
+ * - ?id=XXX:          muestra el perfil de otro usuario (solo profesores/admins).
+ * - ?courseId=XXX:    si se proporciona junto con ?id, habilita el panel de gestión
+ * de calificaciones y eliminación para profesores/admins.
  *
  * Seguridad:
- *  - Usuarios no autenticados → redirect /auth/login
- *  - Estudiantes que intenten ver perfiles ajenos → redirect /account/profile (propio)
- *  - Perfil no existente → 404
+ * - Usuarios no autenticados → redirect /auth/login
+ * - Estudiantes que intenten ver perfiles ajenos → redirect /account/profile (propio)
+ * - Perfil no existente → 404
  */
 
 import { getServerSession } from "next-auth";
@@ -33,6 +33,7 @@ import {
 import { redirect, notFound } from "next/navigation";
 import mongoose from "mongoose";
 import TeacherProfileView from "@/components/ui/profile/TeacherProfileView";
+import EditProfileForm from "@/components/ui/profile/EditProfileForm";
 
 // Definición de interfaces y tipos de datos utilizados en esta página
 
@@ -191,123 +192,132 @@ export default async function ProfilePage({
         </div>
       </div>
 
-      {/* SECCIÓN 2: Detalles del usuario en un grid responsivo de dos columnas */}
-      <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
-        <div className="card-body">
-          <div className="flex mb-4">
-            <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">
-              Detalles del Usuario
-            </span>
-          </div>
+      {/* SECCIÓN 2: Detalles del usuario (Editable para el dueño, estático para el resto) */}
+      {!isViewingOthers ? (
+        <EditProfileForm 
+          user={{
+            ...user,
+            _id: String(user._id)
+          }} 
+        />
+      ) : (
+        // Tu código de visualización original para profesores/administradores externos
+        <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
+          <div className="card-body">
+            <div className="flex mb-4">
+              <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">
+                Detalles del Usuario
+              </span>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {/* Campo: Nombre del usuario */}
-            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
-              <IconUser size={30} />
-              <input
-                type="text"
-                value={user.firstName}
-                readOnly
-                className="input input-ghost w-full text-base-content"
-                aria-label="Nombre"
-              />
-            </label>
-
-            {/* Campo: Correo electrónico del usuario */}
-            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
-              <IconMail size={30} />
-              <input
-                type="text"
-                value={user.email}
-                readOnly
-                className="input input-ghost w-full text-base-content"
-                aria-label="Email"
-              />
-            </label>
-
-            {/* Campo: Apellido del usuario - Se muestra solo si está registrado en el perfil */}
-            {user.profile?.lastName && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              {/* Campo: Nombre del usuario */}
               <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
                 <IconUser size={30} />
+                <input 
+                  type="text" 
+                  value={user.firstName} 
+                  readOnly 
+                  className="input input-ghost w-full text-base-content" 
+                  aria-label="Nombre" 
+                />
+              </label>
+
+              {/* Campo: Correo electrónico del usuario */}
+              <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                <IconMail size={30} />
+                <input 
+                  type="text" 
+                  value={user.email} 
+                  readOnly 
+                  className="input input-ghost w-full text-base-content" 
+                  aria-label="Email" 
+                />
+              </label>
+
+              {/* Campo: Apellido del usuario - Se muestra solo si está registrado en el perfil */}
+              {user.profile?.lastName && (
+                <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                  <IconUser size={30} />
+                  <div className="flex flex-col w-full">
+                    <span className="text-xs text-base-content/60">Apellido</span>
+                    <input 
+                      type="text" 
+                      value={user.profile.lastName} 
+                      readOnly 
+                      className="input input-ghost w-full text-base-content" 
+                      aria-label="Apellido" 
+                    />
+                  </div>
+                </label>
+              )}
+
+              {/* Campo: Rol del usuario dentro del sistema */}
+              <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
+                <IconUserCheck size={30} />
                 <div className="flex flex-col w-full">
-                  <span className="text-xs text-base-content/60">Apellido</span>
-                  <input
-                    type="text"
-                    value={user.profile.lastName}
-                    readOnly
-                    className="input input-ghost w-full text-base-content"
-                    aria-label="Apellido"
+                  <span className="text-xs text-base-content/60">Rol</span>
+                  <input 
+                    type="text" 
+                    value={roleLabel(user.role)} 
+                    readOnly 
+                    className="input input-ghost w-full text-base-content" 
+                    aria-label="Rol" 
                   />
                 </div>
               </label>
-            )}
 
-            {/* Campo: Rol del usuario dentro del sistema (Profesor, Estudiante o Administrador) */}
-            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2">
-              <IconUserCheck size={30} />
-              <div className="flex flex-col w-full">
-                <span className="text-xs text-base-content/60">Rol</span>
-                <input
-                  type="text"
-                  value={roleLabel(user.role)}
-                  readOnly
-                  className="input input-ghost w-full text-base-content"
-                  aria-label="Rol"
-                />
-              </div>
-            </label>
+              {/* Campo: Identificador único de MongoDB del usuario */}
+              <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2 col-span-2 text-xs">
+                <IconKey size={30} />
+                <div className="flex flex-col w-full">
+                  <span className="text-xs text-base-content/60">ID del Usuario</span>
+                  <input 
+                    type="text" 
+                    value={String(user._id)} 
+                    readOnly 
+                    className="input input-ghost input-sm w-full text-xs text-base-content font-mono" 
+                    aria-label="ID de usuario" 
+                  />
+                </div>
+              </label>
 
-            {/* Campo: Identificador único de MongoDB del usuario - ocupa dos columnas */}
-            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2 col-span-2 text-xs">
-              <IconKey size={30} />
-              <div className="flex flex-col w-full">
-                <span className="text-xs text-base-content/60">ID del Usuario</span>
-                <input
-                  type="text"
-                  value={String(user._id)}
-                  readOnly
-                  className="input input-ghost input-sm w-full text-xs text-base-content font-mono"
-                  aria-label="ID de usuario"
-                />
-              </div>
-            </label>
-
-            {/* Campo: Fecha en que se creó la cuenta - ocupa dos columnas */}
-            <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2 col-span-2">
-              <IconCalendar size={30} />
-              <div className="flex flex-col w-full">
-                <span className="text-xs text-base-content/60">Miembro desde</span>
-                <input
-                  type="text"
-                  value={new Date(user.createdAt).toLocaleDateString("es-ES")}
-                  readOnly
-                  className="input input-ghost w-full text-base-content"
-                  aria-label="Fecha de registro"
-                />
-              </div>
-            </label>
-
-            {/* Campo: Biografía personal del usuario - Se muestra solo si está registrada y ocupa dos columnas */}
-            {user.profile?.bio && (
+              {/* Campo: Fecha en que se creó la cuenta */}
               <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2 col-span-2">
+                <IconCalendar size={30} />
                 <div className="flex flex-col w-full">
-                  <span className="text-xs text-base-content/60">Biografía</span>
-                  <textarea
-                    value={user.profile.bio}
-                    readOnly
-                    className="textarea textarea-ghost w-full text-base-content"
-                    rows={3}
-                    aria-label="Biografía"
+                  <span className="text-xs text-base-content/60">Miembro desde</span>
+                  <input 
+                    type="text" 
+                    value={new Date(user.createdAt).toLocaleDateString("es-ES")} 
+                    readOnly 
+                    className="input input-ghost w-full text-base-content" 
+                    aria-label="Fecha de registro" 
                   />
                 </div>
               </label>
-            )}
+
+              {/* Campo: Biografía personal del usuario */}
+              {user.profile?.bio && (
+                <label className="card card-side bg-base-200 border border-base-300 p-4 items-center gap-2 col-span-2">
+                  <div className="flex flex-col w-full">
+                    <span className="text-xs text-base-content/60">Biografía</span>
+                    <textarea 
+                      value={user.profile.bio} 
+                      readOnly 
+                      className="textarea textarea-ghost w-full text-base-content" 
+                      rows={3} 
+                      aria-label="Biografía" 
+                    />
+                  </div>
+                </label>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* SECCIÓN 3: Lista de cursos en los que el usuario está inscrito como estudiante */}
-      {/* Solo se muestra si existen cursos inscritos */}
       {user.enrolledCourses && user.enrolledCourses.length > 0 && (
         <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
           <div className="card-body">
@@ -347,7 +357,6 @@ export default async function ProfilePage({
       )}
 
       {/* SECCIÓN 4: Lista de cursos que ha creado el profesor o administrador */}
-      {/* Solo se muestra si existen cursos creados */}
       {user.createdCourses && user.createdCourses.length > 0 && (
         <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
           <div className="card-body">
@@ -387,8 +396,6 @@ export default async function ProfilePage({
       )}
 
       {/* SECCIÓN 5: Panel de gestión para profesores y administradores */}
-      {/* Solo aparece cuando un profesor o administrador está visualizando el perfil de otro usuario */}
-      {/* Desde este panel es posible gestionar calificaciones, tareas y otras funciones académicas */}
       {canManage && (
         <TeacherProfileView
           student={{
