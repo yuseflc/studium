@@ -8,7 +8,6 @@ import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import Task from "@/models/Task";
 import User from "@/models/User";
-import { CURSOS } from "@/seed/data";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { ICourse, IInviteCode } from "@/models/Course";
@@ -195,7 +194,7 @@ export async function fetchCourses(): Promise<SerializedCourse[]> {
     // Sacamos la ID del usuario antes, 
     const userId = await getCurrentUser();
     if (!userId) {
-      return CURSOS.map(serializeCourse);
+      return [];
     }
 
     // En la query a mongo, buscamos los cursos donde el usuario es owner, teacher o enrolled student
@@ -207,18 +206,7 @@ export async function fetchCourses(): Promise<SerializedCourse[]> {
       ],
     }).lean() as ICourse[];
 
-    // Combinamos los cursos de la base de datos con los cursos del seed, evitando duplicados por ID
-    const allCourses = [...dbCourses, ...CURSOS];
-    const courseMap = new Map<string, ICourse>();
-    
-    allCourses.forEach((course) => {
-      const courseId = course._id?.toString() || "";
-      if (courseId && !courseMap.has(courseId)) {
-        courseMap.set(courseId, course);
-      }
-    });
-
-    return Array.from(courseMap.values()).map(serializeCourse);
+    return dbCourses.map(serializeCourse);
   } catch (error) {
     console.error("Error fetching courses:", error);
     return [];
@@ -449,15 +437,11 @@ export async function validateCourseAccess(courseId: string): Promise<boolean> {
       return false;
     }
 
-    // Buscar curso en BD o datos de seed
-    let course = await Course.findById(courseId).lean() as ICourse | null;
+    // Buscar curso en BD
+    const course = await Course.findById(courseId).lean() as ICourse | null;
     
     if (!course) {
-      // Fallback a datos de seed
-      course = CURSOS.find(c => String(c._id) === courseId) || null;
-      if (!course) {
-        return false;
-      }
+      return false;
     }
 
     // Verificar si el usuario es propietario, profesor o estudiante inscrito

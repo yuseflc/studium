@@ -29,7 +29,6 @@ import CourseParticipants from "./CourseParticipants";
 import CourseInviteCodesManager from "./CourseInviteCodesManager";
 import GradesView from "./grades/GradesView"; 
 import CourseFAB from "./CourseFAB"; 
-import { PARTICIPANTES } from "@/seed/data"; 
 import { ICourse } from "@/models/Course"; 
 import { CourseStructureGeneric } from "@/lib/api/types"; 
 
@@ -113,8 +112,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       courseData.enrolledStudents.forEach((s: any) => addParticipant(s, "estudiante"));
     }
 
-    // Si no hay participantes reales en base de datos, fallback a PARTICIPANTES mock
-    return list.length > 0 ? list : PARTICIPANTES;
+    return list;
   }, [courseData]);
 
   // ========== ESTADOS DE NAVEGACIÓN ==========
