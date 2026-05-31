@@ -11,6 +11,7 @@ export interface ICourse {
   _id?: mongoose.Types.ObjectId;
   title: string;
   description?: string;
+  coverImage?: string; // ID de patrón de portada (ver coursePatterns.ts)
   ownerId: mongoose.Types.ObjectId; // Profesor / admin que lo haya creado
   teachers: mongoose.Types.ObjectId[]; // IDs de otros profesores asociados al curso
   status: "draft" | "active" | "archived";
@@ -36,6 +37,10 @@ const CourseSchema = new mongoose.Schema<ICourse>(
     description: {
       type: String,
       maxlength: [1000, "La descripción no puede exceder 1000 caracteres"],
+    },
+    coverImage: {
+      type: String,
+      default: "circles-yellow", // ID del patrón; ver coursePatterns.ts
     },
     ownerId: {
       type: mongoose.Schema.Types.ObjectId,

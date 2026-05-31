@@ -53,6 +53,7 @@ export interface SerializedCourse {
   _id: string;
   title: string;
   description?: string;
+  coverImage?: string; // ID del patrón de portada (ver coursePatterns.ts)
   ownerId: string;
   teachers: string[];
   status: "draft" | "active" | "archived";
@@ -176,6 +177,7 @@ function serializeCourse(course: ICourse): SerializedCourse {
     _id: course._id?.toString() || "",
     title: course.title,
     description: course.description,
+    coverImage: course.coverImage,
     ownerId: course.ownerId?.toString() || "",
     teachers: course.teachers?.map(t => t.toString()) || [],
     status: course.status,
@@ -215,7 +217,7 @@ export async function fetchCourses(): Promise<SerializedCourse[]> {
 
 export async function updateCourse(
   courseId: string,
-  input: { title?: string; description?: string; status?: "draft" | "active" | "archived" }
+  input: { title?: string; description?: string; status?: "draft" | "active" | "archived"; coverImage?: string }
 ): Promise<CourseActionResult> {
   try {
     const session = await getServerSession(authOptions);
@@ -261,7 +263,7 @@ export async function updateCourse(
     }
     if (data.status !== undefined) {
       course.status = data.status;
-      
+
       // Si el curso se cambia a "draft" o "archived", desactivar todos los códigos de invitación
       if (data.status === "draft" || data.status === "archived") {
         course.invitationCodes = course.invitationCodes.map((code: IInviteCode) => ({
@@ -269,6 +271,9 @@ export async function updateCourse(
           active: false,
         }));
       }
+    }
+    if (data.coverImage !== undefined) {
+      course.coverImage = data.coverImage;
     }
 
     course.updatedAt = new Date();

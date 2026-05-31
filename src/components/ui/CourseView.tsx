@@ -49,6 +49,7 @@ import {
   CourseArchiveModal,
   CourseDeleteModal
 } from "@/components/ui/modals";
+import CoursePatternPicker from "@/components/ui/CoursePatternPicker";
 
 /**
  * PROPS DEL COMPONENTE PRINCIPAL
@@ -146,6 +147,8 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   const [title, setTitle] = useState(courseData?.title || "");
   const [description, setDescription] = useState(courseData?.description || "");
   const [status, setStatus] = useState<CourseStatus>(courseData?.status || "draft");
+  // cast a `any` porque ICourse no expone coverImage directamente en su tipo base
+  const [coverImage, setCoverImage] = useState((courseData as any)?.coverImage || "circles-yellow");
   const [isSaving, setIsSaving] = useState(false); // para deshabilitar botón mientras guarda
   const [saveMessage, setSaveMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -392,7 +395,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     setSaveMessage(null);
 
     try {
-      const result = await updateCourse(courseId, { title, description, status });
+      const result = await updateCourse(courseId, { title, description, status, coverImage });
       if (!result.success) {
         throw new Error(result.error || "Error al guardar");
       }
@@ -826,6 +829,12 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                             </label>
                           </div>
                         </div>
+
+                        {/* Imagen de portada */}
+                        <CoursePatternPicker
+                          selectedId={coverImage}
+                          onChange={setCoverImage}
+                        />
 
                         {/* Mensaje temporal de guardado (éxito o error) */}
                         {saveMessage && (

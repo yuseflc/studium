@@ -16,6 +16,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    coverImage: "circles-yellow",
   });
 
   const openModal = () => {
@@ -31,6 +32,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
     setFormData({
       title: "",
       description: "",
+      coverImage: "circles-yellow",
     });
     setError("");
     setSuccess(false);
@@ -62,6 +64,7 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
         body: JSON.stringify({
           title: formData.title,
           description: formData.description,
+          coverImage: formData.coverImage,
         }),
       });
 
@@ -123,13 +126,15 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
         setTitleValue={(val) => setFormData(prev => ({ ...prev, title: val }))}
         descriptionValue={formData.description}
         setDescriptionValue={(val) => setFormData(prev => ({ ...prev, description: val }))}
+        coverImageValue={formData.coverImage}
+        setCoverImageValue={(val) => setFormData(prev => ({ ...prev, coverImage: val }))}
         onConfirm={handleSubmit}
         isLoading={loading}
         error={error}
         success={success}
         successMessage="¡Curso creado correctamente!"
         successAction={
-          courseId 
+          courseId
             ? {
                 label: "Ir al curso",
                 onClick: handleNavigateToCourse,

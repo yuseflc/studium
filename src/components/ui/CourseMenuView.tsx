@@ -8,6 +8,7 @@ import { ModalAdvise, CourseMenuDeleteModal } from "@/components/ui/modals";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
 import { truncateText } from "@/lib/utils";
+import { getPatternById } from "@/lib/coursePatterns";
 
 export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
   const [courses, setCourses] = useState<SerializedCourse[]>([]);
@@ -122,7 +123,7 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
         {loading ? (
           Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="card bg-base-200 border border-base-200 shadow-sm animate-pulse min-h-[300px]">
-              <div className="h-40 bg-base-300 rounded-t-xl" />
+              <div className="h-28 bg-base-300 rounded-t-xl" />
               <div className="card-body p-4 flex flex-col gap-4">
                 <div className="h-6 w-3/4 rounded-md bg-base-300" />
                 <div className="h-4 w-1/2 rounded-md bg-base-300" />
@@ -141,14 +142,16 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
         ) : (
           courses.map((c: SerializedCourse) => {
             const courseId = c._id;
+            // Resuelve el patrón CSS a partir del ID guardado en BD; usa el primero como fallback
+            const pattern = getPatternById(c.coverImage);
             return (
               <Link key={courseId} href={`/mycourses/${courseId}`} className="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl transition-all group relative flex flex-col z-20 hover:z-30 focus-within:z-30">
                 <div className="relative">
-                  <figure className="aspect-video relative overflow-hidden rounded-t-xl">
-                    <img
-                      src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=60"
-                      alt={c.title}
-                      className="w-full h-full object-cover transition-transform"
+                  {/* Cabecera de la tarjeta: div en vez de <img> porque el fondo es CSS puro */}
+                  <figure className="h-28 relative overflow-hidden rounded-t-xl">
+                    <div
+                      className="w-full h-full"
+                      style={pattern.style}
                     />
                     {/* Overlay para facilitar lectura del nombre */}
                     <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />

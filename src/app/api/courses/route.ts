@@ -151,7 +151,7 @@ export const POST = withErrorHandling(
       return unauthorizedResponse(requestId);
     }
 
-    const { title, description, status } = validationResult.data;
+    const { title, description, status, coverImage } = validationResult.data;
 
     await dbPromise;
 
@@ -170,6 +170,7 @@ export const POST = withErrorHandling(
       title,
       description,
       status,
+      coverImage: coverImage ?? "circles-blue",
       ownerId: userId,
       teachers: [],
       subjectIds: [],

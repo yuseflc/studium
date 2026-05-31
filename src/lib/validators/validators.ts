@@ -131,6 +131,7 @@ export const createCourseSchema = z.object({
     .enum(["draft", "active", "archived"])
     .optional()
     .default("draft"),
+  coverImage: z.string().optional(),
 });
 
 export type CreateCourseInput = z.infer<typeof createCourseSchema>;
@@ -153,6 +154,7 @@ export const updateCourseSchema = z.object({
   status: z
     .enum(["draft", "active", "archived"])
     .optional(),
+  coverImage: z.string().optional(),
 });
 
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;

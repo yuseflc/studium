@@ -2,12 +2,16 @@
 
 import React from 'react';
 import { ModalForm, ModalFormProps } from './ModalForm';
+import CoursePatternPicker from '@/components/ui/CoursePatternPicker';
 
 interface CreateCourseModalUIProps extends Omit<ModalFormProps, 'title' | 'children' | 'onConfirm' | 'confirmLabel'> {
     titleValue: string;
     setTitleValue: (val: string) => void;
     descriptionValue: string;
     setDescriptionValue: (val: string) => void;
+    // ID del patrón de portada seleccionado (ver coursePatterns.ts)
+    coverImageValue: string;
+    setCoverImageValue: (val: string) => void;
     onConfirm: (e: React.FormEvent) => void;
     success?: boolean;
     successMessage?: string;
@@ -23,6 +27,8 @@ export const CreateCourseModalUI = ({
     setTitleValue,
     descriptionValue,
     setDescriptionValue,
+    coverImageValue,
+    setCoverImageValue,
     onConfirm,
     ...props
 }: CreateCourseModalUIProps) => {
@@ -59,6 +65,11 @@ export const CreateCourseModalUI = ({
                         required
                     />
                 </label>
+
+                <CoursePatternPicker
+                    selectedId={coverImageValue}
+                    onChange={setCoverImageValue}
+                />
             </div>
         </ModalForm>
     );
