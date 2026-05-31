@@ -95,9 +95,9 @@ export default async function CourseNavbar() {
 
                     {/* Notificaciones */}
                     <div className="dropdown dropdown-end">
-                        <div 
-                            tabIndex={0} 
-                            role="button" 
+                        <div
+                            tabIndex={0}
+                            role="button"
                             aria-label="Abrir notificaciones"
                             className="btn btn-ghost btn-circle text-base-content"
                         >
@@ -125,7 +125,7 @@ export default async function CourseNavbar() {
                                     ) : (
                                         /* js-index-maps: Usar key={notification.id} para identificación eficiente en listas */
                                         NOTIFICACIONES.map((notification) => (
-                                            <div 
+                                            <div
                                                 key={notification.id}
                                                 className="group relative flex flex-col gap-1 p-1 rounded-lg transition-colors hover:bg-base-200"
                                             >
@@ -134,7 +134,7 @@ export default async function CourseNavbar() {
                                                         {notification.title}
                                                     </span>
                                                     {/* Botón para cerrar notificación - Aparece al hacer hover */}
-                                                    <button 
+                                                    <button
                                                         aria-label="Cerrar notificación"
                                                         className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity text-base-content"
                                                     >
@@ -154,7 +154,7 @@ export default async function CourseNavbar() {
                                     )}
                                 </div>
                                 <div className="card-actions pt-2 border-t border-base-300">
-                                    <a 
+                                    <a
                                         className="btn btn-primary btn-sm btn-block"
                                         href="/account/notifications"
                                     >
@@ -167,7 +167,7 @@ export default async function CourseNavbar() {
 
                     {/* Mensajes */}
                     <div className="dropdown dropdown-end">
-                        <div 
+                        <div
                             tabIndex={0}
                             role="button"
                             aria-label="Abrir mensajes"
@@ -197,14 +197,14 @@ export default async function CourseNavbar() {
                                         </p>
                                     ) : (
                                         MENSAJES.map((message) => (
-                                            <div 
+                                            <div
                                                 key={message.id}
                                                 className="group relative flex gap-3 p-3 rounded-lg hover:bg-base-200 transition-colors cursor-pointer"
                                             >
                                                 {/* Avatar del remitente */}
                                                 <div className="avatar">
                                                     <div className="w-10 h-10 rounded-full">
-                                                        <img 
+                                                        <img
                                                             src={message.avatar}
                                                             alt={message.sender}
                                                         />
@@ -233,7 +233,7 @@ export default async function CourseNavbar() {
                                                 </div>
 
                                                 {/* Botón para cerrar/descartar mensaje */}
-                                                <button 
+                                                <button
                                                     aria-label="Cerrar mensaje"
                                                     className="btn btn-ghost btn-xs btn-square opacity-0 group-hover:opacity-100 transition-opacity absolute right-1 top-1"
                                                 >
@@ -244,7 +244,7 @@ export default async function CourseNavbar() {
                                     )}
                                 </div>
                                 <div className="card-actions pt-2 border-t border-base-300">
-                                    <a 
+                                    <a
                                         className="btn btn-primary btn-sm btn-block"
                                         href="/messages"
                                     >
@@ -263,7 +263,7 @@ export default async function CourseNavbar() {
                     */}
                     <div className="hidden md:block">
                         <div className="dropdown dropdown-end text-base-content">
-                            <div 
+                            <div
                                 tabIndex={0}
                                 role="button"
                                 aria-label={`Menú de usuario - ${userFirstName}`}
@@ -281,18 +281,35 @@ export default async function CourseNavbar() {
                                     />
                                 </div>
                             </div>
-                            <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow border border-base-300">
-                                <li className="px-4 py-2 text-sm font-medium text-base-content text-center">
-                                    {user?.firstName}
+
+
+
+                            <ul tabIndex={-1} className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-40 p-2 shadow border border-base-300">
+
+
+                                <li className="px-2 pb-2 flex flex-col items-center border-b border-base-300 mb-2">
+
+                                    {/* Nombre */}
+                                    <div className="flex items-center gap-2 text-base-content">
+                                        <span className="font-semibold text-sm">
+                                            {user?.firstName} {user?.lastName?.charAt(0)}
+                                        </span>
+                                    </div>
+
+                                    {/* Rol más arriba */}
+                                    <span className="text-xs opacity-70 mt-0.5">
+                                        {user?.role === "student" ? "Estudiante" : "Profesor"}
+                                    </span>
                                 </li>
+
                                 <li>
                                     <a href="/account/profile" className="justify-between">
-                                        Profile
+                                        Perfil
                                     </a>
                                 </li>
                                 {/* Opción de Configuración */}
                                 <li>
-                                    <a>Settings</a>
+                                    <a>Configuración</a>
                                 </li>
                                 {/* Opción de Logout - Estilizada en rojo */}
                                 <li className="hover:bg-error/10 hover:text-error transition-colors">
@@ -308,7 +325,7 @@ export default async function CourseNavbar() {
                       - Abre el drawer sidebar en mobile
                       - Usa checkbox para toggle sin JavaScript
                     */}
-                    <label 
+                    <label
                         htmlFor="mobile-menu-drawer"
                         className="btn btn-ghost btn-circle md:hidden text-base-content"
                         aria-label="Abrir menú móvil"
