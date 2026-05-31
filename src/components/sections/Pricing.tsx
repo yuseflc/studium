@@ -57,7 +57,7 @@ export default function Pricing() {
                 <div className="card-body flex flex-col justify-between">
                     <div>
                         <span className="badge w-full badge-primary text-center py-3 mb-4">
-                            ⭐ Más elegido
+                            Más elegido
                         </span>
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl md:text-3xl font-bold text-base-content">Básico</h2>
@@ -117,7 +117,7 @@ export default function Pricing() {
                 <div className="card-body flex flex-col justify-between">
                     <div>
                         <span className="badge w-full bg-black text-white text-center py-3 mb-4">
-                            🚀 Para empresas
+                            Para empresas
                         </span>
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl md:text-3xl font-bold text-base-content">Premium</h2>
