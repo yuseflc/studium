@@ -38,6 +38,7 @@ import { redirect, notFound } from "next/navigation";
 import mongoose from "mongoose";
 import TeacherProfileView from "@/components/ui/profile/TeacherProfileView";
 import EditProfileForm from "@/components/ui/profile/EditProfileForm";
+import { getUserAvatarUrl } from "@/lib/utils/avatar";
 
 // Definición de interfaces y tipos de datos utilizados en esta página
 
@@ -165,9 +166,7 @@ export default async function ProfilePage({
     : user.firstName;
 
   // Imagen de perfil: utiliza la URL personalizada o genera un avatar genérico desde Gravatar.
-  const profilePicture =
-    user.profile?.profilePicture ??
-    `https://i.pravatar.cc/150?u=${user.email}`;
+  const profilePicture = getUserAvatarUrl(user);
 
   // Determinar si se debe mostrar el panel de gestión
   // Solo aparece cuando un profesor o administrador visualiza el perfil de otro usuario.

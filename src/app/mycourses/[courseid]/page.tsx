@@ -41,15 +41,15 @@ export default async function MyCoursePage({ params }: { params: Promise<{ cours
     const rawCurso = await Course.findById(courseid)
       .populate({
         path: 'ownerId',
-        select: 'firstName email profile.lastName profile.profilePicture role',
+        select: 'firstName email profile.lastName profile.profilePicture role thirdparty.provider thirdparty.profilePicture',
       })
       .populate({
         path: 'teachers',
-        select: 'firstName email profile.lastName profile.profilePicture role',
+        select: 'firstName email profile.lastName profile.profilePicture role thirdparty.provider thirdparty.profilePicture',
       })
       .populate({
         path: 'enrolledStudents',
-        select: 'firstName email profile.lastName profile.profilePicture role',
+        select: 'firstName email profile.lastName profile.profilePicture role thirdparty.provider thirdparty.profilePicture',
       })
       .lean();
     

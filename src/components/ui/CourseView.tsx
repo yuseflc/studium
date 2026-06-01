@@ -34,6 +34,7 @@ import GradesView from "./grades/GradesView";
 import CourseFAB from "./CourseFAB";
 import { ICourse } from "@/models/Course";
 import { CourseStructureGeneric } from "@/lib/api/types";
+import { getUserAvatarUrl } from "@/lib/utils/avatar";
 
 // SERVER ACTIONS: funciones que se ejecutan en el servidor (Next.js App Router)
 import { deleteTask } from "@/app/actions/taskActions";
@@ -97,7 +98,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
         apellidos: user.profile?.lastName || "",
         email: user.email || "",
         rol: role,
-        avatar: user.profile?.profilePicture || `https://i.pravatar.cc/150?u=${user.email}`
+        avatar: getUserAvatarUrl(user)
       });
     };
 

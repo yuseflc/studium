@@ -4,17 +4,18 @@
 // Componente: CourseNavbar — navbar de curso con perfil
 import { IconMenu2 } from "@tabler/icons-react";
 import ThemeSwitcher from "@/components/ThemeSwitcher";
-import CourseNavbarDrawerContent from "./CourseNavbarDrawerContent";
+import CourseNavbarDrawerContent from "@/components/ui/navbars/CourseNavbarDrawerContent";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
 import { User } from "@/models/index";
-import LogoutButton from "./LogoutButton";
-import ProfileImage from "./ProfileImage";
+import LogoutButton from "@/components/ui/navbars/LogoutButton";
+import ProfileImage from "@/components/ui/navbars/ProfileImage";
 import { LOGGER } from "@/config/logger";
 import Logo from "../Logo";
-import RoleInfoModal from "./RoleInfoModal";
+import RoleInfoModal from "@/components/ui/navbars/RoleInfoModal";
+import { getUserAvatarUrl } from "@/lib/utils/avatar";
 
 /**
  * server-hoist-static-io: Lista de cursos disponibles hoisted a nivel de módulo.
@@ -65,7 +66,7 @@ export default async function CourseNavbar() {
     ];
 
     const userFirstName = user?.firstName || user?.name || "Usuario";
-    const userProfilePicture = user?.profile?.profilePicture || session?.user?.image || "";
+    const userProfilePicture = user ? getUserAvatarUrl(user) : "";
     const userRole = user?.role || "student";
 
     const cursoRoutes: Record<string, string> = {
@@ -197,8 +198,8 @@ export default async function CourseNavbar() {
                                     <div className="avatar mb-4">
                                         <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
                                             <ProfileImage
-                                                src={userProfilePicture}
-                                                alt={userFirstName}
+                                                src={user ? getUserAvatarUrl(user) : undefined}
+                                                alt={user?.firstName || 'Profile'}
                                                 className="w-full h-full object-cover rounded-full"
                                             />
                                         </div>

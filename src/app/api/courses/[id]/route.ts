@@ -53,9 +53,9 @@ export const GET = withErrorHandlingParams<{ id: string }>(
 
     // También obtener datos del propietario y otros detalles
     const course = await Course.findById(id)
-      .populate('ownerId', 'email firstName')
-      .populate('teachers', 'email firstName')
-      .populate('enrolledStudents', 'email firstName');
+      .populate('ownerId', 'email firstName profile.profilePicture thirdparty.provider thirdparty.profilePicture')
+      .populate('teachers', 'email firstName profile.profilePicture thirdparty.provider thirdparty.profilePicture')
+      .populate('enrolledStudents', 'email firstName profile.profilePicture thirdparty.provider thirdparty.profilePicture');
 
     if (!course) {
       return notFoundResponse('Curso', requestId);

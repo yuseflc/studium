@@ -5,6 +5,7 @@
 // Contiene rutinas que migran/reenlazan tareas entre cursos y unidades
 import mongoose from "mongoose";
 import { connectDB } from "@/lib/database/database";
+import { getUserAvatarUrl } from "@/lib/utils/avatar";
 import Course from "@/models/Course";
 import Task from "@/models/Task";
 import Submission from "@/models/Submission";
@@ -51,7 +52,7 @@ export async function getTaskCreationContext(courseId: string): Promise<TaskCrea
   await connectDB();
 
   const course = await Course.findById(courseId)
-    .populate({ path: "enrolledStudents", select: "firstName email profile.profilePicture" })
+    .populate({ path: "enrolledStudents", select: "firstName email profile.profilePicture thirdparty.provider thirdparty.profilePicture" })
     .select("title description ownerId teachers enrolledStudents")
     .lean();
 
@@ -104,7 +105,7 @@ export async function getTaskCreationContext(courseId: string): Promise<TaskCrea
       _id: studentId,
       firstName: student?.firstName || "Usuario",
       email: student?.email || "",
-      profilePicture: student?.profile?.profilePicture,
+      profilePicture: getUserAvatarUrl(student),
       averageGrade,
       failedTaskCount,
       hasFailedTask: failedTaskCount > 0,
