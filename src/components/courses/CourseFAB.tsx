@@ -19,7 +19,7 @@ interface CourseFABProps {
   units?: any[];
 }
 
-type CreationType = 'task' | 'exam' | 'resource' | 'unit' | null;
+type CreationType = 'task' | 'resource' | 'unit' | null;
 
 export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultUnitId, units = [] }: CourseFABProps) {
   const router = useRouter();
@@ -73,10 +73,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
     setErrorMessage(null);
 
     try {
-      const isTaskCreation = creationType === 'task';
-      const isExamCreation = creationType === 'exam';
-
-      if (isTaskCreation || isExamCreation) {
+      if (creationType === 'task') {
         const result = await createTask({
           title,
           description,
@@ -84,7 +81,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
           unitId: targetUnitId,
           dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
           startDate: new Date().toISOString(),
-          type: isExamCreation ? 'quiz' : 'assignment',
+          type: 'assignment',
           maxPoints: 10,
           allowLateSubmission: false,
           active: true,
@@ -96,9 +93,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
 
         const createdItem = { task: result.task };
 
-        if (isTaskCreation) {
           router.refresh();
-        }
 
         setIsSubmitting(false);
         setIsSuccess(true);
@@ -169,8 +164,6 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
       if (modalRef.current) modalRef.current.close();
       if (creationType === 'task') {
         router.push(`/mycourses/${courseid}/tasks/${createdItemId}`);
-      } else if (creationType === 'exam') {
-        router.push(`/mycourses/${courseid}/exams/${createdItemId}`);
       } else if (creationType === 'resource') {
         router.push(`/mycourses/${courseid}/resources/${createdItemId}`);
         } else if (creationType === 'unit') {
@@ -181,17 +174,6 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
 
   const getModalConfig = () => {
     switch (creationType) {
-      case 'exam':
-        return {
-          icon: <GraduationCap size={20} />,
-          title: 'Crear Nuevo Examen',
-          successText: '¡Examen creado con éxito!',
-          successDesc: 'El examen se ha añadido al curso correctamente.',
-          btnText: 'Crear Examen',
-          redirectText: 'Ir al Examen',
-          nameLabel: 'Nombre del examen',
-          namePlaceholder: 'Ej: Examen parcial de matemáticas'
-        };
       case 'resource':
         return {
           icon: <FileText size={20} />,
@@ -258,24 +240,6 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
             <ClipboardList size={20} className="text-primary" aria-hidden="true" />
           </button>
           <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Tarea</span>
-        </div>
-
-        {/* Crear Examen: Tooltip en desktop, Icono+Texto en mobile */}
-        <div 
-          className="md:tooltip md:tooltip-hover md:tooltip-left md:tooltip-warning relative" 
-          data-tip="Examen"
-        >
-          <button 
-            onClick={() => {
-              handleOpenModal('exam');
-              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-            }}
-            className="btn btn-circle btn-lg shadow-md hover:bg-base-200" 
-            aria-label="Crear Examen"
-          >
-            <GraduationCap size={20} className="text-primary" aria-hidden="true" />
-          </button>
-          <span className="absolute left-14 top-1/2 -translate-y-1/2 text-sm whitespace-nowrap md:hidden font-medium text-warning">Examen</span>
         </div>
 
         {/* Añadir Recurso: Tooltip en desktop, Icono+Texto en mobile */}
@@ -424,11 +388,11 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
               </div>
             )}
 
-            {(creationType === 'task' || creationType === 'exam') && (
+            {creationType === 'task' && (
               <div className="form-control">
                 <label className="label">
                   <span className="label-text font-bold text-base-content/80 dark:text-warning/80">
-                    {creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
+                    Fecha de entrega
                   </span>
                 </label>
                 <input
@@ -436,9 +400,9 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
                   className="input w-full border border-base-300 bg-base-100 dark:bg-base-200 text-base-content focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/10 transition-all font-medium rounded-xl shadow-sm dark:shadow-none"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  required={creationType === 'exam'}
+                  required={false}
                   disabled={isSubmitting}
-                  title={creationType === 'task' ? 'Fecha de entrega' : 'Fecha del examen'}
+                  title="Fecha de entrega"
                   placeholder="Selecciona una fecha"
                 />
               </div>

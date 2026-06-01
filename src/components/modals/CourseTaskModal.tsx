@@ -40,8 +40,8 @@ export const CourseTaskModal = ({
 }: CourseTaskModalProps) => {
     const isQuiz = taskType === 'quiz';
     const title = mode === 'edit' 
-        ? (isQuiz ? "Editar examen" : "Editar tarea") 
-        : (isQuiz ? "Crear examen" : "Crear tarea");
+        ? "Editar tarea"
+        : "Crear tarea";
 
     return (
         <ModalForm
@@ -79,7 +79,6 @@ export const CourseTaskModal = ({
                         disabled={true}
                     >
                         <option value="assignment">Tarea</option>
-                        <option value="quiz">Examen</option>
                         <option value="forum">Foro</option>
                         <option value="project">Proyecto</option>
                     </select>

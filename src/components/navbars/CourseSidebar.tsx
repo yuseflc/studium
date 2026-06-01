@@ -95,10 +95,7 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
     const hasUnitResources = (unit: IUnitWithContent) => (unit.resources?.length || 0) > 0;
 
     const hasUnitAssignments = (subject: ISubjectWithUnits, unit: IUnitWithContent) =>
-        getUnitTasks(subject, unit).some((task) => task.type !== "quiz");
-
-    const hasUnitExams = (subject: ISubjectWithUnits, unit: IUnitWithContent) =>
-        getUnitTasks(subject, unit).some((task) => task.type === "quiz");
+        getUnitTasks(subject, unit).length > 0;
 
     const sortedSubjects = [...subjects].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -123,13 +120,6 @@ export default function CourseSidebar({ isTeacher, subjects, courseData }: Cours
         if (hasUnitAssignments(subject, unit)) {
             entries.push({
                 label: "Ver Tareas",
-                onClick: () => handleScrollToUnit(unit._id?.toString() || ""),
-            });
-        }
-
-        if (hasUnitExams(subject, unit)) {
-            entries.push({
-                label: "Ver Examenes",
                 onClick: () => handleScrollToUnit(unit._id?.toString() || ""),
             });
         }

@@ -882,7 +882,6 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                             <li><button type="button" onClick={() => openEditUnit(subject._id, unit)}><Pencil size={14} />Editar unidad</button></li>
                             <li><button type="button" onClick={() => openCreateResource(subject._id, unit)}><Plus size={14} />Añadir recurso</button></li>
                             <li><button type="button" onClick={() => goToTaskCreationPage(unit._id)}><ClipboardTaskIcon />Nueva tarea</button></li>
-                            <li><button type="button" onClick={() => openCreateTask(subject, "quiz", unit._id)}><GraduationCap size={14} />Nuevo examen</button></li>
                             <li className="menu-title"><span>Reordenar</span></li>
                             <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveMappedUnit(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
                             <li><button type="button" disabled={subject.order >= sortedSubjects.length - 1} onClick={() => handleMoveMappedUnit(subject._id, 1)}><ArrowDown size={14} />Bajar</button></li>
@@ -974,15 +973,15 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                 <Link
                                   href={`/mycourses/${courseId}/tasks/${task._id}`}
                                   className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
-                                  aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
+                                  aria-label={`Ver tarea: ${task.title}`}
                                 >
                                   <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
-                                    {task.type === "quiz" ? <GraduationCap size={18} aria-hidden="true" /> : <ClipboardList size={18} aria-hidden="true" />}
+                                    <ClipboardList size={18} aria-hidden="true" />
                                   </div>
 
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">Tarea</span>
                                       {task.active === false && (
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-warning/15 text-warning border border-warning/30">Borrador</span>
                                       )}
@@ -1046,7 +1045,6 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                             <li><button type="button" onClick={() => openEditSubject(subject)}><Pencil size={14} />Editar materia</button></li>
                             <li><button type="button" onClick={() => openCreateUnit(subject)}><Plus size={14} />Añadir unidad</button></li>
                             <li><button type="button" onClick={() => goToTaskCreationPage()}><ClipboardTaskIcon />Nueva tarea</button></li>
-                            <li><button type="button" onClick={() => openCreateTask(subject, "quiz")}><GraduationCap size={14} />Nuevo examen</button></li>
                             <li className="menu-title"><span>Reordenar</span></li>
                             <li><button type="button" disabled={subject.order === 0} onClick={() => handleMoveSubject(subject._id, -1)}><ArrowUp size={14} />Subir</button></li>
                             <li><button type="button" disabled={subject.order >= sortedSubjects.length - 1} onClick={() => handleMoveSubject(subject._id, 1)}><ArrowDown size={14} />Bajar</button></li>
@@ -1179,7 +1177,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                       <Link
                                         href={`/mycourses/${courseId}/tasks/${task._id}`}
                                         className="flex min-w-0 flex-1 items-center gap-4 px-4 py-3"
-                                        aria-label={`Ver ${task.type === "quiz" ? "examen" : "tarea"}: ${task.title}`}
+                                        aria-label={`Ver tarea: ${task.title}`}
                                       >
                                         <div className="p-2.5 rounded-full flex-shrink-0 bg-primary/10 text-primary border border-primary/20 shadow-sm">
                                           <ClipboardList size={18} aria-hidden="true" />
@@ -1187,7 +1185,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
                                         <div className="flex min-w-0 flex-1 flex-col">
                                           <div className="flex items-center gap-2 flex-wrap">
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">Tarea</span>
                                             <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                           </div>
                                           <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(task.description, 140)}</p>
@@ -1212,11 +1210,11 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                           <div className="dropdown dropdown-end">
                                             {renderMenuButton()}
                                             <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow bg-base-100 rounded-box w-56 border border-base-200">
-                                              <li><button type="button" onClick={() => router.push(`/mycourses/${courseId}/tasks/${task._id}/edit`)}><Pencil size={14} />Editar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                              <li><button type="button" onClick={() => router.push(`/mycourses/${courseId}/tasks/${task._id}/edit`)}><Pencil size={14} />Editar tarea</button></li>
                                               <li className="menu-title"><span>Reordenar</span></li>
                                               <li><button type="button" disabled={taskIndex === 0} onClick={() => handleMoveTask(subject._id, task._id, -1)}><ArrowUp size={14} />Subir</button></li>
                                               <li><button type="button" disabled={taskIndex === (subject.tasks || []).length - 1} onClick={() => handleMoveTask(subject._id, task._id, 1)}><ArrowDown size={14} />Bajar</button></li>
-                                              <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar {task.type === "quiz" ? "examen" : "tarea"}</button></li>
+                                              <li className="mt-1"><button type="button" className="text-error" onClick={() => requestDelete({ kind: "task", id: task._id, title: task.title, subjectId: subject._id })}><Trash2 size={14} />Eliminar tarea</button></li>
                                             </ul>
                                           </div>
                                         </div>

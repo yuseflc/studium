@@ -50,10 +50,7 @@ export default function CourseNavbarDrawerContent() {
   const [error, setError] = useState<string | null>(null);
 
   const hasAssignments = (unit: UnitItem) =>
-    unit.tasks?.some((task) => task.type !== "quiz");
-
-  const hasExams = (unit: UnitItem) =>
-    unit.tasks?.some((task) => task.type === "quiz");
+    (unit.tasks?.length || 0) > 0;
 
   useEffect(() => {
     if (!courseId) {
@@ -142,17 +139,6 @@ export default function CourseNavbarDrawerContent() {
                                 className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm text-base-content/80 transition-colors hover:bg-base-200"
                               >
                                 <span>Ver Tareas</span>
-                              </button>
-                            </li>
-                          )}
-                          {hasExams(unit) && (
-                            <li>
-                              <button
-                                type="button"
-                                onClick={() => scrollToElement(`unit-${unit._id}`)}
-                                className="flex w-full items-center justify-between rounded-lg px-4 py-2 text-left text-sm text-base-content/80 transition-colors hover:bg-base-200"
-                              >
-                                <span>Ver Examenes</span>
                               </button>
                             </li>
                           )}
