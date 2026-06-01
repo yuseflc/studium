@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 
 // Componentes internos del curso
-import CourseSidebar from "@/components/ui/Navbars/CourseSidebar"; 
+import CourseSidebar from "@/components/ui/navbars/CourseSidebar"; 
 import CourseStructureManager, { type CourseSubjectItem } from "./CourseStructureManager"; 
 import CourseParticipants from "./CourseParticipants"; 
 import CourseInviteCodesManager from "./CourseInviteCodesManager";

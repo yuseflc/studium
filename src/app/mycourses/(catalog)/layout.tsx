@@ -2,8 +2,8 @@
   Descripción: Layout para las páginas del catálogo de cursos (barra superior y contenedor). */
 
 import type { Metadata } from "next";
-import Sidebar from "@/components/ui/Navbars/CourseMenuSidebar";
-import CourseNavbar from "@/components/ui/Navbars/CourseNavbar";
+import Sidebar from "@/components/ui/navbars/CourseMenuSidebar";
+import CourseNavbar from "@/components/ui/navbars/CourseNavbar";
 export const metadata: Metadata = {
   title: "Studium UI | Menu",
   description: "Catálogo de cursos",
