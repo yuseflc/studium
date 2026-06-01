@@ -51,7 +51,7 @@ const initialState: TaskCreationFormState = {
 };
 
 function getAvatarUrl(student: TaskCreationStudent) {
-  return student.profilePicture || `https://robohash.org/${student._id}.svg?set=set5`;
+  return student.profilePicture || `https://robohash.org/${student._id}?set=set5`;
 }
 
 function toDateTimeLocal(value?: string) {

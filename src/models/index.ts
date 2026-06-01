@@ -12,3 +12,4 @@ export { default as Resource } from './Resource';
 export { default as Session } from './Session';
 export { default as Task } from './Task';
 export { default as Submission } from './Submission';
+export { default as Organization } from './Organization';

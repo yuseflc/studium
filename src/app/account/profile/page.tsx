@@ -69,6 +69,7 @@ interface PopulatedUser {
     profilePicture?: string;
     bio?: string;
   };
+  organization?: { _id: mongoose.Types.ObjectId; name: string } | null;
   enrolledCourses?: PopulatedCourse[];
   createdCourses?: PopulatedCourse[];
   createdAt: Date;
@@ -147,10 +148,12 @@ export default async function ProfilePage({
     ? ((await User.findById(targetUserId)
         .populate<{ enrolledCourses: PopulatedCourse[] }>("enrolledCourses", "title description")
         .populate<{ createdCourses: PopulatedCourse[] }>("createdCourses", "title description")
+        .populate<{ organization: { _id: mongoose.Types.ObjectId; name: string } | null }>("organization", "name")
         .lean()) as PopulatedUser | null)
     : ((await User.findOne({ email: session.user.email })
         .populate<{ enrolledCourses: PopulatedCourse[] }>("enrolledCourses", "title description")
         .populate<{ createdCourses: PopulatedCourse[] }>("createdCourses", "title description")
+        .populate<{ organization: { _id: mongoose.Types.ObjectId; name: string } | null }>("organization", "name")
         .lean()) as PopulatedUser | null);
 
   // PASO 8: Validar que el usuario existe en la base de datos
@@ -195,6 +198,12 @@ export default async function ProfilePage({
             <p className="text-xs font-semibold text-base-content/60 mt-1 capitalize bg-base-200 px-2.5 py-0.5 rounded-md inline-block w-fit border border-base-300">
               {roleLabel(user.role)}
             </p>
+            {user.organization && (
+              <p className="text-xs font-medium text-primary mt-1 flex items-center gap-1">
+                <IconSchool size={13} />
+                {user.organization.name}
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -255,6 +264,17 @@ export default async function ProfilePage({
                   <input type="text" value={roleLabel(user.role)} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Rol" />
                 </div>
               </div>
+
+              {/* Campo: Organización del usuario */}
+              {user.organization && (
+                <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2">
+                  <IconSchool size={22} className="text-primary shrink-0" />
+                  <div className="flex flex-col w-full">
+                    <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Organización</span>
+                    <input type="text" value={user.organization.name} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Organización" />
+                  </div>
+                </div>
+              )}
 
               {/* Campo: Identificador único de MongoDB del usuario */}
               <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2 opacity-75">

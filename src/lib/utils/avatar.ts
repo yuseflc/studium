@@ -15,5 +15,5 @@ export function getUserAvatarUrl(user: {
     return googleAccount.profilePicture;
   }
   const id = user._id ? String(user._id) : "unknown";
-  return `https://robohash.org/${id}.svg?set=set5`;
+  return `https://robohash.org/${id}?set=set5`;
 }

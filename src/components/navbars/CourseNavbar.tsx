@@ -52,7 +52,7 @@ export default async function CourseNavbar() {
 
     if (session?.user?.id) {
         await connectDB();
-        user = await User.findOne({ _id: session.user.id });
+        user = await User.findOne({ _id: session.user.id }).populate<{ organization: { name: string } | null }>("organization", "name");
         LOGGER.info(`Usuario de sesión: ${session.user.id} - ${session.user.email} - ${session.user.name}`);
     }
 
@@ -68,6 +68,7 @@ export default async function CourseNavbar() {
     const userFirstName = user?.firstName || user?.name || "Usuario";
     const userProfilePicture = user ? getUserAvatarUrl(user) : "";
     const userRole = user?.role || "student";
+    const userOrganizationName = (user?.organization as { name: string } | null)?.name;
 
     const cursoRoutes: Record<string, string> = {
         "Diseño de Interfaces Web": "/course/diseno-interfaces-web",
@@ -141,7 +142,7 @@ export default async function CourseNavbar() {
                                         </span>
                                     </div>
 
-                                    <RoleInfoModal role={userRole} triggerClassName="text-xs opacity-70 mt-0.5" />
+                                    <RoleInfoModal role={userRole} triggerClassName="text-xs opacity-70 mt-0.5" organizationName={userOrganizationName} />
                                 </li>
 
                                 <li>
@@ -149,6 +150,13 @@ export default async function CourseNavbar() {
                                         Perfil
                                     </a>
                                 </li>
+                                {userRole === "admin" && (
+                                    <li>
+                                        <a href="/admin" className="justify-between text-primary font-semibold">
+                                            Administración
+                                        </a>
+                                    </li>
+                                )}
                                 {/* Opción de Configuración */}
                                 <li>
                                     <a>Configuración</a>
@@ -209,6 +217,7 @@ export default async function CourseNavbar() {
                                     <RoleInfoModal
                                         role={userRole}
                                         triggerClassName="inline-flex items-center rounded-full border border-base-300 px-3 py-1 text-xs font-medium text-base-content/80 transition-colors hover:bg-base-200"
+                                        organizationName={userOrganizationName}
                                     />
 
                                     <ul className="w-full menu menu-vertical gap-1 p-0 text-base">
@@ -217,12 +226,22 @@ export default async function CourseNavbar() {
                                                 href="/account/profile"
                                                 className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors"
                                             >
-                                                Profile
+                                                Perfil
                                             </a>
                                         </li>
+                                        {userRole === "admin" && (
+                                            <li>
+                                                <a
+                                                    href="/admin"
+                                                    className="justify-start py-3 px-6 font-semibold text-primary active:bg-base-300 rounded-xl transition-colors"
+                                                >
+                                                    Administración
+                                                </a>
+                                            </li>
+                                        )}
                                         <li>
                                             <a className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">
-                                                Settings
+                                                Configuración
                                             </a>
                                         </li>
                                         <li>

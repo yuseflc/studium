@@ -8,6 +8,7 @@ export type UserRole = "student" | "teacher" | "admin";
 interface RoleInfoModalProps {
   role: UserRole;
   triggerClassName?: string;
+  organizationName?: string;
 }
 
 const roleLabels: Record<UserRole, string> = {
@@ -51,7 +52,7 @@ const roleDescriptions: Record<
   },
 };
 
-export default function RoleInfoModal({ role, triggerClassName }: RoleInfoModalProps) {
+export default function RoleInfoModal({ role, triggerClassName, organizationName }: RoleInfoModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const [isMounted, setIsMounted] = useState(false);
   const roleLabel = roleLabels[role];
@@ -100,6 +101,12 @@ export default function RoleInfoModal({ role, triggerClassName }: RoleInfoModalP
               </div>
 
               <div className="space-y-4 py-5 text-sm leading-relaxed text-base-content/80">
+                {organizationName && (
+                  <div className="rounded-2xl bg-primary/10 border border-primary/20 p-4 flex items-center gap-3">
+                    <span className="text-xs font-bold uppercase tracking-widest text-primary">Organización</span>
+                    <span className="font-semibold text-base-content">{organizationName}</span>
+                  </div>
+                )}
                 <div className="rounded-2xl bg-base-200/60 p-4">
                   <p className="font-semibold text-base-content">{content.highlight}</p>
                 </div>

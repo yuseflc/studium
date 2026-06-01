@@ -28,6 +28,9 @@ export interface IThirdParty {
 }
 
 
+// Tipos de plan disponibles en la plataforma
+export type UserPlan = "free" | "student" | "basic" | "premium" | "education";
+
 // Interfaz para el usuario
 export interface IUser {
   _id: mongoose.Types.ObjectId;
@@ -35,8 +38,11 @@ export interface IUser {
   firstName: string; // Nombre
   password: string; // Contraseña
   role: "student" | "teacher" | "admin"; // Rol: estudiante, profesor, administrador
+  plan: UserPlan; // Plan del usuario
   active: boolean; // Activo
+  banned: boolean; // Baneado
   profile: IProfile; // Perfil
+  organization?: mongoose.Types.ObjectId; // Organización educativa a la que pertenece
   enrolledCourses: mongoose.Types.ObjectId[]; // Cursos donde el usuario está inscrito (estudiante)
   createdCourses: mongoose.Types.ObjectId[]; // Cursos creados por el usuario (profesor/admin)
   thirdparty?: IThirdParty[]; // Cuentas de terceros vinculadas (Google, GitHub, etc.)
@@ -81,9 +87,23 @@ const UserSchema = new mongoose.Schema<IUser>(
       enum: ["student", "teacher", "admin"], // Valores permitidos: estudiante, profesor, administrador
       default: "student", // Valor por defecto: estudiante
     },
+    plan: {
+      type: String,
+      enum: ["free", "student", "basic", "premium", "education"], // Planes disponibles
+      default: "free", // Valor por defecto: free
+    },
     active: {
       type: Boolean,
       default: true, // Valor por defecto: true
+    },
+    banned: {
+      type: Boolean,
+      default: false, // Valor por defecto: false
+    },
+    organization: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Organization", // Referencia al modelo Organization
+      default: null,
     },
     profile: {
       lastName: {
@@ -162,8 +182,11 @@ UserSchema.pre('save', async function () {
 });
 
 // Middleware pre-búsqueda: Excluir usuarios desactivados por defecto
+// Bypass: pasar { skipActiveFilter: true } en setOptions() para queries de admin
 UserSchema.pre(/^find/, function (this: mongoose.Query<IUser[], IUser>) {
-  this.where('active').equals(true); // Solo usuarios activos
+  if (!this.getOptions().skipActiveFilter) {
+    this.where('active').equals(true);
+  }
 });
 
 // Virtual: Nombre completo
@@ -232,6 +255,8 @@ UserSchema.methods.hasThirdParty = function (provider: string): boolean {
 // Índices para optimizar consultas
 UserSchema.index({ email: 1 }); // Índice por correo electrónico
 UserSchema.index({ role: 1 }); // Índice por rol
+UserSchema.index({ plan: 1 }); // Índice por plan
+UserSchema.index({ organization: 1 }); // Índice por organización
 UserSchema.index({ enrolledCourses: 1 }); // Índice por cursos inscritos
 UserSchema.index({ createdCourses: 1 }); // Índice por cursos creados
 UserSchema.index({ active: 1, role: 1 }); // Índice compuesto por activo y rol
