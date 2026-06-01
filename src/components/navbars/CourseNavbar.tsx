@@ -38,7 +38,7 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
       cursosDisponibles = result.data;
     }
   } catch (error) {
-    LOGGER.error("❌ Error cargando cursos:", error);
+    LOGGER.error({ error }, "Error cargando cursos");
   }
 
   const userFirstName = user?.firstName || user?.name || "Usuario";

@@ -123,7 +123,7 @@ export default function CourseNavbarDrawerContent() {
                                   {resource.type === 'pdf' && '📄'}
                                   {resource.type === 'image' && '🖼️'}
                                   {resource.type === 'link' && '🔗'}
-                                  {!['video', 'pdf', 'image', 'link'].includes(resource.type) && '📎'}
+                                  {!['video', 'pdf', 'image', 'link'].includes(resource.type ?? '') && '📎'}
                                   {' '}{resource.title}
                                 </button>
                               </li>

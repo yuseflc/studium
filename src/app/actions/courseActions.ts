@@ -1215,6 +1215,7 @@ export async function getCourseStructure(courseId: string): Promise<GetCourseStr
         resources: (unit.resources || []).map((r: any) => ({
           _id: r._id?.toString() || "",
           title: r.title || "",
+          type: r.type,
         })),
         tasks: (unit.tasks || []).map((t: any) => ({
           _id: t._id?.toString() || "",
@@ -1325,7 +1326,7 @@ export async function getAvailableCoursesForNavbar(): Promise<{
       })),
     };
   } catch (error) {
-    LOGGER.error("❌ Error al obtener cursos para navbar:", error);
+    LOGGER.error({ error }, "Error al obtener cursos para navbar");
     return {
       success: false,
       error: error instanceof Error ? error.message : "Error desconocido",

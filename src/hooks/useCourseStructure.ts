@@ -12,6 +12,7 @@ interface TaskItem {
 interface ResourceItem {
   _id: string;
   title: string;
+  type?: string;
 }
 
 interface UnitItem {
