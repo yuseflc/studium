@@ -1276,3 +1276,59 @@ export async function listInviteCodes(
     return { success: false, error: message };
   }
 }
+
+/**
+ * Obtiene los cursos disponibles para el usuario actual
+ * (cursos donde el usuario es owner, teacher o enrolled student Y que están activos)
+ */
+export async function getAvailableCoursesForNavbar(): Promise<{
+  success: boolean;
+  data?: Array<{ _id: string; name: string; slug: string }>;
+  error?: string;
+}> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    await connectDB();
+
+    const user = await User.findOne({ email: session.user.email }).lean();
+    if (!user) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    const userId = user._id.toString();
+
+    // Buscar cursos donde el usuario tiene acceso Y el curso está activo
+    const courses = await Course.find({
+      status: "active", // Solo cursos activos
+      $or: [
+        { ownerId: userId },
+        { teachers: { $in: [userId] } },
+        { enrolledStudents: { $in: [userId] } },
+      ],
+    })
+      .select("title slug") // Solo seleccionamos título y slug
+      .sort({ title: 1 }) // Orden alfabético
+      .lean();
+
+    LOGGER.info(`📚 Cursos disponibles para navbar: ${courses.length}`);
+
+    return {
+      success: true,
+      data: courses.map(course => ({
+        _id: course._id.toString(),
+        name: course.title,
+        slug: course.slug,
+      })),
+    };
+  } catch (error) {
+    LOGGER.error("❌ Error al obtener cursos para navbar:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error desconocido",
+    };
+  }
+}
