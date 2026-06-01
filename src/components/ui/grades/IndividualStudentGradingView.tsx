@@ -147,24 +147,29 @@ export default function IndividualStudentGradingView({
         setFeedbackModalOpen(true);
     };
 
-    // Guardar feedback desde el modal
-    const handleSaveFeedback = async (newFeedback: string): Promise<boolean> => {
+    // Guardar nota y feedback desde el modal
+    const handleSaveFeedback = async (newGrade: string, newFeedback: string): Promise<boolean> => {
         if (!selectedTaskForFeedback) return false;
 
         try {
-            // Actualizar el estado local
+            if (newGrade !== '') {
+                if (!/^\d*\.?\d{0,2}$/.test(newGrade)) return false;
+                const num = parseFloat(newGrade);
+                if (isNaN(num) || num < 0 || num > 10) return false;
+            }
+
             setGradesState(prev => {
                 const currentTask = prev[selectedTaskForFeedback.stateKey] || { grade: "", feedback: "", taskId: "" };
                 return {
                     ...prev,
                     [selectedTaskForFeedback.stateKey]: {
                         ...currentTask,
+                        grade: newGrade,
                         feedback: newFeedback
                     }
                 };
             });
 
-            // Cerrar el modal
             setFeedbackModalOpen(false);
             setSelectedTaskForFeedback(null);
 
@@ -318,7 +323,7 @@ export default function IndividualStudentGradingView({
                                 <th className="w-2/5">Actividad / Tema</th>
                                 <th className="text-center w-24">Estado</th>
                                 <th className="text-center w-28">Nota</th>
-                                <th className="text-center w-2/5">Feedback</th>
+                                <th className="text-center w-2/5">Calificar / Feedback</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -363,17 +368,11 @@ export default function IndividualStudentGradingView({
                                                         )}
                                                     </td>
                                                     <td className="text-center">
-                                                        <div className="flex flex-col items-center">
-                                                            <div className="flex items-center gap-1">
-                                                                <input 
-                                                                    type="text" 
-                                                                    value={state.grade}
-                                                                    onChange={(e) => handleFieldChange(stateKey, "grade", e.target.value)}
-                                                                    placeholder="—"
-                                                                    className={`w-14 bg-transparent text-right font-mono font-bold text-lg focus:outline-none border-b border-transparent focus:border-base-content/30 ${!isNaN(gradeVal) && gradeVal >= 5 ? 'text-success' : 'text-error'}`}
-                                                                />
-                                                                <span className="text-xs opacity-50 ml-0.5">/10</span>
-                                                            </div>
+                                                        <div className="flex items-center justify-center gap-1">
+                                                            <span className={`font-mono font-bold text-lg ${state.grade === '' ? 'text-base-content/30' : !isNaN(gradeVal) && gradeVal >= 5 ? 'text-success' : 'text-error'}`}>
+                                                                {state.grade === '' ? '—' : state.grade}
+                                                            </span>
+                                                            {state.grade !== '' && <span className="text-xs opacity-40">/10</span>}
                                                         </div>
                                                     </td>
                                                     <td className="text-center">
@@ -382,7 +381,7 @@ export default function IndividualStudentGradingView({
                                                             className="btn btn-sm btn-outline btn-primary gap-2"
                                                         >
                                                             <MessageSquare size={16} />
-                                                            {state.feedback ? "Editar" : "Añadir"}
+                                                            {state.grade || state.feedback ? "Editar" : "Calificar"}
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -407,6 +406,7 @@ export default function IndividualStudentGradingView({
                     }}
                     taskTitle={selectedTaskForFeedback.title}
                     studentName={`${student.nombre} ${student.apellidos}`}
+                    initialGrade={gradesState[selectedTaskForFeedback.stateKey]?.grade || ""}
                     initialFeedback={gradesState[selectedTaskForFeedback.stateKey]?.feedback || ""}
                     onSubmit={handleSaveFeedback}
                 />
