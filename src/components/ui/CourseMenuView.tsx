@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
 import CreateCourseModal from "@/components/ui/CreateCourseModal";
-import JoinCourseButton from "@/components/ui/JoinCourseButton";
+import JoinCourseButton from "@/components/ui/modals/JoinCourseModal";
 import { ModalAdvise, CourseMenuDeleteModal } from "@/components/ui/modals";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";

@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { joinCourseByCode } from '@/app/actions/courseActions';
-import { Modal } from '@/components/ui/modals';
-import { IconPlus, IconLoader } from '@tabler/icons-react';
+import { ModalForm } from '@/components/ui/modals';
+import { IconPlus } from '@tabler/icons-react';
 
 /**
  * JoinCourseButton
@@ -105,69 +105,42 @@ export default function JoinCourseButton({ onCourseJoined }: { onCourseJoined?: 
         </button>
       </div>
 
-      <Modal 
-        dialogRef={dialogRef} 
+      <ModalForm
+        dialogRef={dialogRef}
         onClose={closeModal}
-        className="max-w-md"
-        showClose={true}
+        title="Unirse a un curso"
+        confirmLabel="Unirse"
+        onConfirm={handleSubmit}
+        isLoading={isLoading}
+        error={error || null}
+        success={!!success}
+        successMessage={success}
+        className="max-w-sm"
       >
-        <h3 className="font-bold text-lg">Unirse a un curso</h3>
-        <p className="text-sm text-base-content/70 my-2">
-          Ingresa el código de invitación para unirte a un curso
-        </p>
+        <div className="space-y-6">
+          <p className="text-base-content/60 text-sm">
+            Ingresa el código de invitación para unirte a un curso
+          </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4 py-4">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text font-medium">Código de invitación</span>
-            </label>
+          <label className="form-control w-full">
+            <span className="label-text font-medium mb-2 text-base dark:text-warning">Código de invitación</span>
             <input
               type="text"
               placeholder="Ej: AB12CD"
               value={code}
               onChange={handleCodeChange}
               disabled={isLoading}
-              className="input input-bordered text-center text-lg tracking-widest font-mono"
+              className="input input-bordered input-lg text-center font-mono text-2xl tracking-[0.5em] uppercase w-full focus:border-warning focus:outline-none transition-all"
               maxLength={6}
+              minLength={6}
+              required
               autoComplete="off"
+              autoFocus
             />
-            <label className="label">
-              <span className="label-text-alt text-xs">6 caracteres alfanuméricos (mayúsculas)</span>
-            </label>
-          </div>
-
-          {error && (
-            <div className="alert alert-error text-sm">
-              <span>{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="alert alert-success text-sm">
-              <span>{success}</span>
-            </div>
-          )}
-
-          <div className="modal-action gap-2">
-            <button
-              type="button"
-              onClick={closeModal}
-              className="btn btn-ghost"
-              disabled={isLoading}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={isLoading || code.length !== 6}
-              className="btn btn-primary gap-2"
-            >
-              {isLoading && <IconLoader size={18} className="animate-spin" />}
-              {isLoading ? 'Uniéndose...' : 'Unirse'}
-            </button>
-          </div>
-        </form>
-      </Modal>
+            <span className="label-text-alt text-xs mt-1 text-base-content/50">6 caracteres alfanuméricos (mayúsculas)</span>
+          </label>
+        </div>
+      </ModalForm>
     </>
   );
 }

@@ -35,8 +35,8 @@ export const CreateCourseModalUI = ({
     return (
         <ModalForm
             {...props}
-            title="Crear clase"
-            confirmLabel="Crear clase"
+            title="Crear curso"
+            confirmLabel="Crear curso"
             onConfirm={onConfirm}
             className="max-w-3xl"
         >
