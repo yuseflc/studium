@@ -76,26 +76,28 @@ export default function FeaturesSection() {
                             </div>
                             <div className="w-full md:w-1/3 bg-base-200 rounded-3xl p-6 shadow-inner relative overflow-hidden h-48 md:h-auto">
                                 <div className="space-y-3">
-                                    {(() => {
+                                    {([1, 2, 3] as const).map((i) => {
                                         const opacityMap: Record<number, string> = {
                                             1: 'opacity-80',
                                             2: 'opacity-60',
-                                            3: 'opacity-40'
+                                            3: 'opacity-40',
                                         };
-                                        return [1, 2, 3].map((i) => (
+
+                                        return (
                                             <div key={i} className={`bg-base-100 p-3 rounded-xl shadow-sm flex items-center gap-3 animate-pulse ${opacityMap[i]}`}>
-                                            <div className="size-8 rounded-lg bg-base-300 flex items-center justify-center">
-                                                <BookOpen className="size-4 opacity-50" />
+                                                <div className="size-8 rounded-lg bg-base-300 flex items-center justify-center">
+                                                    <BookOpen className="size-4 opacity-50" />
+                                                </div>
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="h-2 w-2/3 bg-base-300 rounded" />
+                                                    <div className="h-1.5 w-1/3 bg-base-300/50 rounded" />
+                                                </div>
                                             </div>
-                                            <div className="flex-1 space-y-2">
-                                                <div className="h-2 w-2/3 bg-base-300 rounded" />
-                                                <div className="h-1.5 w-1/3 bg-base-300/50 rounded" />
-                                            </div>
-                                        </div>
-                                    ))}
+                                        )
+                                    })}
                                 </div>
                                 <div className="absolute inset-0 bg-gradient-to-t from-base-200 via-transparent to-transparent flex items-end justify-center pb-4">
-                                    <span className="text-xs font-bold opacity-30 tracking-widest uppercase text-base-content">Historial del Curso 2024/25</span>
+                                    <span className="text-xs font-bold opacity-30 tracking-widest uppercase text-base-content">{"Historial del Curso 2024/25"}</span>
                                 </div>
                             </div>
                         </Card>

@@ -6,7 +6,6 @@
 // Vista y lista de tareas del curso; maneja estados de entrega y filtros
 import { Calendar, ClipboardList, Trash2, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import { CALIFICACIONES } from '@/seed/data';
 import { useParams } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 

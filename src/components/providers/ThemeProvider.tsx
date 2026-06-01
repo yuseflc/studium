@@ -16,18 +16,19 @@ const ThemeContext = createContext<{
 });
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-    const [theme, setThemeState] = useState<Theme>('default');
+    const [theme, setThemeState] = useState<Theme>('bumblebee');
 
     useEffect(() => {
         const savedTheme = localStorage.getItem('theme') as Theme | null;
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const resolvedTheme = savedTheme && savedTheme !== 'default'
+            ? savedTheme
+            : prefersDark
+                ? 'dark'
+                : 'bumblebee';
         
-        if (savedTheme && savedTheme !== 'default') {
-            setThemeState(savedTheme);
-        } else {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const systemTheme = prefersDark ? 'dark' : 'bumblebee';
-            setThemeState('default');
-        }
+        setThemeState(resolvedTheme);
+        document.documentElement.setAttribute('data-theme', resolvedTheme);
     }, []);
 
     const setTheme = (newTheme: Theme) => {

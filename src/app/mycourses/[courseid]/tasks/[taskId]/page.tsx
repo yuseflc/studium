@@ -9,7 +9,6 @@ import Submission from '@/models/Submission';
 import User from '@/models/User';
 import { notFound } from 'next/navigation';
 import mongoose from 'mongoose';
-import { CALIFICACIONES } from '@/seed/data';
 import TaskDetailClient from '../../../../../components/ui/TaskDetailClient';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/config/auth.config';
@@ -82,16 +81,8 @@ export default async function TaskDetailPage({
       }));
     }
   } else {
-    // Fallback temporal para las tareas que vienen de CALIFICACIONES u otras pruebas
-    const seedTask = CALIFICACIONES.find(t => String(t._id) === taskId);
-    if (seedTask) {
-      taskInfo = {
-        title: seedTask.taskTitle,
-        description: "Dominio de Flexbox y CSS Grid para layouts complejos.",
-        dueDate: new Date(),
-        maxPoints: seedTask.maxScore
-      };
-    }
+    // Fallback: si no hay tarea en BD, retornar 404
+    notFound();
   }
 
   if (!taskInfo) {

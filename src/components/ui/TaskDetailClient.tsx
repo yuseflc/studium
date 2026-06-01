@@ -1,3 +1,4 @@
+"use client";
 /* Archivo: src\components\ui\TaskDetailClient.tsx
   Descripción: Componente cliente que muestra detalles de una tarea y su entregable. */
 

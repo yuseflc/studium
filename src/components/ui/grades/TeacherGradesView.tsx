@@ -101,7 +101,7 @@ export default function TeacherGradesView({ participants, subjects, courseId }: 
                         <thead className="bg-base-200/50">
                             <tr>
                                 <th className="bg-transparent pl-6">Estudiante</th>
-                                <th className="text-center bg-transparent">Media Real</th>
+                                <th className="text-center bg-transparent">Media</th>
                                 <th className="text-center bg-transparent">Acciones</th>
                             </tr>
                         </thead>
