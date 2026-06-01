@@ -6,18 +6,15 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  BookOpen, 
-  FileText, 
-  StickyNote,
-  Bookmark,
-  GraduationCap,
+  BookOpen,
+  FileText,
   ChevronDown,
   ClipboardList
 } from "lucide-react";
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";
-import TasksView from "./tasks/TasksView";
+import TasksView from "@/components/tasks/TasksView";
 
 /**
  * Tipo para Subject con units pobladas (estructura retornada por getCourseFullStructure)

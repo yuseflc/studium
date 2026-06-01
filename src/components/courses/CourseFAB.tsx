@@ -3,7 +3,7 @@
 
 // Floating Action Button para acciones rápidas dentro de un curso (crear tarea, subir)
 // Proporciona accesos rápidos y modal de creación (task/resource/unit)
-import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X, BookOpen } from 'lucide-react';
+import { ClipboardList, FileText, Plus, CheckCircle, Upload, X, BookOpen } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { ModalForm } from '@/components/modals';
