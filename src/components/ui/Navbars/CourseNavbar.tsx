@@ -197,8 +197,8 @@ export default async function CourseNavbar() {
                                     <div className="avatar mb-4">
                                         <div className="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center bg-base-300">
                                             <ProfileImage
-                                                src={user?.profile.profilePicture}
-                                                alt={user?.firstName || 'Profile'}
+                                                src={userProfilePicture}
+                                                alt={userFirstName}
                                                 className="w-full h-full object-cover rounded-full"
                                             />
                                         </div>

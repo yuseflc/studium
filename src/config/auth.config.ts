@@ -144,6 +144,9 @@ export const authOptions: NextAuthOptions = {
                 if (token?.email) {
                     session.user.email = token.email as string;
                 }
+                if (token?.picture) {
+                    session.user.image = token.picture as string;
+                }
             }
             return session;
         }
