@@ -112,6 +112,7 @@ export default function GradesView({
             participants={participants}
             subjects={subjects as any}
             courseId={courseId}
+            initialSubmissions={submissions}
         />
     );
 }

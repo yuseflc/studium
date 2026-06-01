@@ -3,7 +3,7 @@
 
 "use client";
 // Vista de profesor: listar estudiantes y abrir grading individual por alumno
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { GraduationCap } from "lucide-react";
 import IndividualStudentGradingView from "./IndividualStudentGradingView";
 import { getCourseSubmissions } from "@/app/actions/participantActions";
@@ -32,13 +32,14 @@ interface TeacherGradesViewProps {
     participants: Participant[];
     subjects: Subject[];
     courseId: string;
+    initialSubmissions?: any[];
 }
 
-export default function TeacherGradesView({ participants, subjects, courseId }: TeacherGradesViewProps) {
+export default function TeacherGradesView({ participants, subjects, courseId, initialSubmissions = [] }: TeacherGradesViewProps) {
     const [selectedStudent, setSelectedStudent] = useState<Participant | null>(null);
-    const [submissions, setSubmissions] = useState<any[]>([]);
+    const [submissions, setSubmissions] = useState<any[]>(initialSubmissions);
     const [tasks, setTasks] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
     const loadSubmissions = async () => {
         setLoading(true);
@@ -54,10 +55,6 @@ export default function TeacherGradesView({ participants, subjects, courseId }: 
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        loadSubmissions();
-    }, [courseId]);
 
     // Solo mostramos estudiantes en la lista de calificaciones
     const visibleStudents = participants.filter(p => p.rol === "estudiante");
