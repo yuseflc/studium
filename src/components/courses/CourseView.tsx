@@ -87,17 +87,20 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
     const list: any[] = [];
     const seenIds = new Set<string>();
 
-    const addParticipant = (user: any, role: string) => {
+    const addParticipant = (user: any, defaultRole: string) => {
       if (!user || !user._id) return;
       const idStr = String(user._id);
       if (seenIds.has(idStr)) return;
       seenIds.add(idStr);
+      
+      const finalRole = user.role === 'admin' ? 'admin' : defaultRole;
+      
       list.push({
         id: idStr,
         nombre: user.firstName || "Usuario",
         apellidos: user.profile?.lastName || "",
         email: user.email || "",
-        rol: role,
+        rol: finalRole,
         avatar: getUserAvatarUrl(user)
       });
     };
