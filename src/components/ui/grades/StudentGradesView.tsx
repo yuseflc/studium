@@ -77,7 +77,7 @@ export default function StudentGradesView({
                                 return (
                                     <React.Fragment key={subject._id}>
                                         <tr 
-                                            className="bg-base-200/50 hover:bg-base-200/70 transition-colors cursor-pointer"
+                                            className="bg-base-200/50"
                                             onClick={() => toggleSubject(subject._id)}
                                         >
                                             <td colSpan={4} className="p-0 border-b border-base-300/30">

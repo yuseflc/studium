@@ -330,8 +330,8 @@ export default function IndividualStudentGradingView({
 
                                 return (
                                     <React.Fragment key={subject._id}>
-                                        <tr 
-                                            className="bg-base-200/50 hover:bg-base-200/70 transition-colors cursor-pointer"
+                                        <tr
+                                            className="bg-base-200/50"
                                             onClick={() => toggleSubject(subject._id)}
                                         >
                                             <td colSpan={4} className="p-0 border-b border-base-300/30">
@@ -350,7 +350,7 @@ export default function IndividualStudentGradingView({
                                             const hasSubmission = state.grade !== "" || state.feedback !== "";
 
                                             return (
-                                                <tr key={stateKey} className="transition-colors border-b border-base-300/10 group">
+                                                <tr key={stateKey} className="hover:bg-base-200/30 transition-colors border-b border-base-300/10 group">
                                                     <td className="pl-12">
                                                         <Link 
                                                             href={`/mycourses/${courseId}/tasks/${state.taskId}`}
