@@ -7,6 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
+import { getCourseStructure } from "@/app/actions/courseActions";
 
 interface TaskItem {
   _id: string;
@@ -64,22 +65,15 @@ export default function CourseNavbarDrawerContent() {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/courses/${courseId}`, {
-      cache: "no-store",
-      credentials: "same-origin",
-    })
-      .then(async (response) => {
-        const body = await response.json().catch(() => null);
-        if (!response.ok) {
-          throw new Error(body?.message || "Error cargando curso");
-        }
-        return body;
-      })
+    getCourseStructure(courseId)
       .then((result) => {
-        setStructure(result?.data?.structure || null);
+        if (result.success) {
+          setStructure(result.structure || null);
+        } else {
+          setError(result.error || "Error cargando curso");
+        }
       })
-      .catch((fetchError) => {
-        console.error("Error loading course structure:", fetchError);
+      .catch(() => {
         setError("No se pudo cargar el contenido del curso.");
       })
       .finally(() => setLoading(false));

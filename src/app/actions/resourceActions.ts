@@ -11,7 +11,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
-import { deleteFromR2 } from "@/lib/r2";
+import { deleteFromR2, uploadToR2 } from "@/lib/r2";
 import Course from "@/models/Course";
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
@@ -341,6 +341,140 @@ export async function deleteResource(resourceId: string): Promise<{ success: boo
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al eliminar el recurso";
     LOGGER.error({ error, resourceId }, "Error deleting resource from action");
+    return { success: false, error: message };
+  }
+}
+
+const UPLOAD_ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+  "text/csv",
+  "application/rtf",
+  "application/vnd.oasis.opendocument.text",
+  "application/vnd.oasis.opendocument.spreadsheet",
+  "application/vnd.oasis.opendocument.presentation",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/svg+xml",
+  "image/bmp",
+  "image/tiff",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
+  "audio/webm",
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/x-rar-compressed",
+  "application/x-7z-compressed",
+  "application/octet-stream",
+]);
+
+const UPLOAD_ALLOWED_EXTENSIONS = new Set([
+  ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
+  ".txt", ".csv", ".rtf", ".odt", ".ods", ".odp",
+  ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".bmp", ".tif", ".tiff",
+  ".mp4", ".webm", ".mov",
+  ".mp3", ".wav", ".ogg",
+  ".zip", ".rar", ".7z",
+]);
+
+const MAX_UPLOAD_SIZE = 50 * 1024 * 1024;
+
+function getUploadFileExtension(fileName: string): string {
+  const lastDot = fileName.lastIndexOf(".");
+  return lastDot < 0 ? "" : fileName.slice(lastDot).toLowerCase();
+}
+
+function isUploadFileTypeAllowed(file: File): boolean {
+  const extension = getUploadFileExtension(file.name);
+  const mime = (file.type || "").toLowerCase();
+  if (mime && UPLOAD_ALLOWED_MIME_TYPES.has(mime)) return true;
+  if (!mime || mime === "application/octet-stream") return UPLOAD_ALLOWED_EXTENSIONS.has(extension);
+  return UPLOAD_ALLOWED_EXTENSIONS.has(extension);
+}
+
+export interface UploadFileResult {
+  success: boolean;
+  url?: string;
+  fileName?: string;
+  error?: string;
+}
+
+export async function uploadFile(formData: FormData): Promise<UploadFileResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const file = formData.get("file") as File | null;
+    const courseId = formData.get("courseId") as string | null;
+    const unitId = formData.get("unitId") as string | null;
+
+    if (!file) return { success: false, error: "El archivo es requerido" };
+    if (file.size === 0) return { success: false, error: "El archivo está vacío" };
+    if (file.size > MAX_UPLOAD_SIZE) {
+      return { success: false, error: `El archivo excede el límite de ${MAX_UPLOAD_SIZE / (1024 * 1024)}MB` };
+    }
+    if (!isUploadFileTypeAllowed(file)) {
+      return { success: false, error: `Tipo de archivo no permitido: ${file.type || "sin MIME"} (${file.name})` };
+    }
+    if (!courseId || !mongoose.Types.ObjectId.isValid(courseId)) {
+      return { success: false, error: "ID de curso inválido" };
+    }
+    if (!unitId || !mongoose.Types.ObjectId.isValid(unitId)) {
+      return { success: false, error: "ID de unidad inválido" };
+    }
+
+    await connectDB();
+
+    const course = await Course.findById(courseId);
+    if (!course) return { success: false, error: "Curso no encontrado" };
+
+    const unit = await Unit.findById(unitId);
+    if (!unit) return { success: false, error: "Unidad no encontrada" };
+    if (unit.courseId.toString() !== courseId) {
+      return { success: false, error: "La unidad no pertenece al curso especificado" };
+    }
+
+    const currentUser = await User.findOne({ email: session.user.email }).lean();
+    if (!currentUser) return { success: false, error: "Usuario no encontrado" };
+
+    const userId = (currentUser as any)._id.toString();
+    const isOwner = course.ownerId.toString() === userId;
+    const isTeacher = course.teachers.some(
+      (teacherId: mongoose.Types.ObjectId) => teacherId.toString() === userId
+    );
+
+    if (!isOwner && !isTeacher) {
+      return { success: false, error: "No tienes permiso para subir archivos a este curso" };
+    }
+
+    const buffer = await file.arrayBuffer();
+    const uint8Array = new Uint8Array(buffer);
+    const timestamp = Date.now();
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_").substring(0, 100);
+    const fileName = `resources/${courseId}/${unitId}/${timestamp}-${sanitizedFileName}`;
+
+    const publicUrl = await uploadToR2(uint8Array, fileName, file.type || "application/octet-stream");
+
+    LOGGER.info({ fileName, fileSize: file.size, courseId, unitId }, "Archivo subido a R2 exitosamente");
+
+    return { success: true, url: publicUrl, fileName: file.name };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al subir el archivo";
+    LOGGER.error({ error }, "Error en uploadFile action");
     return { success: false, error: message };
   }
 }

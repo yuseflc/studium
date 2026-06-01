@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { IconMail, IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import Link from 'next/link';
 import Logo from '@/components/ui/Logo';
+import { forgotPassword } from '@/app/actions/authActions';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -23,23 +24,15 @@ export default function ForgotPasswordForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const result = await forgotPassword(email);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (result.success) {
         setMessageType('success');
         setMessage('¡Éxito! Revisa tu correo electrónico para restaurar tu contraseña.');
         setEmail('');
       } else {
         setMessageType('error');
-        setMessage(data.message || 'No pudimos encontrar una cuenta con ese correo electrónico.');
+        setMessage(result.message || 'No pudimos encontrar una cuenta con ese correo electrónico.');
       }
     } catch (err) {
       setMessageType('error');

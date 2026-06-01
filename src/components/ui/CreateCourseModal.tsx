@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { IconPlus, IconBook } from '@tabler/icons-react';
 import { CreateCourseModalUI } from './modals';
+import { createCourse } from '@/app/actions/courseActions';
 
 export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated?: () => void | Promise<void> }) {
   const router = useRouter();
@@ -61,27 +62,21 @@ export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated
         return;
       }
 
-      const response = await fetch("/api/courses", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: formData.title,
-          description: formData.description,
-          coverImage: formData.coverImage,
-        }),
+      const result = await createCourse({
+        title: formData.title,
+        description: formData.description,
+        coverImage: formData.coverImage,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || data.message || "Error al crear el curso");
+      if (!result.success) {
+        setError(result.error || "Error al crear el curso");
         setLoading(false);
         return;
       }
 
       // Éxito: mostrar mensaje y guardar el ID del curso
       setSuccess(true);
-      setCourseId(data.data?.id);
+      setCourseId(result.data?.id ?? "");
       setLoading(false);
       
       // Actualizar la UI

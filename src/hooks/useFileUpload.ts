@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { uploadFile } from '@/app/actions/resourceActions';
 
 interface UploadProgress {
   loaded: number;
@@ -64,46 +65,21 @@ export function useFileUpload(options: UseFileUploadOptions) {
         formData.append('courseId', options.courseId);
         formData.append('unitId', options.unitId);
 
-        // Enviar solicitud POST al endpoint de subida de recursos
-        // El servidor manejará la validación y subida a R2
-        const response = await fetch('/api/resources/upload', {
-          method: 'POST',
-          body: formData,
-        });
+        const result = await uploadFile(formData);
 
-        const data = await response.json();
-
-        // Verificar si la respuesta es exitosa (status 200)
-        if (!response.ok) {
-          // Extraer mensaje de error de la respuesta del servidor
-          const validationDetails = data?.error?.details as Record<string, unknown> | undefined;
-
-          const firstValidationError = validationDetails
-            ? Object.values(validationDetails).find(
-                (value): value is string[] => Array.isArray(value) && value.length > 0
-              )?.[0]
-            : undefined;
-
-          const errorMessage =
-            firstValidationError ||
-            (Array.isArray(validationDetails?.file) ? (validationDetails.file as string[])[0] : undefined) ||
-            data?.message ||
-            'Error al subir el archivo';
+        if (!result.success) {
+          const errorMessage = result.error || 'Error al subir el archivo';
           setError(errorMessage);
-          return {
-            success: false,
-            error: errorMessage,
-          };
+          return { success: false, error: errorMessage };
         }
 
         // Actualizar progreso a 100% cuando la carga es exitosa
         setProgress({ loaded: file.size, total: file.size, percentage: 100 });
 
-        // Retornar la URL del archivo y metadatos
         return {
           success: true,
-          url: data.data.url,  // URL pública del archivo en R2
-          fileName: data.data.fileName,
+          url: result.url,
+          fileName: result.fileName,
         };
       } catch (err) {
         // Capturar errores de red o parsing

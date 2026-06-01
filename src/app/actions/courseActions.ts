@@ -19,10 +19,12 @@ import { authOptions } from "@/config/auth.config";
 import { ICourse, IInviteCode } from "@/models/Course";
 import {
   createSubjectSchema,
+  createCourseSchema,
   updateCourseSchema,
   updateSubjectSchema,
   reorderSubjectsSchema,
 } from "@/lib/validators/validators";
+import { getCourseFullStructure } from "@/lib/api/course-helpers";
 import { LOGGER } from "@/config/logger";
 import { emailSchema } from "@/lib/validators/validators";
 import mongoose from "mongoose";
@@ -1043,6 +1045,134 @@ export async function joinCourseByCode(
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al unirse al curso";
     LOGGER.error({ error, code }, "Error joining course by code");
+    return { success: false, error: message };
+  }
+}
+
+export interface CreateCourseResult {
+  success: boolean;
+  data?: {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+    ownerId: string;
+  };
+  error?: string;
+}
+
+export async function createCourse(input: {
+  title: string;
+  description?: string;
+  coverImage?: string;
+}): Promise<CreateCourseResult> {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return { success: false, error: "No autorizado" };
+    }
+
+    const validationResult = createCourseSchema.safeParse(input);
+    if (!validationResult.success) {
+      return {
+        success: false,
+        error: validationResult.error.issues[0]?.message || "Datos de curso inválidos",
+      };
+    }
+
+    await connectDB();
+
+    const user = await User.findOne({ email: session.user.email }).lean();
+    if (!user) {
+      return { success: false, error: "Usuario no encontrado" };
+    }
+
+    if ((user as any).role !== "teacher") {
+      return { success: false, error: "Solo los profesores pueden crear cursos" };
+    }
+
+    const { title, description, status, coverImage } = validationResult.data;
+
+    const newCourse = new Course({
+      title,
+      description,
+      status,
+      coverImage: coverImage ?? "circles-blue",
+      ownerId: (user as any)._id,
+      teachers: [],
+      subjectIds: [],
+      enrolledStudents: [],
+    });
+
+    await newCourse.save();
+
+    LOGGER.info({ courseId: newCourse._id.toString(), title }, "Curso creado desde action");
+
+    revalidatePath("/mycourses");
+
+    return {
+      success: true,
+      data: {
+        id: newCourse._id.toString(),
+        title: newCourse.title,
+        description: newCourse.description,
+        status: newCourse.status,
+        ownerId: newCourse.ownerId.toString(),
+      },
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al crear el curso";
+    LOGGER.error({ error }, "Error creating course from action");
+    return { success: false, error: message };
+  }
+}
+
+export interface CourseStructureUnit {
+  _id: string;
+  title: string;
+  resources?: Array<{ _id: string; title: string }>;
+  tasks?: Array<{ _id: string; title: string; type?: string }>;
+}
+
+export interface GetCourseStructureResult {
+  success: boolean;
+  structure?: { units?: CourseStructureUnit[] } | null;
+  error?: string;
+}
+
+export async function getCourseStructure(courseId: string): Promise<GetCourseStructureResult> {
+  try {
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      return { success: false, error: "ID de curso inválido" };
+    }
+
+    await connectDB();
+
+    const raw = await getCourseFullStructure(courseId);
+    if (!raw) {
+      return { success: true, structure: null };
+    }
+
+    const structure = {
+      units: ((raw as any).units || []).map((unit: any) => ({
+        _id: unit._id?.toString() || "",
+        title: unit.title || "",
+        resources: (unit.resources || []).map((r: any) => ({
+          _id: r._id?.toString() || "",
+          title: r.title || "",
+        })),
+        tasks: (unit.tasks || []).map((t: any) => ({
+          _id: t._id?.toString() || "",
+          title: t.title || "",
+          type: t.type,
+        })),
+      })),
+    };
+
+    return { success: true, structure };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Error al obtener la estructura del curso";
+    LOGGER.error({ error, courseId }, "Error en getCourseStructure action");
     return { success: false, error: message };
   }
 }

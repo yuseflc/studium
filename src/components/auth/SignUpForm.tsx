@@ -12,6 +12,7 @@ import { FormInput } from './FormInput';
 import { PasswordInput } from './PasswordInput';
 import { validators } from './validatorConfig';
 import { validateField, validatePasswordMatch } from '@/lib/clientValidation';
+import { signupUser } from '@/app/actions/authActions';
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -172,20 +173,14 @@ export default function SignUpForm() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify({ firstName, email, password }),
-        headers: { 'Content-Type': 'application/json' },
-      });
+      const result = await signupUser({ firstName, email, password });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        if (data.details) {
-          setFieldErrors(data.details);
+      if (!result.success) {
+        if (result.details) {
+          setFieldErrors(result.details);
         } else {
           setFieldErrors({
-            general: data.error || 'Error desconocido. Por favor intenta de nuevo.',
+            general: result.error || 'Error desconocido. Por favor intenta de nuevo.',
           });
         }
         return;
