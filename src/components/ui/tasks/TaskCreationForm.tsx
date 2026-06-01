@@ -91,7 +91,7 @@ export default function TaskCreationForm({
   const [assignmentThreshold, setAssignmentThreshold] = useState(initialTask?.assignmentThreshold ?? 5);
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>(initialTask?.assignedStudentIds || []);
   const [search, setSearch] = useState("");
-  const [maxPoints, setMaxPoints] = useState(String(initialTask?.maxPoints ?? 100));
+  const [maxPoints, setMaxPoints] = useState(String(initialTask?.maxPoints ?? 10));
   const [taskType] = useState<"assignment" | "quiz" | "forum" | "project">(initialTask?.type || "assignment");
 
   const activeUnitTitle = useMemo(() => {

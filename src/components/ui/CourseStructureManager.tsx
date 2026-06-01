@@ -217,7 +217,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
   const [resourceType, setResourceType] = useState<"link" | "file" | "text">("file");
   const [resourceUrl, setResourceUrl] = useState("");
   const [dueDate, setDueDate] = useState("");
-  const [maxPoints, setMaxPoints] = useState("100");
+  const [maxPoints, setMaxPoints] = useState("10");
   const [active, setActive] = useState(true);
 
   const sortedSubjects = useMemo(
@@ -337,7 +337,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     setTitle(task.title);
     setDescription(task.description);
     setDueDate(toDateTimeLocal(task.dueDate));
-    setMaxPoints(String(task.maxPoints ?? 100));
+    setMaxPoints(String(task.maxPoints ?? 10));
     setActive(task.active ?? true);
     setEditor({
       kind: "task",

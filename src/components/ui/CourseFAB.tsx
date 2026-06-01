@@ -85,7 +85,7 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
           dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
           startDate: new Date().toISOString(),
           type: isExamCreation ? 'quiz' : 'assignment',
-          maxPoints: 100,
+          maxPoints: 10,
           allowLateSubmission: false,
           active: true,
         });

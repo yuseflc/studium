@@ -124,18 +124,30 @@ export default async function TaskDetailPage({
   };
 
   const serializedSubmission = existingSubmission ? {
-    content: existingSubmission.content,
-    files: existingSubmission.files,
-    submittedAt: existingSubmission.submittedAt
+    content: (existingSubmission as any).content,
+    files: (existingSubmission as any).files,
+    submittedAt: (existingSubmission as any).submittedAt,
+    grade: (existingSubmission as any).grade,
+    feedback: (existingSubmission as any).feedback,
+    gradedAt: (existingSubmission as any).gradedAt ? String((existingSubmission as any).gradedAt) : undefined,
+    submissionStatus: (existingSubmission as any).submissionStatus,
   } : undefined;
 
+  const totalStudents = (() => {
+    if (!course) return 0;
+    if (taskInfo.assignmentMode === 'manual') {
+      return Array.isArray(taskInfo.assignedStudentIds) ? taskInfo.assignedStudentIds.length : 0;
+    }
+    return course.enrolledStudents?.length || 0;
+  })();
+
   return (
-    <TaskDetailClient 
-      taskInfo={serializedTask} 
-      courseid={courseid} 
+    <TaskDetailClient
+      taskInfo={serializedTask}
+      courseid={courseid}
       isTeacherView={isTeacherView}
       deliveredCount={deliveredCount}
-      totalStudents={course ? course.enrolledStudents?.length || 0 : 0}
+      totalStudents={totalStudents}
       editTaskHref={`/mycourses/${courseid}/tasks/${taskId}/edit`}
       existingSubmission={serializedSubmission}
       teacherSubmissions={teacherSubmissions}

@@ -198,7 +198,7 @@ export const POST = withErrorHandling(
       title,
       description,
       type: type || 'assignment',
-      maxPoints: maxPoints || 100,
+      maxPoints: maxPoints || 10,
       startDate,
       dueDate,
       allowLateSubmission: allowLateSubmission || false,

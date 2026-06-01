@@ -4,7 +4,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2, ChevronLeft, ChevronRight, Save, MessageSquareText, Clock3, BadgeInfo, Files, AlertCircle } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2, ChevronLeft, ChevronRight, Save, MessageSquareText, Clock3, BadgeInfo, Files, AlertCircle, Star } from 'lucide-react';
 import Link from 'next/link';
 import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
 import { Modal } from '@/components/ui/modals/Modal';
@@ -51,6 +51,10 @@ interface TaskDetailClientProps {
     content: string;
     files: string[];
     submittedAt: Date;
+    grade?: number;
+    feedback?: string;
+    gradedAt?: string;
+    submissionStatus?: string;
   };
 }
 
@@ -73,6 +77,7 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeletingTask, setIsDeletingTask] = useState(false);
   const [taskDeleteError, setTaskDeleteError] = useState<string | null>(null);
+  const [isDeleteSubmissionModalOpen, setIsDeleteSubmissionModalOpen] = useState(false);
   const [reviewMode, setReviewMode] = useState(false);
   const [reviewSubmissions, setReviewSubmissions] = useState<TeacherSubmissionView[]>(teacherSubmissions);
   const [activeSubmissionIndex, setActiveSubmissionIndex] = useState(0);
@@ -132,7 +137,7 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
   const isDeadlinePassed = dueDateObj && new Date() > dueDateObj;
   const canSubmit = !isDeadlinePassed || !!taskInfo.allowLateSubmission;
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -174,8 +179,6 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
   };
 
   const handleDelete = async () => {
-    if (!confirm('¿Estás seguro de que quieres borrar tu entrega?')) return;
-    
     setIsSubmitting(true);
     setError(null);
 
@@ -183,6 +186,7 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
       const result = await deleteSubmission(taskInfo._id || '');
 
       if (result.success) {
+        setIsDeleteSubmissionModalOpen(false);
         setIsSubmitted(false);
         setSubmissionText('');
         setSelectedFile(null);
@@ -611,21 +615,34 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                   )
                 ) : (
                   <form onSubmit={handleSubmit} className="flex flex-col h-full justify-between min-h-0">
-                    <div className="flex flex-col min-h-0">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                          <Upload size={24} />
+                    <div className="flex flex-col min-h-0 overflow-y-auto pr-1">
+                      {/* Header dinámico según estado */}
+                      <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+                        <div className={`p-2.5 rounded-xl ${isSubmitted ? 'bg-success/10 text-success' : 'bg-primary/10 text-primary'}`}>
+                          {isSubmitted ? <CheckCircle2 size={24} /> : <Upload size={24} />}
                         </div>
-                        <h2 className="card-title text-xl font-bold text-base-content">Tu Entrega</h2>
+                        <div>
+                          <h2 className="card-title text-xl font-bold text-base-content">
+                            {isSubmitted ? 'Tarea entregada' : 'Tu Entrega'}
+                          </h2>
+                          {isSubmitted && (
+                            <p className="text-xs text-base-content/50 mt-0.5">
+                              {existingSubmission?.grade !== undefined && existingSubmission?.grade !== null
+                                ? `Corregida · ${existingSubmission.grade} / ${taskInfo.maxPoints ?? 10} pts`
+                                : 'Pendiente de corrección'}
+                            </p>
+                          )}
+                        </div>
                       </div>
 
-                      <div className="divider my-0"></div>
+                      <div className="divider my-0 flex-shrink-0"></div>
 
                       <div className="mt-4 space-y-4">
+                        {/* Archivos */}
                         <div className="form-control w-full">
                           <label className="label py-1">
                             <span className="label-text font-semibold text-sm">
-                              {isSubmitted ? "Archivo Entregado" : "Adjuntar Archivo de Trabajo"}
+                              {isSubmitted ? 'Archivo entregado' : 'Adjuntar archivo de trabajo'}
                             </span>
                           </label>
 
@@ -688,25 +705,56 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                           )}
                         </div>
 
+                        {/* Respuesta escrita */}
                         <div className="form-control w-full">
                           <label className="label py-1 flex justify-between">
-                            <span className="label-text font-semibold text-sm">Respuesta Escrita</span>
+                            <span className="label-text font-semibold text-sm">Respuesta escrita</span>
                           </label>
-                          <textarea
-                            placeholder="Escribe aquí tu respuesta o comentarios para el profesor..."
-                            className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
-                            value={submissionText}
-                            onChange={(e) => setSubmissionText(e.target.value)}
-                            disabled={isSubmitting || !canSubmit}
-                          />
+                          {isSubmitted ? (
+                            <div className="rounded-xl border border-base-300 bg-base-200/30 p-4 min-h-24 text-sm leading-relaxed text-base-content/85 whitespace-pre-wrap break-words">
+                              {submissionText.trim() || <span className="italic text-base-content/40">Sin respuesta escrita.</span>}
+                            </div>
+                          ) : (
+                            <textarea
+                              name="content"
+                              placeholder="Escribe aquí tu respuesta o comentarios para el profesor..."
+                              className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
+                              value={submissionText}
+                              onChange={(e) => setSubmissionText(e.target.value)}
+                              disabled={isSubmitting}
+                            />
+                          )}
                         </div>
 
-                        {!canSubmit && (
+                        {/* Corrección del profesor */}
+                        {isSubmitted && existingSubmission?.grade !== undefined && existingSubmission?.grade !== null && (
+                          <div className="rounded-2xl border border-success/30 bg-success/5 p-4 space-y-3">
+                            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-success/80">
+                              <Star size={12} /> Corrección del profesor
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-3xl font-bold text-base-content">
+                                {existingSubmission.grade}
+                              </span>
+                              <span className="text-base-content/50 text-sm">/ {taskInfo.maxPoints ?? 10} pts</span>
+                            </div>
+                            {existingSubmission.feedback?.trim() && (
+                              <div className="space-y-1">
+                                <p className="text-[10px] font-bold uppercase tracking-wider text-base-content/40">Feedback</p>
+                                <p className="text-sm leading-relaxed text-base-content/80 whitespace-pre-wrap">
+                                  {existingSubmission.feedback}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {!canSubmit && !isSubmitted && (
                           <div className="bg-error/10 border border-error/20 text-error p-4 rounded-xl flex items-center gap-3 w-full mt-2">
                             <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
                             <div className="flex flex-col">
                               <span className="font-semibold text-sm">Plazo de entrega finalizado</span>
-                              <span className="text-xs opacity-90 mt-0.5">La fecha límite ha pasado y no se admiten entregas tardías. No puedes modificar ni realizar nuevas entregas.</span>
+                              <span className="text-xs opacity-90 mt-0.5">La fecha límite ha pasado y no se admiten entregas tardías.</span>
                             </div>
                           </div>
                         )}
@@ -719,44 +767,42 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                       </div>
                     </div>
 
+                    {/* Botones: solo visibles si se puede entregar/modificar */}
                     {canSubmit && (
                       <div className="pt-4 border-t border-base-300 mt-4 flex gap-3 flex-shrink-0">
                         {isSubmitted ? (
                           <>
                             <button
                               type="button"
-                              onClick={handleDelete}
-                              disabled={isSubmitting || !canSubmit}
+                              onClick={() => setIsDeleteSubmissionModalOpen(true)}
+                              disabled={isSubmitting}
                               className="btn btn-outline btn-error flex-1 gap-2"
                             >
                               {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                              <span>Borrar Entrega</span>
+                              <span>Borrar entrega</span>
                             </button>
-
                             <button
                               type="submit"
-                              disabled={isSubmitting || (!submissionText.trim() && !selectedFile) || !canSubmit}
+                              disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
                               className="btn btn-primary flex-1 hover:bg-primary/95 transition-all duration-200 gap-2"
-                              title={!canSubmit ? 'La fecha de entrega ha pasado y no se permiten entregas tardías' : ''}
                             >
                               {isSubmitting ? (
                                 <><Loader2 size={18} className="animate-spin" /> Guardando...</>
                               ) : (
-                                <><Pencil size={18} /> Editar Entrega</>
+                                <><Pencil size={18} /> Editar entrega</>
                               )}
                             </button>
                           </>
                         ) : (
                           <button
                             type="submit"
-                            disabled={isSubmitting || (!submissionText.trim() && !selectedFile) || !canSubmit}
+                            disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
                             className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200 gap-2"
-                            title={!canSubmit ? 'La fecha de entrega ha pasado y no se permiten entregas tardías' : ''}
                           >
                             {isSubmitting ? (
                               <><Loader2 size={18} className="animate-spin" /> Entregando...</>
                             ) : (
-                              <><Upload size={18} /> Entregar Tarea</>
+                              <><Upload size={18} /> Entregar tarea</>
                             )}
                           </button>
                         )}
@@ -769,6 +815,40 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
           </div>
         </div>
       </div>
+
+      <Modal
+        isOpen={isDeleteSubmissionModalOpen}
+        onClose={() => { if (!isSubmitting) setIsDeleteSubmissionModalOpen(false); }}
+        className="max-w-xl border border-error/20"
+      >
+        <h3 className="font-bold text-lg text-error">Borrar entrega</h3>
+        <p className="py-4 text-base-content/80">
+          Se eliminará tu entrega y podrás volver a entregar la tarea. Esta acción no se puede deshacer.
+        </p>
+        {error ? (
+          <div className="alert alert-error mb-4 text-sm">
+            <span>{error}</span>
+          </div>
+        ) : null}
+        <div className="modal-action">
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => setIsDeleteSubmissionModalOpen(false)}
+            disabled={isSubmitting}
+          >
+            Cancelar
+          </button>
+          <HoldConfirmButton
+            className="btn btn-error text-white"
+            onConfirm={handleDelete}
+            disabled={isSubmitting}
+            holdText="Suelta para borrar"
+          >
+            {isSubmitting ? 'Borrando...' : 'Borrar entrega'}
+          </HoldConfirmButton>
+        </div>
+      </Modal>
 
       <Modal
         isOpen={isDeleteModalOpen}
