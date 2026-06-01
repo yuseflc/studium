@@ -3,10 +3,11 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { deleteParticipant, getCourseSubmissions, saveStudentTaskGrade } from '@/app/actions/participantActions';
 import { Trash2, GraduationCap, Save, AlertTriangle, Check } from 'lucide-react';
+import { ParticipantDeleteModal } from '../modals';
 
 interface Task {
   _id: string;
@@ -36,11 +37,15 @@ interface TeacherProfileViewProps {
 
 export default function TeacherProfileView({ student, courseId }: TeacherProfileViewProps) {
   const router = useRouter();
+  const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [submissions, setSubmissions] = useState<Record<string, Submission>>({});
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [gradesState, setGradesState] = useState<Record<string, { grade: string; feedback: string }>>({});
 
   // Cargar tareas y entregas si hay un curso asociado
@@ -137,25 +142,33 @@ export default function TeacherProfileView({ student, courseId }: TeacherProfile
 
   const handleRemoveFromCourse = async () => {
     if (!courseId) return;
-    const confirmed = window.confirm(
-      `¿Estás seguro de que deseas eliminar a ${student.firstName} de este curso?`
-    );
-    if (!confirmed) return;
-
-    setLoading(true);
+    setDeleting(true);
+    setDeleteError(null);
     try {
       const res = await deleteParticipant(courseId, student._id);
       if (res.success) {
-        alert('Estudiante eliminado del curso correctamente.');
+        deleteDialogRef.current?.close();
         router.push(`/mycourses/${courseId}`);
       } else {
-        alert(`Error: ${res.message}`);
+        setDeleteError(res.message);
       }
     } catch (err) {
-      alert('Error al intentar eliminar al estudiante.');
+      setDeleteError('Error al intentar eliminar al estudiante.');
     } finally {
-      setLoading(false);
+      setDeleting(false);
     }
+  };
+
+  const openDeleteModal = () => {
+    setIsDeleteModalOpen(true);
+    setDeleteError(null);
+    deleteDialogRef.current?.showModal();
+  };
+
+  const closeDeleteModal = () => {
+    deleteDialogRef.current?.close();
+    setDeleteError(null);
+    setIsDeleteModalOpen(false);
   };
 
   return (
@@ -169,8 +182,8 @@ export default function TeacherProfileView({ student, courseId }: TeacherProfile
             </h2>
             {courseId && (
               <button
-                onClick={handleRemoveFromCourse}
-                disabled={loading}
+                onClick={openDeleteModal}
+                disabled={deleting}
                 className="btn btn-error btn-sm gap-2"
               >
                 <Trash2 size={16} />
@@ -250,6 +263,17 @@ export default function TeacherProfileView({ student, courseId }: TeacherProfile
           )}
         </div>
       </div>
+
+      {courseId && isDeleteModalOpen && (
+        <ParticipantDeleteModal
+          dialogRef={deleteDialogRef}
+          onClose={closeDeleteModal}
+          onConfirm={handleRemoveFromCourse}
+          participantName={student.firstName}
+          isDeleting={deleting}
+          error={deleteError}
+        />
+      )}
     </div>
   );
 }

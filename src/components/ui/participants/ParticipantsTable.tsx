@@ -7,12 +7,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  IconTrash,
   IconEdit,
   IconDots,
   IconMail,
 } from '@tabler/icons-react';
-import { deleteParticipant } from '@/app/actions/participantActions';
 
 interface ParticipantData {
   _id: string;
@@ -50,7 +48,6 @@ export default function ParticipantsTable({
   const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
     new Set()
   );
-  const [isLoading, setIsLoading] = useState(false);
 
   /**
    * Alterna la selección de un participante
@@ -92,36 +89,6 @@ export default function ParticipantsTable({
       }).format(d);
     } catch {
       return '—';
-    }
-  };
-
-  /**
-   * Elimina un participante del curso
-   */
-  const handleDelete = async (participantId: string, participantName: string) => {
-    const confirmed = window.confirm(
-      `¿Estás seguro de que deseas eliminar a ${participantName} del curso?`
-    );
-    
-    if (!confirmed) return;
-
-    setIsLoading(true);
-    try {
-      const result = await deleteParticipant(courseId, participantId);
-      
-      if (result.success) {
-        // Refrescar la página para actualizar la lista
-        router.refresh();
-        alert(`${participantName} ha sido eliminado del curso`);
-      } else {
-        alert(`Error: ${result.message}`);
-      }
-    } catch (error) {
-      console.error('Error al eliminar participante:', error);
-      alert('Error al eliminar el participante');
-    } finally {
-      setIsLoading(false);
-      setExpandedRow(null);
     }
   };
 
@@ -268,20 +235,6 @@ export default function ParticipantsTable({
                               Enviar Mensaje
                             </button>
                           </li>
-                          {participant.role === 'student' && (
-                            <li>
-                              <button
-                                className="btn btn-ghost btn-sm justify-start gap-2 text-error"
-                                onClick={() =>
-                                  handleDelete(participant._id, participant.firstName)
-                                }
-                                disabled={isLoading}
-                              >
-                                <IconTrash size={16} />
-                                Eliminar del Curso
-                              </button>
-                            </li>
-                          )}
                         </ul>
                       )}
                     </div>
@@ -352,18 +305,6 @@ export default function ParticipantsTable({
                   <IconEdit size={14} />
                   Editar
                 </button>
-                {participant.role === 'student' && (
-                  <button
-                    className="btn btn-ghost btn-sm flex-1 gap-1 text-xs text-error"
-                    onClick={() =>
-                      handleDelete(participant._id, participant.firstName)
-                    }
-                    disabled={isLoading}
-                  >
-                    <IconTrash size={14} />
-                    Eliminar
-                  </button>
-                )}
               </div>
             )}
           </div>

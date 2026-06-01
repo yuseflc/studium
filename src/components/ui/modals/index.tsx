@@ -18,3 +18,4 @@ export * from './CourseArchiveModal';
 export * from './CourseDeleteModal';
 export * from './CourseStructureDeleteModal';
 export * from './CourseMenuDeleteModal';
+export * from './ParticipantDeleteModal';
