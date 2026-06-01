@@ -13,7 +13,7 @@ import { User } from "@/models/index";
 import LogoutButton from "@/components/navbars/LogoutButton";
 import ProfileImage from "@/components/navbars/ProfileImage";
 import { LOGGER } from "@/config/logger";
-import Logo from "../Logo";
+import Logo from "@/components/ui/Logo";
 import RoleInfoModal from "@/components/navbars/RoleInfoModal";
 import { getUserAvatarUrl } from "@/lib/utils/avatar";
 

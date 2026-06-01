@@ -7,7 +7,7 @@
 import Link from "next/link";
 import { IconList } from "@tabler/icons-react";
 import ThemeSwitcher from "@/components/ui/ThemeSwitcher";
-import Logo from "../Logo";
+import Logo from "@/components/ui/Logo";
 
 export default function Navbar() {
 

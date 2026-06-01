@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Modal } from './Modal';
-import HoldConfirmButton from '../HoldConfirmButton';
+import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
 import { IconTrash } from '@tabler/icons-react';
 
 interface CourseMenuDeleteModalProps {

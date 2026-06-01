@@ -6,7 +6,7 @@
 import React from 'react';
 import { IconTrash } from '@tabler/icons-react';
 import { Modal } from './Modal';
-import HoldConfirmButton from '../HoldConfirmButton';
+import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
 
 interface ParticipantDeleteModalProps {
     dialogRef: React.RefObject<HTMLDialogElement | null>;

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Modal } from './Modal';
-import HoldConfirmButton from '../HoldConfirmButton';
+import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
 
 interface CourseStructureDeleteModalProps {
     onClose: () => void;
