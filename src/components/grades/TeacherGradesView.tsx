@@ -3,10 +3,10 @@
 
 "use client";
 // Vista de profesor: listar estudiantes y abrir grading individual por alumno
-import React, { useState } from "react";
+import React from "react";
 import { GraduationCap } from "lucide-react";
 import IndividualStudentGradingView from "./IndividualStudentGradingView";
-import { getCourseSubmissions } from "@/app/actions/participantActions";
+import { useTeacherGrades } from "@/hooks/useTeacherGrades";
 
 interface Participant {
     id: string;
@@ -36,38 +36,7 @@ interface TeacherGradesViewProps {
 }
 
 export default function TeacherGradesView({ participants, subjects, courseId, initialSubmissions = [] }: TeacherGradesViewProps) {
-    const [selectedStudent, setSelectedStudent] = useState<Participant | null>(null);
-    const [submissions, setSubmissions] = useState<any[]>(initialSubmissions);
-    const [tasks, setTasks] = useState<any[]>([]);
-    const [loading, setLoading] = useState(false);
-
-    const loadSubmissions = async () => {
-        setLoading(true);
-        try {
-            const res = await getCourseSubmissions(courseId);
-            if (res.success) {
-                setSubmissions(res.submissions);
-                setTasks(res.tasks);
-            }
-        } catch (error) {
-            console.error("Error loading submissions:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Solo mostramos estudiantes en la lista de calificaciones
-    const visibleStudents = participants.filter(p => p.rol === "estudiante");
-
-    // Calcular la media real para cada estudiante
-    const getStudentAverage = (studentId: string) => {
-        const studentSubs = submissions.filter(
-            (s: any) => String(s.studentId) === String(studentId) && s.grade !== undefined
-        );
-        if (studentSubs.length === 0) return "—";
-        const sum = studentSubs.reduce((acc: number, curr: any) => acc + curr.grade, 0);
-        return (sum / studentSubs.length).toFixed(1);
-    };
+    const { selectedStudent, setSelectedStudent, submissions, loading, visibleStudents, loadSubmissions, getStudentAverage } = useTeacherGrades(courseId, participants, initialSubmissions);
 
     if (selectedStudent) {
         return (

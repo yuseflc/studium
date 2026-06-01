@@ -3,10 +3,9 @@
 
 "use client";
 // Punto de entrada para vistas de calificaciones; enruta entre estudiante y profesor
-import { useEffect, useState } from "react";
 import StudentGradesView from "./StudentGradesView";
 import TeacherGradesView from "./TeacherGradesView";
-import { getCourseSubmissions } from "@/app/actions/participantActions";
+import { useSubmissions } from "@/hooks/useSubmissions";
 
 // [SSR] Interfaz de Submission (entregas reales)
 interface Submission {
@@ -54,30 +53,7 @@ export default function GradesView({
     currentUserEmail,
     courseId
 }: GradesViewProps) {
-    const [submissions, setSubmissions] = useState<Submission[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    // [SSR] Cargar submissions reales del curso
-    useEffect(() => {
-        const loadSubmissions = async () => {
-            setLoading(true);
-            try {
-                const res = await getCourseSubmissions(courseId);
-                if (res.success) {
-                    setSubmissions(res.submissions);
-                    console.log(
-                        `[GradesView] Cargadas ${res.submissions.length} entregas reales`
-                    );
-                }
-            } catch (error) {
-                console.error("[GradesView] Error:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadSubmissions();
-    }, [courseId]);
+    const { submissions, loading } = useSubmissions(courseId);
 
     if (loading) {
         return (

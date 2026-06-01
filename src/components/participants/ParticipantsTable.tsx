@@ -11,6 +11,7 @@ import {
   IconDots,
   IconMail,
 } from '@tabler/icons-react';
+import { useParticipantSelection } from '@/hooks/useParticipantSelection';
 
 interface ParticipantData {
   _id: string;
@@ -45,35 +46,7 @@ export default function ParticipantsTable({
 }: ParticipantsTableProps) {
   const router = useRouter();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
-  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(
-    new Set()
-  );
-
-  /**
-   * Alterna la selección de un participante
-   */
-  const toggleParticipant = (id: string) => {
-    const newSelected = new Set(selectedParticipants);
-    if (newSelected.has(id)) {
-      newSelected.delete(id);
-    } else {
-      newSelected.add(id);
-    }
-    setSelectedParticipants(newSelected);
-  };
-
-  /**
-   * Alterna todos los participantes
-   */
-  const toggleAllParticipants = () => {
-    if (selectedParticipants.size === participants.length) {
-      setSelectedParticipants(new Set());
-    } else {
-      setSelectedParticipants(
-        new Set(participants.map((p) => p._id))
-      );
-    }
-  };
+  const { selectedParticipants, toggleParticipant, toggleAllParticipants } = useParticipantSelection(participants);
 
   /**
    * Formato seguro de fechas

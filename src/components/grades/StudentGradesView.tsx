@@ -3,8 +3,9 @@
 
 "use client";
 // Vista de estudiante: muestra solo las notas que el profesor ha guardado
-import React, { useState } from "react";
+import React from "react";
 import { ChevronDown, ChevronRight } from "lucide-react";
+import { useStudentGradesUI } from "@/hooks/useStudentGradesUI";
 // Tipos mínimos locales para evitar problemas de resolución de módulos
 type Task = { _id?: string; id?: string; title: string };
 type Subject = { _id: string; title: string; tasks?: Task[] };
@@ -37,23 +38,7 @@ export default function StudentGradesView({
     subjects = [],
     submissions = []
 }: StudentGradesViewProps) {
-    const [expandedSubjects, setExpandedSubjects] = useState<Record<string, boolean>>(
-        Object.fromEntries((subjects || []).map(s => [s._id, true]))
-    );
-
-    // [Mini Modal] Estado para mostrar comentario del profesor
-    const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
-    const [selectedFeedback, setSelectedFeedback] = useState<{ title: string; feedback: string } | null>(null);
-
-    const toggleSubject = (id: string) => {
-        setExpandedSubjects(prev => ({ ...prev, [id]: !prev[id] }));
-    };
-
-    // [Mini Modal] Abrir modal de comentario
-    const handleShowFeedback = (taskTitle: string, feedback: string) => {
-        setSelectedFeedback({ title: taskTitle, feedback });
-        setFeedbackModalOpen(true);
-    };
+    const { expandedSubjects, toggleSubject, feedbackModalOpen, setFeedbackModalOpen, selectedFeedback, handleShowFeedback } = useStudentGradesUI(subjects || []);
 
     return (
         <div className="space-y-4">

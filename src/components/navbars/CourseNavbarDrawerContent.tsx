@@ -4,31 +4,16 @@
 // Drawer content: lista de elementos del navbar del curso (estructura navegable)
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
-import { getCourseStructure } from "@/app/actions/courseActions";
-
-interface TaskItem {
-  _id: string;
-  title: string;
-  type?: string;
-}
-
-interface ResourceItem {
-  _id: string;
-  title: string;
-}
+import { useCourseStructure } from "@/hooks/useCourseStructure";
 
 interface UnitItem {
   _id: string;
   title: string;
-  resources?: ResourceItem[];
-  tasks?: TaskItem[];
-}
-
-interface CourseStruct {
-  units?: UnitItem[];
+  resources?: { _id: string; title: string }[];
+  tasks?: { _id: string; title: string; type?: string }[];
 }
 
 const scrollToElement = (id: string) => {
@@ -45,36 +30,10 @@ export default function CourseNavbarDrawerContent() {
     return match?.[1] || null;
   }, [pathname]);
 
-  const [structure, setStructure] = useState<CourseStruct | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { structure, loading, error } = useCourseStructure(courseId);
 
   const hasAssignments = (unit: UnitItem) =>
     (unit.tasks?.length || 0) > 0;
-
-  useEffect(() => {
-    if (!courseId) {
-      setStructure(null);
-      setError(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    getCourseStructure(courseId)
-      .then((result) => {
-        if (result.success) {
-          setStructure(result.structure || null);
-        } else {
-          setError(result.error || "Error cargando curso");
-        }
-      })
-      .catch(() => {
-        setError("No se pudo cargar el contenido del curso.");
-      })
-      .finally(() => setLoading(false));
-  }, [courseId]);
 
   if (!courseId) {
     return null;

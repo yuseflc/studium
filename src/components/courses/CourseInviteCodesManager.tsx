@@ -3,16 +3,8 @@
 
 "use client";
 // Gestión de códigos de invitación para cursos (generar, desactivar, listar)
-import { useState, useEffect } from 'react';
-import { generateInviteCode, deactivateInviteCode, listInviteCodes } from '@/app/actions/courseActions';
+import { useInviteCodes } from '@/hooks/useInviteCodes';
 import { IconCopy, IconTrash, IconLoader, IconPlus, IconCheck, IconInfoCircle } from '@tabler/icons-react';
-
-interface InviteCode {
-  code: string;
-  createdAt: string;
-  lastUsedAt?: string;
-  active: boolean;
-}
 
 interface CourseInviteCodesManagerProps {
   courseId: string;
@@ -28,64 +20,7 @@ export default function CourseInviteCodesManager({
   courseId,
   courseStatus = "active",
 }: CourseInviteCodesManagerProps) {
-  const [codes, setCodes] = useState<InviteCode[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [error, setError] = useState('');
-  const [copied, setCopied] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCodes = async () => {
-      try {
-        setIsLoading(true);
-        const result = await listInviteCodes(courseId);
-        if (!result.success) throw new Error(result.error || 'Error al cargar los códigos');
-        setCodes(result.codes || []);
-        setError('');
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchCodes();
-  }, [courseId]);
-
-  const handleGenerateCode = async () => {
-    try {
-      setIsGenerating(true);
-      const result = await generateInviteCode(courseId);
-      if (!result.success || !result.code) throw new Error(result.error || 'Error al generar código');
-      setCodes([...codes, { code: result.code, createdAt: new Date().toISOString(), active: true }]);
-      setError('');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
-  const handleCopyCode = async (code: string) => {
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopied(code);
-      setTimeout(() => setCopied(null), 2000);
-    } catch {
-      setError('No se pudo copiar el código');
-    }
-  };
-
-  const handleDeactivateCode = async (code: string) => {
-    try {
-      const result = await deactivateInviteCode(courseId, code);
-      if (!result.success) throw new Error(result.error || 'Error al desactivar código');
-      setCodes(codes.map(c => c.code === code ? { ...c, active: false } : c));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-    }
-  };
-
-  const activeCodes = codes.filter(c => c.active).length;
+  const { codes, isLoading, isGenerating, error, copied, activeCodes, handleGenerateCode, handleCopyCode, handleDeactivateCode } = useInviteCodes(courseId);
 
   return (
     <div className="space-y-4">

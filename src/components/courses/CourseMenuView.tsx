@@ -8,110 +8,25 @@ import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabl
 import CreateCourseModal from "@/components/courses/CreateCourseModal";
 import JoinCourseButton from "@/components/modals/JoinCourseModal";
 import { ModalAdvise, CourseMenuDeleteModal } from "@/components/modals";
-import { useEffect, useState, useRef, useCallback } from "react";
-import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
+import { useCourseList } from "@/hooks/useCourseList";
 import { truncateText } from "@/lib/utils";
 import { getPatternById } from "@/lib/coursePatterns";
 
 export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
-  const [courses, setCourses] = useState<SerializedCourse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [currentUserId, setCurrentUserId] = useState<string>("");
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [deleteError, setDeleteError] = useState("");
-  const [courseToDelete, setCourseToDelete] = useState<string | null>(null);
-  const [unenrollingId, setUnenrollingId] = useState<string | null>(null);
-  const [unenrollError, setUnenrollError] = useState("");
-
-  useEffect(() => {
-    const initializeData = async () => {
-      try {
-        // Fetch cursos desde BD + seed (ya combinados en Server Actions)
-        const allCourses = await fetchCourses();
-        setCourses(allCourses);
-
-        // Obtener ID del usuario actual
-        const userId = await getCurrentUser();
-        if (userId) {
-          setCurrentUserId(userId);
-        }
-      } catch (error) {
-        console.error("Error initializing data:", error);
-        setCourses([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeData();
-  }, []);
-
-  const handleDeleteCourse = async (courseId: string) => {
-    setDeletingId(courseId);
-    setDeleteError("");
-    try {
-      const result = await deleteCourse(courseId);
-
-      if (!result.success) {
-        setDeleteError(result.error || "Error al eliminar el curso");
-        setDeletingId(null);
-        return;
-      }
-
-      // Eliminar del estado local
-      setCourses((prevCourses) => prevCourses.filter((c: SerializedCourse) => c._id !== courseId));
-      setDeletingId(null);
-      setCourseToDelete(null);
-
-      // Cerrar modal de confirmación
-      (document.getElementById(`confirm_delete_${courseId}`) as HTMLDialogElement)?.close();
-    } catch (error: any) {
-      setDeleteError(error.message || "Error al eliminar el curso");
-      setDeletingId(null);
-    }
-  };
-
-  /**
-   * Recarga la lista de cursos sin hacer un full page reload
-   * Se usa cuando el usuario crea o se une a un curso
-   */
-  const handleRefresh = async () => {
-    try {
-      setLoading(true);
-      const allCourses = await fetchCourses();
-      setCourses(allCourses);
-    } catch (error) {
-      console.error("Error refreshing courses:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUnenrollCourse = async (courseId: string) => {
-    setUnenrollingId(courseId);
-    setUnenrollError("");
-    try {
-      const result = await unenrollCourse(courseId);
-
-      if (!result.success) {
-        setUnenrollError(result.error || "Error al cancelar el registro");
-        setUnenrollingId(null);
-        return;
-      }
-
-      // Cerrar modal de confirmación
-      (document.getElementById(`confirm_unenroll_${courseId}`) as HTMLDialogElement)?.close();
-      setUnenrollingId(null);
-
-      // Mostrar confirmación y recargar
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } catch (error: any) {
-      setUnenrollError(error.message || "Error al cancelar el registro");
-      setUnenrollingId(null);
-    }
-  };
+  const {
+    courses,
+    loading,
+    currentUserId,
+    deletingId,
+    deleteError,
+    courseToDelete,
+    setCourseToDelete,
+    unenrollingId,
+    unenrollError,
+    handleRefresh,
+    handleDeleteCourse,
+    handleUnenrollCourse,
+  } = useCourseList();
 
   return (
     <main className="p-8 bg-base-100 min-h-[calc(100vh-64px)]">
