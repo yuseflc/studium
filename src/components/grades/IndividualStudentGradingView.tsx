@@ -43,8 +43,8 @@ export default function IndividualStudentGradingView({
         isSaving,
         saveStatus,
         feedbackModalOpen,
-        setFeedbackModalOpen,
         selectedTaskForFeedback,
+        handleCloseFeedbackModal,
         feedbackModalRef,
         handleOpenFeedbackModal,
         handleSaveFeedback,
@@ -190,10 +190,7 @@ export default function IndividualStudentGradingView({
                 <FeedbackModal
                     dialogRef={feedbackModalRef}
                     isOpen={feedbackModalOpen}
-                    onClose={() => {
-                        setFeedbackModalOpen(false);
-                        setSelectedTaskForFeedback(null);
-                    }}
+                    onClose={handleCloseFeedbackModal}
                     taskTitle={selectedTaskForFeedback.title}
                     studentName={`${student.nombre} ${student.apellidos}`}
                     initialGrade={gradesState[selectedTaskForFeedback.stateKey]?.grade || ""}

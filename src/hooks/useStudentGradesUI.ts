@@ -22,12 +22,17 @@ export function useStudentGradesUI(subjects: Subject[]) {
     setFeedbackModalOpen(true);
   };
 
+  const handleCloseFeedback = () => {
+    setFeedbackModalOpen(false);
+    setSelectedFeedback(null);
+  };
+
   return {
     expandedSubjects,
     toggleSubject,
     feedbackModalOpen,
-    setFeedbackModalOpen,
     selectedFeedback,
     handleShowFeedback,
+    handleCloseFeedback,
   };
 }

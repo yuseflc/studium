@@ -93,6 +93,11 @@ export function useStudentGrading(
     });
   };
 
+  const handleCloseFeedbackModal = () => {
+    setFeedbackModalOpen(false);
+    setSelectedTaskForFeedback(null);
+  };
+
   const handleOpenFeedbackModal = (stateKey: string, taskTitle: string) => {
     setSelectedTaskForFeedback({ stateKey, title: taskTitle });
     setFeedbackModalOpen(true);
@@ -175,10 +180,10 @@ export function useStudentGrading(
     isSaving,
     saveStatus,
     feedbackModalOpen,
-    setFeedbackModalOpen,
     selectedTaskForFeedback,
     feedbackModalRef,
     handleOpenFeedbackModal,
+    handleCloseFeedbackModal,
     handleSaveFeedback,
     handleSaveAll,
   };

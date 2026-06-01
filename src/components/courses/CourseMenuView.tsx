@@ -9,6 +9,7 @@ import CreateCourseModal from "@/components/courses/CreateCourseModal";
 import JoinCourseButton from "@/components/modals/JoinCourseModal";
 import { ModalAdvise, CourseMenuDeleteModal } from "@/components/modals";
 import { useCourseList } from "@/hooks/useCourseList";
+import type { SerializedCourse } from "@/app/actions/courseActions";
 import { truncateText } from "@/lib/utils";
 import { getPatternById } from "@/lib/coursePatterns";
 

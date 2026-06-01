@@ -38,7 +38,7 @@ export default function StudentGradesView({
     subjects = [],
     submissions = []
 }: StudentGradesViewProps) {
-    const { expandedSubjects, toggleSubject, feedbackModalOpen, setFeedbackModalOpen, selectedFeedback, handleShowFeedback } = useStudentGradesUI(subjects || []);
+    const { expandedSubjects, toggleSubject, feedbackModalOpen, selectedFeedback, handleShowFeedback, handleCloseFeedback } = useStudentGradesUI(subjects || []);
 
     return (
         <div className="space-y-4">
@@ -143,10 +143,7 @@ export default function StudentGradesView({
 
             {/* [Mini Modal] Mostrar comentario del profesor */}
             {feedbackModalOpen && selectedFeedback && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => {
-                    setFeedbackModalOpen(false);
-                    setSelectedFeedback(null);
-                }}>
+                <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={handleCloseFeedback}>
                     {/* Backdrop */}
                     <div className="absolute inset-0 bg-black/50" />
                     
@@ -164,10 +161,7 @@ export default function StudentGradesView({
                         <div className="flex justify-end gap-2">
                             <button
                                 className="btn btn-sm btn-primary"
-                                onClick={() => {
-                                    setFeedbackModalOpen(false);
-                                    setSelectedFeedback(null);
-                                }}
+                                onClick={handleCloseFeedback}
                             >
                                 Cerrar
                             </button>
