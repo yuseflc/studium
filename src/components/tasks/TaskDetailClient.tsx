@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2, ChevronLeft, ChevronRight, Save, MessageSquareText, Clock3, BadgeInfo, Files, AlertCircle, Star } from 'lucide-react';
 import Link from 'next/link';
 import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
-import { Modal } from '@/components/ui/modals/Modal';
+import { Modal } from '@/components/modals/Modal';
 import { submitTask, deleteSubmission, deleteTask } from '@/app/actions/taskActions';
 import { saveStudentTaskGrade } from '@/app/actions/participantActions';
 import { TASK_SUBMISSION_MAX_FILE_SIZE_BYTES, TASK_SUBMISSION_MAX_FILE_SIZE_LABEL } from '@/lib/upload-limits';

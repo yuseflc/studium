@@ -6,7 +6,7 @@
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { IconPlus, IconBook } from '@tabler/icons-react';
-import { CreateCourseModalUI } from './modals';
+import { CreateCourseModalUI } from '@/components/modals';
 import { createCourse } from '@/app/actions/courseActions';
 
 export default function CreateCourseModal({ onCourseCreated }: { onCourseCreated?: () => void | Promise<void> }) {

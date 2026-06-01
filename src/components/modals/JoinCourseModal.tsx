@@ -8,7 +8,7 @@
 import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { joinCourseByCode } from '@/app/actions/courseActions';
-import { ModalForm } from '@/components/ui/modals';
+import { ModalForm } from '@/components/modals';
 import { IconPlus } from '@tabler/icons-react';
 
 /**

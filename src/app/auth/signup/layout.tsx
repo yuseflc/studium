@@ -2,7 +2,7 @@
   Descripción: Layout específico para las páginas de registro (signup). */
 
 import React from 'react';
-import Navbar from '@/components/ui/navbars/Navbar'; 
+import Navbar from '@/components/navbars/Navbar'; 
 
 export default function SignUpLayout({
   children,

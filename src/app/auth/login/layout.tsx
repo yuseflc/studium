@@ -1,7 +1,7 @@
 /* Archivo: src\app\auth\login\layout.tsx
   Descripción: Layout para la sección de login, aporta estructura y estilos comunes. */
 
-import Navbar from '@/components/ui/navbars/Navbar';
+import Navbar from '@/components/navbars/Navbar';
 export default function LoginLayout({
   children,
 }: {

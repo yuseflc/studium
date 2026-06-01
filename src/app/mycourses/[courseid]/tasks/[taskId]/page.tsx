@@ -9,7 +9,7 @@ import Submission from '@/models/Submission';
 import User from '@/models/User';
 import { notFound } from 'next/navigation';
 import mongoose from 'mongoose';
-import TaskDetailClient from '../../../../../components/ui/TaskDetailClient';
+import TaskDetailClient from '@/components/tasks/TaskDetailClient';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/config/auth.config';
 

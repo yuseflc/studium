@@ -7,7 +7,7 @@ import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
 import { Course, User } from "@/models/index";
 import { getTaskCreationContext } from "@/lib/task-assignment";
-import TaskCreationForm from "@/components/ui/tasks/TaskCreationForm";
+import TaskCreationForm from "@/components/tasks/TaskCreationForm";
 
 export const dynamic = "force-dynamic";
 

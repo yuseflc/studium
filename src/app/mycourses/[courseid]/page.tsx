@@ -6,7 +6,7 @@ import { connectDB } from "@/lib/database/database";
 import { User, Course } from "@/models/index";
 import { getCourseFullStructure } from "@/lib/api/course-helpers";
 import { notFound, redirect } from "next/navigation";
-import CourseView from "@/components/ui/CourseView";
+import CourseView from "@/components/courses/CourseView";
 import { ICourse } from "@/models/Course";
 import { CourseStructureGeneric } from "@/lib/api/types";
 import { LOGGER } from "@/config/logger";

@@ -3,7 +3,7 @@
 
 'use client';
 // Wrapper sencillo para `CreateCourseModal` (preserva compatibilidad con el layout)
-import CreateCourseModal from "@/components/ui/CreateCourseModal";
+import CreateCourseModal from "@/components/courses/CreateCourseModal";
 
 export default function CreateCourseModalWrapper() {
   return <CreateCourseModal onCourseCreated={() => {}} />;

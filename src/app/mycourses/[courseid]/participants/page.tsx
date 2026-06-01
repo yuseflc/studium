@@ -7,7 +7,7 @@ import { connectDB } from '@/lib/database/database';
 import { User, Course } from '@/models/index';
 import { notFound, redirect } from 'next/navigation';
 import { Suspense } from 'react';
-import { ParticipantsTable, ParticipantsHeader, ParticipantsSkeleton } from '@/components/ui/participants';
+import { ParticipantsTable, ParticipantsHeader, ParticipantsSkeleton } from '@/components/participants';
 import mongoose from 'mongoose';
 
 export const dynamic = 'force-dynamic';

@@ -36,8 +36,8 @@ import {
 } from "@tabler/icons-react";
 import { redirect, notFound } from "next/navigation";
 import mongoose from "mongoose";
-import TeacherProfileView from "@/components/ui/profile/TeacherProfileView";
-import EditProfileForm from "@/components/ui/profile/EditProfileForm";
+import TeacherProfileView from "@/components/profile/TeacherProfileView";
+import EditProfileForm from "@/components/profile/EditProfileForm";
 import { getUserAvatarUrl } from "@/lib/utils/avatar";
 
 // Definición de interfaces y tipos de datos utilizados en esta página

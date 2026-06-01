@@ -7,7 +7,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare, ExternalLink } from "lucide-react";
 import { saveStudentTaskGrade } from "@/app/actions/participantActions";
-import { FeedbackModal } from "@/components/ui/modals/FeedbackModal";
+import { FeedbackModal } from "@/components/modals/FeedbackModal";
 // Tipos mínimos locales para evitar problemas de resolución de módulos
 type Task = { _id?: string; id?: string; title: string };
 type Subject = { _id: string; title: string; tasks?: Task[] };

@@ -5,7 +5,7 @@
 // Modal para crear tareas: formulario UI y validación mínima antes de enviar
 import { useRef, useState } from 'react';
 import { IconPlus } from '@tabler/icons-react';
-import { ModalForm } from './modals';
+import { ModalForm } from '@/components/modals';
 
 interface CreateTaskModalProps {
   courseName?: string;

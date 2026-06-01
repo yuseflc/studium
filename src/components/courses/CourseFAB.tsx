@@ -6,7 +6,7 @@
 import { ClipboardList, GraduationCap, FileText, Plus, CheckCircle, Upload, X, BookOpen } from 'lucide-react';
 import { useState, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { ModalForm } from './modals';
+import { ModalForm } from '@/components/modals';
 import { createTask } from '@/app/actions/taskActions';
 import { createResource } from '@/app/actions/resourceActions';
 import { createUnit } from '@/app/actions/unitActions';

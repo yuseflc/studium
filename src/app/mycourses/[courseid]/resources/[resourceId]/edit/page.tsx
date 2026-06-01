@@ -5,7 +5,7 @@ import { authOptions } from "@/config/auth.config";
 import { connectDB } from "@/lib/database/database";
 import { Course, Resource, User } from "@/models/index";
 import { getCourseFullStructure } from "@/lib/api/course-helpers";
-import ResourceCreationForm from "@/components/ui/resources/ResourceCreationForm";
+import ResourceCreationForm from "@/components/resources/ResourceCreationForm";
 
 export const dynamic = "force-dynamic";
 

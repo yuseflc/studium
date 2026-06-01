@@ -5,9 +5,9 @@
 // Menú de acciones del curso (editar, eliminar, compartir)
 import Link from "next/link";
 import { IconDotsVertical, IconArrowUpRight, IconTrash, IconCancel } from "@tabler/icons-react";
-import CreateCourseModal from "@/components/ui/CreateCourseModal";
-import JoinCourseButton from "@/components/ui/modals/JoinCourseModal";
-import { ModalAdvise, CourseMenuDeleteModal } from "@/components/ui/modals";
+import CreateCourseModal from "@/components/courses/CreateCourseModal";
+import JoinCourseButton from "@/components/modals/JoinCourseModal";
+import { ModalAdvise, CourseMenuDeleteModal } from "@/components/modals";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { fetchCourses, getCurrentUser, deleteCourse, unenrollCourse, type SerializedCourse } from "@/app/actions/courseActions";
 import { truncateText } from "@/lib/utils";

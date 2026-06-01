@@ -1,7 +1,7 @@
 /* Archivo: src\app\mycourses\[courseid]\layout.tsx
   Descripción: Layout del espacio de curso: barra lateral, navegación y zona de contenido. */
 
-import CourseNavbar from "@/components/ui/navbars/CourseNavbar";
+import CourseNavbar from "@/components/navbars/CourseNavbar";
 
 export default function DetailedCourseLayout({
   children,

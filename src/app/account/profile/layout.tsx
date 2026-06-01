@@ -2,7 +2,7 @@
   Descripción: Layout de la sección de perfil del usuario (navegación y estructura interna). */
 
 // Layout para páginas de perfil del usuario; incluye `CourseNavbar` y el contenido del perfil
-import CourseNavbar from "@/components/ui/navbars/CourseNavbar";
+import CourseNavbar from "@/components/navbars/CourseNavbar";
 
 export default function ProfilePageLayout({
   children,

@@ -32,7 +32,7 @@ import {
   CourseTaskModal, 
   ModalForm,
   CourseStructureDeleteModal
-} from "./modals";
+} from '@/components/modals';
 import {
   // Subjects removed — use Units actions instead
 } from "@/app/actions/courseActions";

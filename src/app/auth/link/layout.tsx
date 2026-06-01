@@ -1,7 +1,7 @@
 /* Archivo: src\app\auth\link\layout.tsx
   Descripción: Layout para páginas relacionadas con el enlace mágico (magic link). */
 
-import Navbar from '@/components/ui/navbars/Navbar';
+import Navbar from '@/components/navbars/Navbar';
 export default function LoginLayout({
   children,
 }: {

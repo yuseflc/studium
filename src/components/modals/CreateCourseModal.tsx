@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { ModalForm, ModalFormProps } from './ModalForm';
-import CoursePatternPicker from '@/components/ui/CoursePatternPicker';
+import CoursePatternPicker from '@/components/courses/CoursePatternPicker';
 
 interface CreateCourseModalUIProps extends Omit<ModalFormProps, 'title' | 'children' | 'onConfirm' | 'confirmLabel'> {
     titleValue: string;

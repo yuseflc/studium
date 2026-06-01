@@ -3,9 +3,9 @@
 
 import Link from 'next/link'
 import Logo from '@/components/ui/Logo'
-import ThemeSwitcher from '@/components/ThemeSwitcher'
+import ThemeSwitcher from '@/components/ui/ThemeSwitcher'
 import { Footer } from '@/components/sections/Footer'
-import Navbar from '@/components/ui/navbars/Navbar'
+import Navbar from '@/components/navbars/Navbar'
 
 export default function LegalLayout({
     children,
