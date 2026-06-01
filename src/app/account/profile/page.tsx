@@ -181,209 +181,192 @@ export default async function ProfilePage({
   // RENDERIZADO: Genera la interfaz de usuario
 
   return (
-    <div className="flex flex-col items-center m-4 p-4">
+    <div className="mx-auto w-full max-w-3xl space-y-5 px-4 py-8">
 
-      {/* SECCIÓN 1: Encabezado del perfil refinado y compacto (Equilibrado) */}
-      <div className="card mb-4 bg-base-100 shadow-md border border-base-200 p-4 w-full max-w-3xl">
-        <div className="flex items-center gap-5">
-          {/* Avatar un poco más pequeño y centrado */}
+      {/* SECCIÓN 1: Encabezado del perfil */}
+      <section className="card border border-base-200 bg-base-100 shadow-sm">
+        <div className="card-body flex-col items-center gap-5 p-6 text-center sm:flex-row sm:text-left">
           <div className="avatar">
-            <div className="w-16 h-16 rounded-full ring ring-base-300 ring-offset-base-100 ring-offset-2 shadow-sm">
+            <div className="h-20 w-20 rounded-full ring-2 ring-primary ring-offset-2 ring-offset-base-100">
               <img src={profilePicture} alt={`Avatar de ${fullName}`} />
             </div>
           </div>
-          {/* Textos alineados verticalmente sin espacios muertos */}
-          <div className="flex flex-col justify-center">
-            <h1 className="text-xl font-bold text-base-content leading-tight">{fullName}</h1>
-            <p className="text-xs font-semibold text-base-content/60 mt-1 capitalize bg-base-200 px-2.5 py-0.5 rounded-md inline-block w-fit border border-base-300">
-              {roleLabel(user.role)}
-            </p>
-            {user.organization && (
-              <p className="text-xs font-medium text-primary mt-1 flex items-center gap-1">
-                <IconSchool size={13} />
-                {user.organization.name}
-              </p>
-            )}
+          <div className="min-w-0 flex-1 space-y-2">
+            <h1 className="truncate text-2xl font-bold text-base-content">{fullName}</h1>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              <span className="badge badge-warning font-semibold">{roleLabel(user.role)}</span>
+              {user.organization && (
+                <span className="badge badge-ghost gap-1.5 font-medium">
+                  <IconSchool size={13} />
+                  {user.organization.name}
+                </span>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* SECCIÓN 2: Detalles del usuario (Editable para el dueño, estático para el resto) */}
       {!isViewingOthers ? (
-        <EditProfileForm 
+        <EditProfileForm
           user={{
             ...user,
             _id: String(user._id)
-          }} 
+          }}
         />
       ) : (
-        // Tu código de visualización original adaptado con las mismas clases de tamaño compacto y equilibrado
-        <div className="card mb-4 bg-base-100 shadow-md border border-base-200 w-full max-w-3xl">
-          <div className="card-body p-5">
-            <div className="flex mb-3">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">
-                Detalles del Usuario
+        <section className="card border border-base-200 bg-base-100 shadow-sm">
+          <div className="card-body gap-5 p-6">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <IconUser size={18} />
               </span>
+              <h2 className="text-lg font-bold text-base-content">Detalles del usuario</h2>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {/* Campo: Nombre del usuario */}
-              <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2">
-                <IconUser size={22} className="text-base-content/60 shrink-0" />
-                <div className="flex flex-col w-full">
-                  <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Nombre</span>
-                  <input type="text" value={user.firstName} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Nombre" />
+              <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+                <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                  <IconUser size={14} /> Nombre
                 </div>
+                <p className="break-words text-base text-base-content">{user.firstName}</p>
               </div>
 
               {/* Campo: Correo electrónico del usuario */}
-              <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2">
-                <IconMail size={22} className="text-base-content/60 shrink-0" />
-                <div className="flex flex-col w-full">
-                  <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Email</span>
-                  <input type="text" value={user.email} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Email" />
+              <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+                <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                  <IconMail size={14} /> Email
                 </div>
+                <p className="break-words text-base text-base-content">{user.email}</p>
               </div>
 
               {/* Campo: Apellido del usuario */}
               {user.profile?.lastName && (
-                <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2">
-                  <IconUser size={22} className="text-base-content/60 shrink-0" />
-                  <div className="flex flex-col w-full">
-                    <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Apellido</span>
-                    <input type="text" value={user.profile.lastName} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Apellido" />
+                <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+                  <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                    <IconUser size={14} /> Apellido
                   </div>
+                  <p className="break-words text-base text-base-content">{user.profile.lastName}</p>
                 </div>
               )}
 
               {/* Campo: Rol del usuario dentro del sistema */}
-              <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 opacity-80">
-                <IconUserCheck size={22} className="text-base-content/60 shrink-0" />
-                <div className="flex flex-col w-full">
-                  <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Rol</span>
-                  <input type="text" value={roleLabel(user.role)} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Rol" />
+              <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+                <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                  <IconUserCheck size={14} /> Rol
                 </div>
+                <p className="break-words text-base text-base-content">{roleLabel(user.role)}</p>
               </div>
 
               {/* Campo: Organización del usuario */}
               {user.organization && (
-                <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2">
-                  <IconSchool size={22} className="text-primary shrink-0" />
-                  <div className="flex flex-col w-full">
-                    <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Organización</span>
-                    <input type="text" value={user.organization.name} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Organización" />
+                <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+                  <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                    <IconSchool size={14} className="text-primary" /> Organización
                   </div>
+                  <p className="break-words text-base text-base-content">{user.organization.name}</p>
                 </div>
               )}
 
               {/* Campo: Identificador único de MongoDB del usuario */}
-              <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2 opacity-75">
-                <IconKey size={22} className="text-base-content/60 shrink-0" />
-                <div className="flex flex-col w-full">
-                  <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">ID del Usuario</span>
-                  <input type="text" value={String(user._id)} readOnly className="input input-sm h-8 w-full text-sm p-0 bg-transparent text-base-content font-mono border-none" aria-label="ID de usuario" />
+              <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+                <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                  <IconKey size={14} /> ID del usuario
                 </div>
+                <p className="break-all font-mono text-sm text-base-content/80">{String(user._id)}</p>
               </div>
 
               {/* Campo: Fecha en que se creó la cuenta */}
-              <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2 opacity-80">
-                <IconCalendar size={22} className="text-base-content/60 shrink-0" />
-                <div className="flex flex-col w-full">
-                  <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Miembro desde</span>
-                  <input type="text" value={new Date(user.createdAt).toLocaleDateString("es-ES")} readOnly className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none" aria-label="Fecha de registro" />
+              <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+                <div className="mb-1 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                  <IconCalendar size={14} /> Miembro desde
                 </div>
+                <p className="text-base text-base-content">{new Date(user.createdAt).toLocaleDateString("es-ES")}</p>
               </div>
 
               {/* Campo: Biografía personal del usuario */}
               {user.profile?.bio && (
-                <div className="bg-base-200 border border-base-300 rounded-xl px-4 py-3 col-span-1 md:col-span-2">
-                  <div className="flex flex-col w-full">
-                    <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-2">Biografía</span>
-                    <textarea value={user.profile.bio} readOnly className="textarea w-full text-base bg-transparent text-base-content border-none p-0 min-h-[80px] resize-none" rows={3} aria-label="Biografía" />
-                  </div>
+                <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+                  <div className="mb-1 text-xs font-medium text-base-content/50">Biografía</div>
+                  <p className="whitespace-pre-line break-words text-base leading-relaxed text-base-content">{user.profile.bio}</p>
                 </div>
               )}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* SECCIÓN 3: Lista de cursos en los que el usuario está inscrito como estudiante */}
       {user.enrolledCourses && user.enrolledCourses.length > 0 && (
-        <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
-          <div className="card-body p-4">
-            <div className="flex mb-4 items-center gap-2">
-              <IconBook size={24} />
-              <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-blue-400 text-black border-2 border-base-100 shadow-md">
-                Cursos Inscritos ({user.enrolledCourses.length})
+        <section className="card border border-base-200 bg-base-100 shadow-sm">
+          <div className="card-body gap-4 p-6">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-info/10 text-info">
+                <IconBook size={18} />
               </span>
+              <h2 className="text-lg font-bold text-base-content">Cursos inscritos</h2>
+              <span className="badge badge-neutral badge-sm">{user.enrolledCourses.length}</span>
             </div>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {user.enrolledCourses.map((course) => {
                 const cId = String(course._id);
                 return (
                   <div
                     key={cId}
-                    className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow"
+                    className="flex items-center justify-between gap-4 rounded-xl border border-base-200 bg-base-200/40 p-4 transition-colors hover:border-base-300"
                   >
-                    <div className="card-body p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <h2 className="card-title text-lg">{course.title}</h2>
-                          {course.description && (
-                            <p className="text-sm text-base-content/70">{truncateText(course.description, 140)}</p>
-                          )}
-                        </div>
-                        <Link href={`/mycourses/${cId}`} className="btn btn-warning btn-sm">
-                          Entrar
-                        </Link>
-                      </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-base font-semibold text-base-content">{course.title}</h3>
+                      {course.description && (
+                        <p className="text-sm text-base-content/60">{truncateText(course.description, 120)}</p>
+                      )}
                     </div>
+                    <Link href={`/mycourses/${cId}`} className="btn btn-warning btn-sm shrink-0">
+                      Entrar
+                    </Link>
                   </div>
                 );
               })}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* SECCIÓN 4: Lista de cursos que ha creado el profesor o administrador */}
       {user.createdCourses && user.createdCourses.length > 0 && (
-        <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
-          <div className="card-body p-4">
-            <div className="flex mb-4 items-center gap-2">
-              <IconSchool size={24} />
-              <span className="inline-flex items-center px-4 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-green-400 text-black border-2 border-base-100 shadow-md">
-                Cursos Creados ({user.createdCourses.length})
+        <section className="card border border-base-200 bg-base-100 shadow-sm">
+          <div className="card-body gap-4 p-6">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-success/10 text-success">
+                <IconSchool size={18} />
               </span>
+              <h2 className="text-lg font-bold text-base-content">Cursos creados</h2>
+              <span className="badge badge-neutral badge-sm">{user.createdCourses.length}</span>
             </div>
-            <div className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-3">
               {user.createdCourses.map((course) => {
                 const cId = String(course._id);
                 return (
                   <div
                     key={cId}
-                    className="card bg-base-100 border border-base-300 shadow-sm hover:shadow-md transition-shadow"
+                    className="flex items-center justify-between gap-4 rounded-xl border border-base-200 bg-base-200/40 p-4 transition-colors hover:border-base-300"
                   >
-                    <div className="card-body p-4">
-                      <div className="flex items-center justify-between gap-4">
-                        <div className="flex-1">
-                          <h2 className="card-title text-lg">{course.title}</h2>
-                          {course.description && (
-                            <p className="text-sm text-base-content/70">{truncateText(course.description, 140)}</p>
-                          )}
-                        </div>
-                        <Link href={`/mycourses/${cId}`} className="btn btn-info btn-sm">
-                          Gestionar
-                        </Link>
-                      </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-base font-semibold text-base-content">{course.title}</h3>
+                      {course.description && (
+                        <p className="text-sm text-base-content/60">{truncateText(course.description, 120)}</p>
+                      )}
                     </div>
+                    <Link href={`/mycourses/${cId}`} className="btn btn-info btn-sm shrink-0">
+                      Gestionar
+                    </Link>
                   </div>
                 );
               })}
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       {/* SECCIÓN 5: Panel de gestión para profesores y administradores */}

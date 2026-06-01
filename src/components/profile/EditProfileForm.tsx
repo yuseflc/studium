@@ -73,144 +73,132 @@ export default function EditProfileForm({ user }: EditProfileFormProps) {
     setIsEditing(false);
   };
 
+  // Estilos comunes para los inputs editables (borde amarillo al enfocar)
+  const editInputClass =
+    "input input-bordered w-full border-base-300 bg-base-100 focus:border-warning focus:outline-none";
+
   return (
-    <div className="card mb-5 bg-base-100 shadow-lg border-2 border-base-200 w-full max-w-3xl">
-      <div className="card-body p-5">
-        
-        {/* Cabecera equilibrada */}
-        <div className="flex justify-between items-center mb-3">
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-yellow-400 text-black border-2 border-base-100 shadow-md">
-            Detalles del Usuario
-          </span>
-          
+    <div className="card w-full border border-base-200 bg-base-100 shadow-sm">
+      <div className="card-body gap-5 p-6">
+
+        {/* Cabecera de sección */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconUser size={18} />
+            </span>
+            <h2 className="text-lg font-bold text-base-content">Detalles del usuario</h2>
+          </div>
+
           {!isEditing ? (
-            <button onClick={() => setIsEditing(true)} className="btn btn-sm btn-outline gap-1.5 font-bold">
-              <IconEdit size={16} /> Editar Perfil
+            <button onClick={() => setIsEditing(true)} className="btn btn-sm btn-outline gap-1.5">
+              <IconEdit size={16} /> Editar perfil
             </button>
           ) : (
             <div className="flex gap-2">
-              <button onClick={handleSave} disabled={loading} className="btn btn-sm btn-success text-white gap-1.5 font-bold">
-                <IconDeviceFloppy size={16} /> {loading ? "Guardando..." : "Guardar"}
+              <button onClick={handleSave} disabled={loading} className="btn btn-warning gap-1.5">
+                <IconDeviceFloppy size={18} /> {loading ? "Guardando..." : "Guardar"}
               </button>
-              <button onClick={handleCancel} disabled={loading} className="btn btn-sm btn-ghost gap-1.5 font-bold">
-                <IconX size={16} /> Cancelar
+              <button onClick={handleCancel} disabled={loading} className="btn btn-error btn-outline gap-1.5">
+                <IconX size={18} /> Cancelar
               </button>
             </div>
           )}
         </div>
 
         {/* Grid de campos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-          
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+
           {/* Campo: Nombre */}
-          <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2">
-            <IconUser size={22} className="text-base-content/60 shrink-0" />
-            <div className="flex flex-col w-full">
-              {isEditing && <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Nombre</span>}
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                disabled={!isEditing || loading}
-                className={`input input-md h-9 w-full text-base p-0 bg-transparent text-base-content focus:outline-none disabled:bg-transparent ${isEditing ? "border-b border-base-300 rounded-none focus:border-primary" : "border-none"}`}
-                aria-label="Nombre"
-              />
+          <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+            <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-base-content/50">
+              <IconUser size={14} /> Nombre
             </div>
+            {isEditing ? (
+              <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} disabled={loading} className={editInputClass} aria-label="Nombre" />
+            ) : (
+              <p className="break-words text-base text-base-content">{firstName}</p>
+            )}
           </div>
 
           {/* Campo: Correo Electrónico */}
-          <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2">
-            <IconMail size={22} className="text-base-content/60 shrink-0" />
-            <div className="flex flex-col w-full">
-              {isEditing && <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Email</span>}
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={!isEditing || loading}
-                className={`input input-md h-9 w-full text-base p-0 bg-transparent text-base-content focus:outline-none disabled:bg-transparent ${isEditing ? "border-b border-base-300 rounded-none focus:border-primary" : "border-none"}`}
-                aria-label="Email"
-              />
+          <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+            <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-base-content/50">
+              <IconMail size={14} /> Email
             </div>
+            {isEditing ? (
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={loading} className={editInputClass} aria-label="Email" />
+            ) : (
+              <p className="break-words text-base text-base-content">{email}</p>
+            )}
           </div>
 
           {/* Campo: Apellido */}
           {(user.profile?.lastName || isEditing) && (
-            <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2">
-              <IconUser size={22} className="text-base-content/60 shrink-0" />
-              <div className="flex flex-col w-full">
-                <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Apellido</span>
-                <input
-                  type="text"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  disabled={!isEditing || loading}
-                  className={`input input-md h-9 w-full text-base p-0 bg-transparent text-base-content focus:outline-none disabled:bg-transparent ${isEditing ? "border-b border-base-300 rounded-none focus:border-primary" : "border-none"}`}
-                  aria-label="Apellido"
-                />
+            <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+              <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-base-content/50">
+                <IconUser size={14} /> Apellido
               </div>
+              {isEditing ? (
+                <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} disabled={loading} className={editInputClass} aria-label="Apellido" />
+              ) : (
+                <p className="break-words text-base text-base-content">{lastName}</p>
+              )}
             </div>
           )}
 
-          {/* Campo: Rol */}
-          <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 opacity-80">
-            <IconUserCheck size={22} className="text-base-content/60 shrink-0" />
-            <div className="flex flex-col w-full">
-              <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Rol</span>
-              <input
-                type="text"
-                value={getRoleLabel(user.role)}
-                readOnly
-                className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none cursor-not-allowed"
-                aria-label="Rol"
-              />
+          {/* Campo: Rol (no editable) */}
+          <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3">
+            <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-base-content/50">
+              <IconUserCheck size={14} /> Rol
             </div>
+            {isEditing ? (
+              <input type="text" value={getRoleLabel(user.role)} disabled className={editInputClass} aria-label="Rol" />
+            ) : (
+              <p className="break-words text-base text-base-content">{getRoleLabel(user.role)}</p>
+            )}
           </div>
 
-          {/* Campo: ID único */}
-          <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2 opacity-75">
-            <IconKey size={22} className="text-base-content/60 shrink-0" />
-            <div className="flex flex-col w-full">
-              <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">ID del Usuario</span>
-              <input
-                type="text"
-                value={user._id}
-                readOnly
-                className="input input-sm h-8 w-full text-sm p-0 bg-transparent text-base-content font-mono border-none cursor-not-allowed"
-                aria-label="ID de usuario"
-              />
+          {/* Campo: ID único (no editable) */}
+          <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+            <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-base-content/50">
+              <IconKey size={14} /> ID del usuario
             </div>
+            {isEditing ? (
+              <input type="text" value={user._id} disabled className={`${editInputClass} font-mono text-sm`} aria-label="ID del usuario" />
+            ) : (
+              <p className="break-all font-mono text-sm text-base-content/80">{user._id}</p>
+            )}
           </div>
 
-          {/* Campo: Miembro desde */}
-          <div className="flex items-center gap-3 bg-base-200 border border-base-300 rounded-xl px-4 py-2 col-span-1 md:col-span-2 opacity-80">
-            <IconCalendar size={22} className="text-base-content/60 shrink-0" />
-            <div className="flex flex-col w-full">
-              <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-1">Miembro desde</span>
-              <input
-                type="text"
-                value={new Date(user.createdAt).toLocaleDateString("es-ES")}
-                readOnly
-                className="input input-md h-9 w-full text-base p-0 bg-transparent text-base-content border-none cursor-not-allowed"
-                aria-label="Fecha de registro"
-              />
+          {/* Campo: Miembro desde (no editable) */}
+          <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+            <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-base-content/50">
+              <IconCalendar size={14} /> Miembro desde
             </div>
+            {isEditing ? (
+              <input type="text" value={new Date(user.createdAt).toLocaleDateString("es-ES")} disabled className={editInputClass} aria-label="Miembro desde" />
+            ) : (
+              <p className="text-base text-base-content">{new Date(user.createdAt).toLocaleDateString("es-ES")}</p>
+            )}
           </div>
 
           {/* Campo: Biografía */}
           {(user.profile?.bio || isEditing) && (
-            <div className="bg-base-200 border border-base-300 rounded-xl px-4 py-3 col-span-1 md:col-span-2">
-              <div className="flex flex-col w-full">
-                <span className="text-[11px] text-base-content/50 font-bold uppercase tracking-wider leading-none mb-2">Biografía</span>
+            <div className="rounded-xl border border-base-200 bg-base-200/40 px-4 py-3 md:col-span-2">
+              <div className="mb-1.5 text-xs font-medium text-base-content/50">Biografía</div>
+              {isEditing ? (
                 <textarea
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  disabled={!isEditing || loading}
-                  className={`textarea w-full text-base bg-transparent text-base-content focus:outline-none disabled:bg-transparent min-h-[80px] resize-y ${isEditing ? "textarea-bordered bg-base-100 p-2" : "border-none p-0"}`}
+                  disabled={loading}
+                  className="textarea textarea-bordered min-h-[90px] w-full resize-none border-base-300 bg-base-100 focus:border-warning focus:outline-none"
                   rows={3}
                   aria-label="Biografía"
                 />
-              </div>
+              ) : (
+                <p className="whitespace-pre-line break-words text-base leading-relaxed text-base-content">{bio}</p>
+              )}
             </div>
           )}
         </div>
