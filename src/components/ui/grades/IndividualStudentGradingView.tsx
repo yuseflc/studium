@@ -4,7 +4,8 @@
 "use client";
 // Interfaz de calificación individual: editar notas y feedback de un estudiante
 import React, { useState, useEffect, useRef } from "react";
-import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare } from "lucide-react";
+import Link from "next/link";
+import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare, ExternalLink } from "lucide-react";
 import { saveStudentTaskGrade } from "@/app/actions/participantActions";
 import { FeedbackModal } from "@/components/ui/modals/FeedbackModal";
 // Tipos mínimos locales para evitar problemas de resolución de módulos
@@ -349,8 +350,16 @@ export default function IndividualStudentGradingView({
                                             const hasSubmission = state.grade !== "" || state.feedback !== "";
 
                                             return (
-                                                <tr key={stateKey} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10">
-                                                    <td className="pl-12 font-medium text-base-content/70">{task.title}</td>
+                                                <tr key={stateKey} className="hover:bg-base-200/20 transition-colors border-b border-base-300/10 group">
+                                                    <td className="pl-12">
+                                                        <Link 
+                                                            href={`/mycourses/${courseId}/tasks/${state.taskId}`}
+                                                            className="inline-flex items-center gap-2 font-medium text-base-content/70 hover:text-secondary/80 transition-colors py-1.5 px-3 -ml-3 rounded-lg hover:bg-base-200/50"
+                                                        >
+                                                            {task.title}
+                                                            <ExternalLink size={14} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                                                        </Link>
+                                                    </td>
                                                     <td className="text-center">
                                                         {hasSubmission ? (
                                                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20 shadow-sm">
