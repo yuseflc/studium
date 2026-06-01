@@ -95,8 +95,35 @@ export async function getCourseFullStructure(courseId: string | mongoose.Types.O
 
     const unitIds = Array.isArray(units) ? units.map((u: any) => u._id) : [];
 
+    // Determinar si el usuario es profesor/propietario para decidir qué tareas mostrar
+    const userId = session?.user?.id;
+    const isTeacherOrOwner = userId && (
+      course.ownerId?.toString() === userId ||
+      (Array.isArray(course.teachers) && course.teachers.some((t: any) => t.toString() === userId))
+    );
+
+    // Construir la query de tareas según el rol del usuario:
+    // - Profesor/propietario: todas las tareas (incluye borradores)
+    // - Estudiante: solo tareas activas donde assignmentMode="all" o el estudiante está en assignedStudentIds
+    let taskQuery: Record<string, any>;
+    if (isTeacherOrOwner) {
+      taskQuery = { unitId: { $in: unitIds } };
+    } else if (userId && mongoose.Types.ObjectId.isValid(userId)) {
+      taskQuery = {
+        unitId: { $in: unitIds },
+        active: true,
+        $or: [
+          { assignmentMode: 'all' },
+          { assignmentMode: { $exists: false } },
+          { assignedStudentIds: new mongoose.Types.ObjectId(userId) },
+        ],
+      };
+    } else {
+      taskQuery = { unitId: { $in: unitIds }, active: true, assignmentMode: 'all' };
+    }
+
     // Obtener todas las tareas asociadas a estas unidades (nuevo modelo usa unitId)
-    const rawTasks = await Task.find({ unitId: { $in: unitIds } })
+    const rawTasks = await Task.find(taskQuery)
       .sort({ createdAt: -1 })
       .lean();
 

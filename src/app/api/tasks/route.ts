@@ -62,11 +62,12 @@ export const GET = withErrorHandling(
       return validationErrorResponse({ unitId: ['ID de unidad inválido'] }, requestId);
     }
 
-    // Paralelizar count y data query
+    // Paralelizar count y data query (solo tareas activas para esta ruta genérica)
+    const activeFilter = { unitId, active: { $ne: false } };
     const [total, tasks] = await Promise.all([
-      Task.countDocuments({ unitId }),
-      Task.find({ unitId })
-        .select('_id unitId courseId title type maxPoints startDate dueDate active createdAt updatedAt')
+      Task.countDocuments(activeFilter),
+      Task.find(activeFilter)
+        .select('_id unitId courseId title type maxPoints startDate dueDate active assignmentMode assignedStudentIds createdAt updatedAt')
         .populate('createdById', 'email firstName')
         .sort({ dueDate: 1 })
         .limit(limit)

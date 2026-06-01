@@ -171,11 +171,6 @@ TaskSchema.pre('save', function () {
   }
 });
 
-// Middleware pre-búsqueda: Filtrar tareas inactivas
-TaskSchema.pre(/^find/, function (this: mongoose.Query<ITask[], ITask>) {
-  this.find({ active: { $ne: false } }); // Excluye tareas inactivas
-});
-
 // Virtual: Está vencida
 TaskSchema.virtual('isOverdue').get(function () {
   if (!this.dueDate) {

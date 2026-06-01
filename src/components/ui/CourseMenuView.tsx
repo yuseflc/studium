@@ -165,14 +165,14 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                   </figure>
 
                   <span className="absolute -bottom-3 left-20 inline-flex items-center px-3 py-1 rounded-full text-[10px] min-[1280px]:max-[1300px]:text-[6px] min-[1300px]:max-[1550px]:text-[8px] font-black uppercase tracking-[0.15em] bg-yellow-400 text-black border-2 border-base-100 shadow-lg z-40 transform hover:scale-105 transition-transform duration-200">
-                    Ignacio Miguel Mateos
+                    {c.ownerName ?? "Profesor"}
                   </span>
 
-                  {/* Avatar movido fuera del figure para evitar recortes y problemas de z-index */}
+                  {/* Avatar del propietario: foto de Google (OAuth) o Robohash si no tiene cuenta vinculada */}
                   <div className="absolute -bottom-8 left-2 w-16 h-16 rounded-full border-4 border-base-100 overflow-hidden z-30 bg-base-300 shadow-lg">
                     <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/a/ac/Default_pfp.jpg"
-                      alt="Ignacio Miguel Mateos"
+                      src={c.ownerAvatar ?? `https://robohash.org/${c.ownerId}?set=set5`}
+                      alt={c.ownerName ?? "Profesor"}
                       className="w-full h-full object-cover"
                     />
                   </div>

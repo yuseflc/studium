@@ -95,6 +95,10 @@ export interface CourseTaskItem {
   allowLateSubmission?: boolean;
   active?: boolean;
   isSubmitted?: boolean;
+  assignmentMode?: "all" | "manual" | "filtered";
+  assignedStudentIds?: string[];
+  isOptional?: boolean;
+  priority?: "low" | "medium" | "high";
   createdAt?: string;
   updatedAt?: string;
 }
@@ -964,6 +968,14 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
                                   <div className="min-w-0 flex-1">
                                     <div className="flex items-center gap-2 flex-wrap">
                                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/70 border border-base-300 shadow-sm">{task.type === "quiz" ? "Examen" : "Tarea"}</span>
+                                      {task.active === false && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-warning/15 text-warning border border-warning/30">Borrador</span>
+                                      )}
+                                      {task.assignmentMode && task.assignmentMode !== 'all' && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-secondary/15 text-secondary border border-secondary/30">
+                                          {task.assignmentMode === 'manual' ? `${task.assignedStudentIds?.length ?? 0} alumno${(task.assignedStudentIds?.length ?? 0) !== 1 ? 's' : ''}` : 'Filtrado'}
+                                        </span>
+                                      )}
                                       <p className="font-bold text-base text-base-content/90 truncate">{task.title}</p>
                                     </div>
                                     {task.description && <p className="text-sm text-base-content/55 mt-1 break-words break-all max-w-full">{truncateText(task.description, 140)}</p>}

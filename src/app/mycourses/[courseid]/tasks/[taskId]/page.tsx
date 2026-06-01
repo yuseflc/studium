@@ -42,11 +42,26 @@ export default async function TaskDetailPage({
   // Buscar en BD si es un ObjectId
   if (mongoose.Types.ObjectId.isValid(taskId)) {
     taskInfo = await Task.findById(taskId).lean();
-    
+
+    // Control de acceso para estudiantes:
+    // - Las tareas borrador (active=false) solo las ve el profesor
+    // - Las tareas con assignmentMode!="all" solo las ven los estudiantes asignados
+    if (taskInfo && !isTeacherView && currentUser) {
+      if (!taskInfo.active) {
+        taskInfo = null;
+      } else if (taskInfo.assignmentMode && taskInfo.assignmentMode !== 'all') {
+        const isAssigned = Array.isArray(taskInfo.assignedStudentIds) &&
+          taskInfo.assignedStudentIds.some(
+            (id: any) => id.toString() === currentUser._id.toString()
+          );
+        if (!isAssigned) taskInfo = null;
+      }
+    }
+
     if (taskInfo && currentUser) {
-        existingSubmission = await Submission.findOne({ 
-          taskId: taskInfo._id, 
-          studentId: currentUser._id 
+        existingSubmission = await Submission.findOne({
+          taskId: taskInfo._id,
+          studentId: currentUser._id
         }).lean();
     }
 

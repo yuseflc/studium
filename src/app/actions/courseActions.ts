@@ -68,6 +68,10 @@ export interface SerializedCourse {
   enrolledStudents: string[];
   createdAt: string;
   updatedAt: string;
+  /** Nombre completo del profesor propietario del curso (resuelto en SSR) */
+  ownerName?: string;
+  /** URL del avatar del profesor: foto de Google si tiene OAuth vinculado, Robohash si no */
+  ownerAvatar?: string;
 }
 
 export interface CreateSubjectActionInput {
@@ -198,8 +202,8 @@ function serializeCourse(course: ICourse): SerializedCourse {
 export async function fetchCourses(): Promise<SerializedCourse[]> {
   try {
     await connectDB();
-    
-    // Sacamos la ID del usuario antes, 
+
+    // Sacamos la ID del usuario antes
     const userId = await getCurrentUser();
     if (!userId) {
       return [];
@@ -214,9 +218,45 @@ export async function fetchCourses(): Promise<SerializedCourse[]> {
       ],
     }).lean() as ICourse[];
 
-    return dbCourses.map(serializeCourse);
+    // Batch-fetch de propietarios en una sola query para evitar N+1
+    const uniqueOwnerIds = [
+      ...new Set(
+        dbCourses
+          .map((c) => c.ownerId?.toString())
+          .filter((id): id is string => Boolean(id))
+      ),
+    ];
+
+    const owners = await User.find({ _id: { $in: uniqueOwnerIds } })
+      .select("firstName profile.lastName thirdparty")
+      .lean();
+
+    // Mapa id → datos del propietario para acceso O(1)
+    const ownerMap = new Map(
+      owners.map((o) => [o._id.toString(), o])
+    );
+
+    return dbCourses.map((course) => {
+      const serialized = serializeCourse(course);
+      const owner = ownerMap.get(course.ownerId?.toString() || "");
+      if (owner) {
+        // Nombre completo: firstName + lastName (si existe)
+        const fullName = [owner.firstName, (owner.profile as { lastName?: string } | undefined)?.lastName]
+          .filter(Boolean)
+          .join(" ");
+        serialized.ownerName = fullName || owner.firstName;
+
+        // Avatar: foto de Google si el usuario tiene OAuth vinculado, Robohash si no
+        const googleAccount = (owner.thirdparty as Array<{ provider: string; profilePicture?: string }> | undefined)
+          ?.find((tp) => tp.provider === "google");
+        serialized.ownerAvatar =
+          googleAccount?.profilePicture ??
+          `https://robohash.org/${owner._id.toString()}?set=set5`;
+      }
+      return serialized;
+    });
   } catch (error) {
-    console.error("Error fetching courses:", error);
+    LOGGER.error({ error }, "Error fetching courses");
     return [];
   }
 }
