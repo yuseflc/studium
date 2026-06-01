@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, AlertTriangle, BarChart3, BookOpen, Calendar, Check, ClipboardCheck, FileText, Search, SlidersHorizontal, Users, ChevronDown } from "lucide-react";
 import { createTaskFromFormData, updateTaskFromFormData, type TaskCreationFormState } from "@/app/actions/taskActions";
 import type { TaskCreationStudent, TaskCreationUnit } from "@/lib/task-assignment";
+import DateTimePicker from "@/components/ui/DateTimePicker";
 
 type TaskFormMode = "create" | "edit";
 
@@ -145,44 +146,41 @@ export default function TaskCreationForm({
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-base-200/40">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-6">
           <button type="button" onClick={() => router.push(backHref || `/mycourses/${courseId}`)} className="btn btn-ghost btn-sm gap-2">
             <ArrowLeft size={16} />
             {backLabel || "Volver al curso"}
           </button>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-base-content/40">
-            <Users size={14} />
-            {mode === "edit" ? "Edición de tarea" : "Creación de tarea"}
-          </div>
         </div>
 
-        <section className="card border border-base-300 bg-base-100 shadow-xl">
-          <div className="px-6 py-8 sm:px-8">
+        <section className="card border border-base-300 bg-base-100 shadow-xl overflow-hidden">
+          <div className="px-6 pt-7 pb-8 sm:px-8">
             <div className="space-y-5">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="badge badge-outline gap-1.5">
+                  <span className="badge badge-warning gap-1.5 font-semibold">
                     <BookOpen size={12} />
                     Profesor
                   </span>
-                  <span className="badge badge-outline gap-1.5">
+                  <span className="badge badge-ghost gap-1.5 font-medium">
+                    <ClipboardCheck size={12} />
+                    {mode === "edit" ? "Edición de tarea" : "Creación de tarea"}
+                  </span>
+                  <span className="badge badge-outline badge-primary gap-1.5 font-medium">
                     <BookOpen size={12} />
                     {selectedUnitTitle || "Sin unidad asignada"}
                   </span>
                 </div>
 
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-base-content/50">{mode === "edit" ? "Editar tarea" : "Nueva tarea"}</p>
-                  <h1 className="w-full text-3xl font-bold tracking-tight text-base-content sm:text-5xl">
-                    {mode === "edit" ? "Editar tarea en" : "Nueva tarea en"} {activeUnitTitle}
-                  </h1>
-                  <p className="w-full text-base-content/70">
-                    {mode === "edit"
-                      ? "Ajusta el enunciado, la fecha, la asignación y los parámetros de evaluación."
-                      : "Define la entrega, el enunciado, los criterios de asignación y los ajustes de evaluación."}
-                  </p>
-                  {courseDescription ? <p className="w-full text-sm text-base-content/50">{courseDescription}</p> : null}
-                </div>
+                <h1 className="w-full text-3xl font-bold text-base-content sm:text-4xl">
+                  {mode === "edit" ? "Editar tarea en" : "Nueva tarea en"} {activeUnitTitle}
+                </h1>
+                <p className="w-full text-base-content/70">
+                  {mode === "edit"
+                    ? "Ajusta el enunciado, la fecha, la asignación y los parámetros de evaluación."
+                    : "Define la entrega, el enunciado, los criterios de asignación y los ajustes de evaluación."}
+                </p>
+                {courseDescription ? <p className="w-full text-sm text-base-content/50">{courseDescription}</p> : null}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-3">
@@ -192,7 +190,7 @@ export default function TaskCreationForm({
                       <BookOpen size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Curso</p>
+                      <p className="text-xs font-semibold text-base-content/50">Curso</p>
                       <p className="text-sm font-semibold text-base-content">{courseTitle}</p>
                     </div>
                   </div>
@@ -204,7 +202,7 @@ export default function TaskCreationForm({
                         <BookOpen size={16} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Unidad</p>
+                        <p className="text-xs font-semibold text-base-content/50">Unidad</p>
                         <p className="text-sm font-semibold text-base-content">{selectedUnitTitle || "Selecciona una unidad"}</p>
                       </div>
                     </div>
@@ -234,7 +232,7 @@ export default function TaskCreationForm({
                       <Check size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Estado</p>
+                      <p className="text-xs font-semibold text-base-content/50">Estado</p>
                       <p className="text-sm font-semibold text-success">Borrador funcional</p>
                     </div>
                   </div>
@@ -274,17 +272,17 @@ export default function TaskCreationForm({
                 <div className="grid gap-4">
                   <label className="form-control gap-2">
                     <span className="label-text font-semibold text-base-content/80">Título</span>
-                    <input name="title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} className="input input-bordered w-full border-base-300 bg-base-100" placeholder="Ej: Informe de diseño accesible" required />
+                    <input name="title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} className="input input-bordered w-full border-base-300 bg-base-100 focus:border-warning focus:outline-none" placeholder="Ej: Informe de diseño accesible" required />
                   </label>
 
                   <label className="form-control gap-2">
                     <span className="label-text font-semibold text-base-content/80">Descripción</span>
-                    <textarea name="description" value={description} onChange={(event) => setDescription(event.target.value)} className="textarea textarea-bordered min-h-32 w-full border-base-300 bg-base-100" placeholder="Resumen de la actividad, objetivos y contexto general." required />
+                    <textarea name="description" value={description} onChange={(event) => setDescription(event.target.value)} className="textarea textarea-bordered min-h-32 w-full resize-none border-base-300 bg-base-100 focus:border-warning focus:outline-none" placeholder="Resumen de la actividad, objetivos y contexto general." required />
                   </label>
 
                   <label className="form-control gap-2">
                     <span className="label-text font-semibold text-base-content/80">Instrucciones de la tarea</span>
-                    <textarea name="instructions" value={instructions} onChange={(event) => setInstructions(event.target.value)} className="textarea textarea-bordered min-h-48 w-full border-base-300 bg-base-100" placeholder="Paso a paso, entregables, criterios y cualquier condición especial." required />
+                    <textarea name="instructions" value={instructions} onChange={(event) => setInstructions(event.target.value)} className="textarea textarea-bordered min-h-48 w-full resize-none border-base-300 bg-base-100 focus:border-warning focus:outline-none" placeholder="Paso a paso, entregables, criterios y cualquier condición especial." required />
                   </label>
                 </div>
               </div>
@@ -305,21 +303,28 @@ export default function TaskCreationForm({
                 <div className="grid gap-4 md:grid-cols-2">
                   <label className="form-control gap-2">
                     <span className="label-text font-semibold text-base-content/80">Fecha de entrega</span>
-                    <input name="dueDate" type="datetime-local" value={dueDate} onChange={(event) => setDueDate(event.target.value)} className="input input-bordered w-full border-base-300 bg-base-100" />
+                    <input type="hidden" name="dueDate" value={dueDate} />
+                    <DateTimePicker value={dueDate} onChange={setDueDate} placeholder="Selecciona fecha y hora de entrega" />
                   </label>
 
                   <div className="form-control gap-2">
                     <span className="label-text font-semibold text-base-content/80">Disponibilidad</span>
                     <div className="grid gap-3 sm:grid-cols-2">
-                      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-base-300 bg-base-200/40 px-4 py-3 transition-colors hover:bg-base-200/80">
-                        <input type="radio" name="scope" className="radio radio-primary" checked={!isOptional} onChange={() => setIsOptional(false)} />
+                      <label className={`group flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all ${!isOptional ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                        <input type="radio" name="scope" className="sr-only" checked={!isOptional} onChange={() => setIsOptional(false)} />
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${!isOptional ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${!isOptional ? "scale-100" : "scale-0"}`} />
+                        </span>
                         <div>
                           <p className="font-semibold text-base-content">Tarea requerida</p>
                           <p className="text-xs text-base-content/60">Visible para todo el grupo.</p>
                         </div>
                       </label>
-                      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-base-300 bg-base-200/40 px-4 py-3 transition-colors hover:bg-base-200/80">
-                        <input type="radio" name="scope" className="radio radio-primary" checked={isOptional} onChange={() => setIsOptional(true)} />
+                      <label className={`group flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all ${isOptional ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                        <input type="radio" name="scope" className="sr-only" checked={isOptional} onChange={() => setIsOptional(true)} />
+                        <span className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${isOptional ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${isOptional ? "scale-100" : "scale-0"}`} />
+                        </span>
                         <div>
                           <p className="font-semibold text-base-content">Tarea opcional</p>
                           <p className="text-xs text-base-content/60">Trabajo extra o ampliación.</p>
@@ -330,16 +335,22 @@ export default function TaskCreationForm({
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
-                  <label className="flex items-start gap-3 rounded-2xl border border-base-300 bg-base-200/30 p-4">
-                    <input type="checkbox" className="checkbox checkbox-primary mt-1" checked={countsTowardAverage} onChange={(event) => setCountsTowardAverage(event.target.checked)} />
+                  <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${countsTowardAverage ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                    <input type="checkbox" className="sr-only" checked={countsTowardAverage} onChange={(event) => setCountsTowardAverage(event.target.checked)} />
+                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all ${countsTowardAverage ? "border-primary bg-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                      <Check size={14} strokeWidth={3} className={`text-primary-content transition-transform ${countsTowardAverage ? "scale-100" : "scale-0"}`} />
+                    </span>
                     <div>
                       <p className="font-semibold text-base-content">Cuenta para la media</p>
                       <p className="text-sm text-base-content/60">Incluye la tarea en el cálculo final de la evaluación.</p>
                     </div>
                   </label>
 
-                  <label className="flex items-start gap-3 rounded-2xl border border-base-300 bg-base-200/30 p-4">
-                    <input type="checkbox" className="checkbox checkbox-primary mt-1" checked={allowLateSubmission} onChange={(event) => setAllowLateSubmission(event.target.checked)} />
+                  <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${allowLateSubmission ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                    <input type="checkbox" className="sr-only" checked={allowLateSubmission} onChange={(event) => setAllowLateSubmission(event.target.checked)} />
+                    <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all ${allowLateSubmission ? "border-primary bg-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                      <Check size={14} strokeWidth={3} className={`text-primary-content transition-transform ${allowLateSubmission ? "scale-100" : "scale-0"}`} />
+                    </span>
                     <div>
                       <p className="font-semibold text-base-content">Permitir entrega tardía</p>
                       <p className="text-sm text-base-content/60">Mantiene visible la tarea aunque cierre el plazo.</p>
@@ -364,22 +375,31 @@ export default function TaskCreationForm({
                 <div className="grid w-full gap-4">
                   <div className="w-full space-y-4">
                     <div className="grid w-full gap-3 md:grid-cols-3">
-                      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${assignmentMode === "all" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100"}`}>
-                        <input type="radio" name="assignmentModeView" className="radio radio-primary mt-1" checked={assignmentMode === "all"} onChange={() => setAssignmentMode("all")} />
+                      <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${assignmentMode === "all" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                        <input type="radio" name="assignmentModeView" className="sr-only" checked={assignmentMode === "all"} onChange={() => setAssignmentMode("all")} />
+                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${assignmentMode === "all" ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${assignmentMode === "all" ? "scale-100" : "scale-0"}`} />
+                        </span>
                         <div>
                           <p className="font-semibold text-base-content">Todo el curso</p>
                           <p className="text-sm text-base-content/60">Asigna la tarea a todos los alumnos matriculados.</p>
                         </div>
                       </label>
-                      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${assignmentMode === "manual" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100"}`}>
-                        <input type="radio" name="assignmentModeView" className="radio radio-primary mt-1" checked={assignmentMode === "manual"} onChange={() => setAssignmentMode("manual")} />
+                      <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${assignmentMode === "manual" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                        <input type="radio" name="assignmentModeView" className="sr-only" checked={assignmentMode === "manual"} onChange={() => setAssignmentMode("manual")} />
+                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${assignmentMode === "manual" ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${assignmentMode === "manual" ? "scale-100" : "scale-0"}`} />
+                        </span>
                         <div>
                           <p className="font-semibold text-base-content">Libre elección</p>
                           <p className="text-sm text-base-content/60">Selecciona manualmente a los alumnos.</p>
                         </div>
                       </label>
-                      <label className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 ${assignmentMode === "filtered" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100"}`}>
-                        <input type="radio" name="assignmentModeView" className="radio radio-primary mt-1" checked={assignmentMode === "filtered"} onChange={() => setAssignmentMode("filtered")} />
+                      <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${assignmentMode === "filtered" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                        <input type="radio" name="assignmentModeView" className="sr-only" checked={assignmentMode === "filtered"} onChange={() => setAssignmentMode("filtered")} />
+                        <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${assignmentMode === "filtered" ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                          <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${assignmentMode === "filtered" ? "scale-100" : "scale-0"}`} />
+                        </span>
                         <div>
                           <p className="font-semibold text-base-content">Por filtro</p>
                           <p className="text-sm text-base-content/60">Aplica filtros automáticos de rendimiento.</p>
@@ -389,17 +409,17 @@ export default function TaskCreationForm({
 
                     {assignmentMode !== "all" && (
                       <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
-                        <label className="input input-bordered flex w-full items-center gap-2 border-base-300 bg-base-100">
+                        <label className="input input-bordered flex w-full items-center gap-2 border-base-300 bg-base-100 focus-within:border-warning focus-within:outline-none">
                           <Search size={16} className="text-base-content/40" />
                           <input type="text" className="w-full bg-transparent outline-none" placeholder="Buscar alumno por nombre o email" value={search} onChange={(event) => setSearch(event.target.value)} />
                         </label>
                         {assignmentMode === "manual" ? (
                           <div className="flex w-full gap-2 sm:w-auto sm:flex-none sm:justify-end">
-                            <button type="button" className="btn btn-outline flex-1 gap-2 whitespace-nowrap sm:flex-none" onClick={selectVisibleStudents}>
+                            <button type="button" className="btn btn-warning flex-1 gap-2 whitespace-nowrap sm:flex-none" onClick={selectVisibleStudents}>
                               <ClipboardCheck size={16} />
                               Seleccionar visibles
                             </button>
-                            <button type="button" className="btn btn-ghost flex-1 gap-2 whitespace-nowrap sm:flex-none" onClick={clearSelection}>
+                            <button type="button" className="btn btn-error btn-outline flex-1 gap-2 whitespace-nowrap sm:flex-none" onClick={clearSelection}>
                               Limpiar
                             </button>
                           </div>
@@ -414,13 +434,22 @@ export default function TaskCreationForm({
                           Alumnos del curso
                         </div>
                         <div className="grid gap-3">
-                          {visibleStudents.map((student) => (
-                            <label key={student._id} className="flex cursor-pointer items-center gap-3 rounded-2xl border border-base-300 bg-base-100 px-4 py-3 transition-colors hover:bg-base-200/60">
-                              <input type="checkbox" className="checkbox checkbox-primary" checked={selectedStudentIds.includes(student._id)} onChange={() => toggleStudent(student._id)} />
-                              <div className="avatar">
-                                <div className="w-10 rounded-full bg-base-200">
-                                  <img src={getAvatarUrl(student)} alt={`Avatar de ${student.firstName}`} />
+                          {visibleStudents.map((student) => {
+                            const isChecked = selectedStudentIds.includes(student._id);
+                            return (
+                            <label key={student._id} className={`group flex cursor-pointer items-center gap-3 rounded-xl border-2 px-4 py-3 transition-all ${isChecked ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                              <input type="checkbox" className="sr-only" checked={isChecked} onChange={() => toggleStudent(student._id)} />
+                              <div className="relative">
+                                <div className={`avatar transition-opacity ${isChecked ? "opacity-100" : ""}`}>
+                                  <div className={`w-10 rounded-full bg-base-200 ring-2 ring-offset-2 ring-offset-base-100 transition-all ${isChecked ? "ring-primary" : "ring-transparent"}`}>
+                                    <img src={getAvatarUrl(student)} alt={`Avatar de ${student.firstName}`} />
+                                  </div>
                                 </div>
+                                {isChecked && (
+                                  <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary ring-2 ring-base-100">
+                                    <Check size={12} strokeWidth={3} className="text-primary-content" />
+                                  </span>
+                                )}
                               </div>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between gap-2">
@@ -430,7 +459,8 @@ export default function TaskCreationForm({
                                 <p className="text-xs text-base-content/60">{student.email}</p>
                               </div>
                             </label>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     )}
@@ -443,30 +473,39 @@ export default function TaskCreationForm({
                         </div>
 
                         <div className="space-y-3">
-                          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-base-300 bg-base-100 p-4">
-                            <input type="radio" name="assignmentFilter" className="radio radio-primary mt-1" checked={assignmentFilterKind === "failing_average"} onChange={() => setAssignmentFilterKind("failing_average")} />
+                          <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${assignmentFilterKind === "failing_average" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                            <input type="radio" name="assignmentFilter" className="sr-only" checked={assignmentFilterKind === "failing_average"} onChange={() => setAssignmentFilterKind("failing_average")} />
+                            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${assignmentFilterKind === "failing_average" ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                              <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${assignmentFilterKind === "failing_average" ? "scale-100" : "scale-0"}`} />
+                            </span>
                             <div>
                               <p className="font-semibold text-base-content">Miembros que han suspendido</p>
                               <p className="text-sm text-base-content/60">Promedio inferior a 5 sobre 10.</p>
                             </div>
                           </label>
 
-                          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-base-300 bg-base-100 p-4">
-                            <input type="radio" name="assignmentFilter" className="radio radio-primary mt-1" checked={assignmentFilterKind === "below_threshold"} onChange={() => setAssignmentFilterKind("below_threshold")} />
+                          <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${assignmentFilterKind === "below_threshold" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                            <input type="radio" name="assignmentFilter" className="sr-only" checked={assignmentFilterKind === "below_threshold"} onChange={() => setAssignmentFilterKind("below_threshold")} />
+                            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${assignmentFilterKind === "below_threshold" ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                              <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${assignmentFilterKind === "below_threshold" ? "scale-100" : "scale-0"}`} />
+                            </span>
                             <div className="space-y-2">
                               <div>
                                 <p className="font-semibold text-base-content">Miembros por debajo de X nota</p>
                                 <p className="text-sm text-base-content/60">Filtra por umbral de media.</p>
                               </div>
                               <div className="flex items-center gap-3">
-                                <input type="number" min="0" max="10" step="0.1" value={assignmentThreshold} onChange={(event) => setAssignmentThreshold(Number(event.target.value))} className="input input-bordered input-sm w-24 border-base-300 bg-base-100" />
+                                <input type="number" min="0" max="10" step="0.1" value={assignmentThreshold} onChange={(event) => setAssignmentThreshold(Number(event.target.value))} className="input input-bordered input-sm w-24 border-base-300 bg-base-100 focus:border-warning focus:outline-none" />
                                 <span className="text-sm text-base-content/60">nota media</span>
                               </div>
                             </div>
                           </label>
 
-                          <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-base-300 bg-base-100 p-4">
-                            <input type="radio" name="assignmentFilter" className="radio radio-primary mt-1" checked={assignmentFilterKind === "failed_task"} onChange={() => setAssignmentFilterKind("failed_task")} />
+                          <label className={`group flex cursor-pointer items-start gap-3 rounded-xl border-2 p-4 transition-all ${assignmentFilterKind === "failed_task" ? "border-primary bg-primary/5" : "border-base-300 bg-base-100 hover:border-base-content/20"}`}>
+                            <input type="radio" name="assignmentFilter" className="sr-only" checked={assignmentFilterKind === "failed_task"} onChange={() => setAssignmentFilterKind("failed_task")} />
+                            <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${assignmentFilterKind === "failed_task" ? "border-primary" : "border-base-300 group-hover:border-base-content/30"}`}>
+                              <span className={`h-2.5 w-2.5 rounded-full bg-primary transition-transform ${assignmentFilterKind === "failed_task" ? "scale-100" : "scale-0"}`} />
+                            </span>
                             <div>
                               <p className="font-semibold text-base-content">Miembros con alguna tarea suspensa</p>
                               <p className="text-sm text-base-content/60">Incluye alumnos con alguna entrega calificada por debajo del aprobado.</p>
@@ -507,12 +546,14 @@ export default function TaskCreationForm({
                     {state.message}
                   </div>
                 ) : null}
-                <button type="submit" name="active" value="false" className="btn btn-primary btn-block gap-2 shadow-lg" disabled={isPending}>
-                  {isPending ? "Guardando..." : mode === "edit" ? "Guardar cambios" : "Guardar borrador"}
-                </button>
-                <button type="submit" name="active" value="true" className="btn btn-outline btn-block gap-2" disabled={isPending}>
-                  {isPending ? "Publicando..." : mode === "edit" ? "Actualizar y publicar" : "Publicar tarea"}
-                </button>
+                <div className="flex flex-col gap-3 sm:flex-row">
+                  <button type="submit" name="active" value="false" className="btn btn-outline flex-1 gap-2" disabled={isPending}>
+                    {isPending ? "Guardando..." : mode === "edit" ? "Guardar cambios" : "Guardar borrador"}
+                  </button>
+                  <button type="submit" name="active" value="true" className="btn btn-primary flex-1 gap-2 shadow-lg" disabled={isPending}>
+                    {isPending ? "Publicando..." : mode === "edit" ? "Actualizar y publicar" : "Publicar tarea"}
+                  </button>
+                </div>
                 <p className="text-center text-xs text-base-content/50">
                   {mode === "edit"
                     ? "Los cambios se guardarán conservando la audiencia y la configuración de evaluación actualizada."

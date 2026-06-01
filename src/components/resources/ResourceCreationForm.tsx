@@ -241,42 +241,39 @@ export default function ResourceCreationForm({
   return (
     <main className="min-h-[calc(100vh-4rem)] bg-base-200/40">
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col px-4 py-6 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="mb-6">
           <button type="button" onClick={() => router.push(backButtonHref)} className="btn btn-ghost btn-sm gap-2">
             <ArrowLeft size={16} />
             {backButtonLabel}
           </button>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-base-content/40">
-            <Upload size={14} />
-            {topLabel}
-          </div>
         </div>
 
-        <section className="card border border-base-300 bg-base-100 shadow-xl">
-          <div className="px-6 py-8 sm:px-8">
+        <section className="card border border-base-300 bg-base-100 shadow-xl overflow-hidden">
+          <div className="px-6 pt-7 pb-8 sm:px-8">
             <div className="space-y-5">
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="badge badge-outline gap-1.5">
+                  <span className="badge badge-warning gap-1.5 font-semibold">
                     <BookOpen size={12} />
                     Profesor
                   </span>
-                  <span className="badge badge-outline gap-1.5">
+                  <span className="badge badge-ghost gap-1.5 font-medium">
+                    <Upload size={12} />
+                    {topLabel}
+                  </span>
+                  <span className="badge badge-outline badge-primary gap-1.5 font-medium">
                     <ShieldCheck size={12} />
                     Recurso descargable o enlazado
                   </span>
                 </div>
 
-                <div className="space-y-2">
-                  <p className="text-sm font-semibold uppercase tracking-[0.28em] text-base-content/50">{headerTag}</p>
-                  <h1 className="w-full text-3xl font-bold tracking-tight text-base-content sm:text-5xl">
-                    {pageTitle} en {courseTitle}
-                  </h1>
-                  <p className="w-full text-base-content/70">
-                    {pageSubtitle}
-                  </p>
-                  {courseDescription ? <p className="w-full text-sm text-base-content/50">{courseDescription}</p> : null}
-                </div>
+                <h1 className="w-full text-3xl font-bold text-base-content sm:text-4xl">
+                  {pageTitle} en {courseTitle}
+                </h1>
+                <p className="w-full text-base-content/70">
+                  {pageSubtitle}
+                </p>
+                {courseDescription ? <p className="w-full text-sm text-base-content/50">{courseDescription}</p> : null}
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3 xl:grid-cols-3">
@@ -286,7 +283,7 @@ export default function ResourceCreationForm({
                       <BookOpen size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Curso</p>
+                      <p className="text-xs font-semibold text-base-content/50">Curso</p>
                       <p className="text-sm font-semibold text-base-content">{courseTitle}</p>
                     </div>
                   </div>
@@ -298,7 +295,7 @@ export default function ResourceCreationForm({
                         <BookOpen size={16} />
                       </div>
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Unidad</p>
+                        <p className="text-xs font-semibold text-base-content/50">Unidad</p>
                         <p className="text-sm font-semibold text-base-content">{selectedUnitTitle}</p>
                       </div>
                     </div>
@@ -330,7 +327,7 @@ export default function ResourceCreationForm({
                       <Check size={16} />
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Estado</p>
+                      <p className="text-xs font-semibold text-base-content/50">Estado</p>
                       <p className="text-sm font-semibold text-success">Listo para publicar</p>
                     </div>
                   </div>
@@ -358,7 +355,7 @@ export default function ResourceCreationForm({
                     <input
                       value={title}
                       onChange={(event) => setTitle(event.target.value)}
-                      className="input input-bordered w-full border-base-300 bg-base-100"
+                      className="input input-bordered w-full border-base-300 bg-base-100 focus:border-warning focus:outline-none"
                       placeholder="Ej: Guía del tema 1"
                       disabled={isSubmitting}
                       required
@@ -372,7 +369,7 @@ export default function ResourceCreationForm({
                     <textarea
                       value={description}
                       onChange={(event) => setDescription(event.target.value)}
-                      className={`textarea textarea-bordered w-full border-base-300 bg-base-100 ${resourceMode === "text" ? "min-h-64" : "min-h-28"}`}
+                      className={`textarea textarea-bordered w-full resize-none border-base-300 bg-base-100 focus:border-warning focus:outline-none ${resourceMode === "text" ? "min-h-64" : "min-h-28"}`}
                       placeholder={resourceMode === "text" ? "Escribe aquí el contenido que verá el alumno..." : "Resumen breve del recurso"}
                       disabled={isSubmitting}
                       required={resourceMode === "text"}
@@ -527,7 +524,7 @@ export default function ResourceCreationForm({
                         <input
                           value={resourceUrl}
                           onChange={(event) => setResourceUrl(event.target.value)}
-                          className="input input-bordered w-full border-base-300 bg-base-100"
+                          className="input input-bordered w-full border-base-300 bg-base-100 focus:border-warning focus:outline-none"
                           placeholder="https://..."
                           disabled={isSubmitting}
                           required
@@ -543,7 +540,7 @@ export default function ResourceCreationForm({
                     <textarea
                       value={content}
                       onChange={(event) => setContent(event.target.value)}
-                      className="textarea textarea-bordered min-h-64 w-full border-base-300 bg-base-100"
+                      className="textarea textarea-bordered min-h-64 w-full resize-none border-base-300 bg-base-100 focus:border-warning focus:outline-none"
                       placeholder="Escribe aquí el contenido que verá el alumno..."
                       disabled={isSubmitting}
                       required
