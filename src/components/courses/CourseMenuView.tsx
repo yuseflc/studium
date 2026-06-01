@@ -80,8 +80,13 @@ export default function CoursesView({ isTeacher }: { isTeacher?: boolean }) {
                     </div>
                   </figure>
 
-                  <span className="absolute -bottom-3 left-20 inline-flex items-center px-3 py-1 rounded-full text-[10px] min-[1280px]:max-[1300px]:text-[6px] min-[1300px]:max-[1550px]:text-[8px] font-black uppercase tracking-[0.15em] bg-yellow-400 text-black border-2 border-base-100 shadow-lg z-40 transform hover:scale-105 transition-transform duration-200">
-                    {c.ownerName ?? "Profesor"}
+                  <span
+                    className="absolute -bottom-3 left-20 z-40 inline-flex max-w-[60%] items-center overflow-hidden rounded-full border-2 border-base-100 px-3 py-1 text-[11px] font-bold text-white shadow-lg"
+                    style={pattern.style}
+                  >
+                    {/* Capa oscura para asegurar legibilidad del nombre sobre cualquier patrón */}
+                    <span className="absolute inset-0 bg-black/35" />
+                    <span className="relative truncate drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">{c.ownerName ?? "Profesor"}</span>
                   </span>
 
                   {/* Avatar del propietario: foto de Google (OAuth) o Robohash si no tiene cuenta vinculada */}

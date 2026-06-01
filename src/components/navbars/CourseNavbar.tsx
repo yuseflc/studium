@@ -157,10 +157,6 @@ export default async function CourseNavbar() {
                                         </a>
                                     </li>
                                 )}
-                                {/* Opción de Configuración */}
-                                <li>
-                                    <a>Configuración</a>
-                                </li>
                                 {/* Opción de Logout - Estilizada en rojo */}
                                 <li className="hover:bg-error/10 hover:text-error transition-colors">
                                     <LogoutButton />
@@ -239,11 +235,6 @@ export default async function CourseNavbar() {
                                                 </a>
                                             </li>
                                         )}
-                                        <li>
-                                            <a className="justify-start py-3 px-6 font-semibold active:bg-base-300 rounded-xl transition-colors">
-                                                Configuración
-                                            </a>
-                                        </li>
                                         <li>
                                             <div className="justify-start py-3 px-6 w-full text-error font-bold active:bg-error/10 rounded-xl transition-colors cursor-pointer">
                                                 <LogoutButton />

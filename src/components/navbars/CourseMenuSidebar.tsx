@@ -18,7 +18,6 @@
 
 import { useState, useEffect } from "react";
 import {
-  Settings,
   User,
   LogOut,
   CircleArrowRight,
@@ -156,13 +155,6 @@ export default function Sidebar() {
             >
               <User size={18} />
               <span>Mi cuenta</span>
-            </Link>
-            <Link
-              href="/settings"
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-base-300 transition-colors text-sm font-semibold"
-            >
-              <Settings size={18} />
-              <span>Ajustes</span>
             </Link>
             <button
               className="flex items-center gap-3 p-2 rounded-xl hover:bg-error/10 hover:text-error transition-colors text-sm font-semibold mt-2 w-full text-left"
