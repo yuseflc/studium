@@ -11,6 +11,7 @@ import LogoutButton from "./LogoutButton";
 import ProfileImage from "./ProfileImage";
 import { LOGGER } from "@/config/logger";
 import Logo from "../Logo";
+import RoleInfoModal from "./RoleInfoModal";
 
 /**
  * server-hoist-static-io: Lista de cursos disponibles hoisted a nivel de módulo.
@@ -62,6 +63,7 @@ export default async function CourseNavbar() {
 
     const userFirstName = user?.firstName || user?.name || "Usuario";
     const userProfilePicture = user?.profile?.profilePicture || user?.profilePicture || "";
+    const userRole = user?.role || "student";
 
     const cursoRoutes: Record<string, string> = {
         "Diseño de Interfaces Web": "/course/diseno-interfaces-web",
@@ -296,10 +298,7 @@ export default async function CourseNavbar() {
                                         </span>
                                     </div>
 
-                                    {/* Rol más arriba */}
-                                    <span className="text-xs opacity-70 mt-0.5">
-                                        {user?.role === "student" ? "Estudiante" : "Profesor"}
-                                    </span>
+                                    <RoleInfoModal role={userRole} triggerClassName="text-xs opacity-70 mt-0.5" />
                                 </li>
 
                                 <li>
@@ -363,6 +362,11 @@ export default async function CourseNavbar() {
                                         </div>
                                     </div>
                                     <span className="font-bold text-xl mb-6">{user?.firstName || "Usuario"}</span>
+
+                                    <RoleInfoModal
+                                        role={userRole}
+                                        triggerClassName="inline-flex items-center rounded-full border border-base-300 px-3 py-1 text-xs font-medium text-base-content/80 transition-colors hover:bg-base-200"
+                                    />
 
                                     <ul className="w-full menu menu-vertical gap-1 p-0 text-base">
                                         <li>

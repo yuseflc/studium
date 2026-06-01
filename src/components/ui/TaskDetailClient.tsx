@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2, ChevronLeft, ChevronRight, Save, MessageSquareText, Clock3, BadgeInfo, Files } from 'lucide-react';
+import { ClipboardList, Calendar, ArrowLeft, Upload, CheckCircle2, Pencil, FileText, Users, Edit3, Loader2, Trash2, ChevronLeft, ChevronRight, Save, MessageSquareText, Clock3, BadgeInfo, Files, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import HoldConfirmButton from '@/components/ui/HoldConfirmButton';
 import { Modal } from '@/components/ui/modals/Modal';
@@ -119,9 +119,16 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
 
   const hasDueDate = !!taskInfo.dueDate;
   const hasFlexibleDeadline = !!taskInfo.isOptional || !!taskInfo.allowLateSubmission || !hasDueDate;
-  const dueDateLabel = hasDueDate
-    ? `${new Date(taskInfo.dueDate as string | Date).toLocaleDateString()} a las 23:59`
+  
+  // Formatear fecha de entrega con hora correcta
+  const dueDateObj = hasDueDate ? new Date(taskInfo.dueDate as string | Date) : null;
+  const dueDateLabel = dueDateObj
+    ? dueDateObj.toLocaleString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })
     : "Sin fecha de entrega";
+
+  // Verificar si la entrega ha pasado la fecha límite
+  const isDeadlinePassed = dueDateObj && new Date() > dueDateObj;
+  const canSubmit = !isDeadlinePassed || !!taskInfo.allowLateSubmission;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +136,13 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
     setError(null);
 
     try {
+      // Validar que no haya pasado la fecha de entrega si no se permiten entregas tardías
+      if (isDeadlinePassed && !taskInfo.allowLateSubmission) {
+        setError('La fecha de entrega ha pasado y no se permiten entregas tardías.');
+        setIsSubmitting(false);
+        return;
+      }
+
       const form = e.currentTarget as HTMLFormElement;
       const formData = new FormData(form);
       const file = selectedFile;
@@ -680,9 +694,19 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                             className="textarea textarea-bordered w-full border border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary bg-base-100 text-sm resize-none h-48"
                             value={submissionText}
                             onChange={(e) => setSubmissionText(e.target.value)}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || !canSubmit}
                           />
                         </div>
+
+                        {!canSubmit && (
+                          <div className="bg-error/10 border border-error/20 text-error p-4 rounded-xl flex items-center gap-3 w-full mt-2">
+                            <AlertCircle size={20} className="mt-0.5 flex-shrink-0" />
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-sm">Plazo de entrega finalizado</span>
+                              <span className="text-xs opacity-90 mt-0.5">La fecha límite ha pasado y no se admiten entregas tardías. No puedes modificar ni realizar nuevas entregas.</span>
+                            </div>
+                          </div>
+                        )}
 
                         {error && (
                           <div className="alert alert-error text-xs p-2 rounded-lg">
@@ -692,45 +716,49 @@ export default function TaskDetailClient({ taskInfo, courseid, isTeacherView = f
                       </div>
                     </div>
 
-                    <div className="pt-4 border-t border-base-300 mt-4 flex gap-3 flex-shrink-0">
-                      {isSubmitted ? (
-                        <>
-                          <button
-                            type="button"
-                            onClick={handleDelete}
-                            disabled={isSubmitting}
-                            className="btn btn-outline btn-error flex-1 gap-2"
-                          >
-                            {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
-                            <span>Borrar Entrega</span>
-                          </button>
+                    {canSubmit && (
+                      <div className="pt-4 border-t border-base-300 mt-4 flex gap-3 flex-shrink-0">
+                        {isSubmitted ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleDelete}
+                              disabled={isSubmitting || !canSubmit}
+                              className="btn btn-outline btn-error flex-1 gap-2"
+                            >
+                              {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <Trash2 size={16} />}
+                              <span>Borrar Entrega</span>
+                            </button>
 
+                            <button
+                              type="submit"
+                              disabled={isSubmitting || (!submissionText.trim() && !selectedFile) || !canSubmit}
+                              className="btn btn-primary flex-1 hover:bg-primary/95 transition-all duration-200 gap-2"
+                              title={!canSubmit ? 'La fecha de entrega ha pasado y no se permiten entregas tardías' : ''}
+                            >
+                              {isSubmitting ? (
+                                <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+                              ) : (
+                                <><Pencil size={18} /> Editar Entrega</>
+                              )}
+                            </button>
+                          </>
+                        ) : (
                           <button
                             type="submit"
-                            disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
-                            className="btn btn-primary flex-1 hover:bg-primary/95 transition-all duration-200 gap-2"
+                            disabled={isSubmitting || (!submissionText.trim() && !selectedFile) || !canSubmit}
+                            className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200 gap-2"
+                            title={!canSubmit ? 'La fecha de entrega ha pasado y no se permiten entregas tardías' : ''}
                           >
                             {isSubmitting ? (
-                              <><Loader2 size={18} className="animate-spin" /> Guardando...</>
+                              <><Loader2 size={18} className="animate-spin" /> Entregando...</>
                             ) : (
-                              <><Pencil size={18} /> Editar Entrega</>
+                              <><Upload size={18} /> Entregar Tarea</>
                             )}
                           </button>
-                        </>
-                      ) : (
-                        <button
-                          type="submit"
-                          disabled={isSubmitting || (!submissionText.trim() && !selectedFile)}
-                          className="btn btn-primary w-full hover:bg-primary/95 transition-all duration-200 gap-2"
-                        >
-                          {isSubmitting ? (
-                            <><Loader2 size={18} className="animate-spin" /> Entregando...</>
-                          ) : (
-                            <><Upload size={18} /> Entregar Tarea</>
-                          )}
-                        </button>
-                      )}
-                    </div>
+                        )}
+                      </div>
+                    )}
                   </form>
                 )}
               </div>

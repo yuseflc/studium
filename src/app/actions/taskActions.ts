@@ -738,6 +738,14 @@ export async function submitTask(formData: FormData): Promise<{ success: boolean
       return { success: false, error: "Tarea no encontrada" };
     }
 
+    // Validar que no haya pasado la fecha de entrega si no se permiten entregas tardías
+    if (task.dueDate) {
+      const now = new Date();
+      if (now > task.dueDate && !task.allowLateSubmission) {
+        return { success: false, error: "La fecha de entrega ha pasado y no se permiten entregas tardías" };
+      }
+    }
+
     let fileUrls: string[] = [];
 
     if (file && file.size > 0) {
@@ -825,6 +833,20 @@ export async function deleteSubmission(taskId: string): Promise<{ success: boole
       return { success: false, error: "Usuario no encontrado" };
     }
 
+    // Obtener la tarea para validar la fecha de entrega
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return { success: false, error: "Tarea no encontrada" };
+    }
+
+    // Validar que no haya pasado la fecha de entrega si no se permiten entregas tardías
+    if (task.dueDate) {
+      const now = new Date();
+      if (now > task.dueDate && !task.allowLateSubmission) {
+        return { success: false, error: "La fecha de entrega ha pasado y no se permiten entregas tardías. No puedes borrar tu entrega." };
+      }
+    }
+
     // Buscar y eliminar la entrega del estudiante para esta tarea
     const result = await Submission.findOneAndDelete({
       taskId: new mongoose.Types.ObjectId(taskId),
@@ -844,8 +866,7 @@ export async function deleteSubmission(taskId: string): Promise<{ success: boole
     );
 
     // Revalidar el curso para actualizar el tic verde en la vista general
-    const task = await Task.findById(taskId).select("courseId");
-    if (task?.courseId) {
+    if (task.courseId) {
       revalidatePath(`/mycourses/${task.courseId.toString()}`);
     }
 
