@@ -119,7 +119,7 @@ export default function TeacherGradesView({ participants, subjects, courseId, in
                                             <td className="pl-6">
                                                 <div className="flex items-center gap-3">
                                                     <div className="avatar">
-                                                        <div className="mask mask-squircle w-10 h-10">
+                                                        <div className="rounded-full w-10 h-10">
                                                             <img src={student.avatar} alt={student.nombre} />
                                                         </div>
                                                     </div>
