@@ -102,7 +102,7 @@ const sections: LegalSection[] = [
             'Estos términos se interpretarán de acuerdo con la normativa aplicable al proyecto y al lugar de prestación del servicio. Si tienes dudas sobre su contenido, puedes escribirnos antes de usar la plataforma de forma continuada.',
         ],
         bullets: [
-            'Correo de contacto: hola@studium.com.',
+            'Correo de contacto: admin@studium.com.',
             'Asunto recomendado: términos, privacidad o ejercicio de derechos.',
         ],
     },
@@ -117,7 +117,7 @@ export default function TermsAndConditionsPage() {
             updatedAt="30 de mayo de 2026"
             summary={summary}
             sections={sections}
-            contactEmail="hola@studium.com"
+            contactEmail="admin@studium.com"
             contactLabel="Contacto para soporte legal y contractual"
             closingNote="Si la plataforma incorpora en el futuro servicios de pago, integraciones adicionales o funciones nuevas, esas condiciones se comunicarán de forma separada antes de su contratación o uso."
         />

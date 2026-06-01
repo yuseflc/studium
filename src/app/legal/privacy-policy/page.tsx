@@ -104,7 +104,7 @@ export default function PrivacyPolicyPage() {
             updatedAt="30 de mayo de 2026"
             summary={summary}
             sections={sections}
-            contactEmail="hola@studium.com"
+            contactEmail="admin@studium.com"
             contactLabel="Contacto para privacidad y derechos de usuario"
             closingNote="Este documento cubre el funcionamiento actual de Studium como plataforma educativa: acceso con email o Google, persistencia de cuentas en MongoDB, sesiones JWT con caducidad, archivos subidos a Cloudflare R2 y preferencias visuales guardadas localmente."
         />
