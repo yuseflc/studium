@@ -307,10 +307,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
   const openCreateResource = (subjectId: string, unit: CourseUnitItem) => {
     if (!canEdit) return;
-    resetForm();
-    setResourceType("file");
-    setResourceUrl("");
-    setEditor({ kind: "resource", mode: "create", subjectId, unitId: unit._id });
+    router.push(`/mycourses/${courseId}/resources/new?unitId=${unit._id}`);
   };
 
   const openEditResource = (subjectId: string, unitId: string, resource: CourseResourceItem) => {
@@ -562,24 +559,42 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
           const createdUnit = result.unit;
 
-          updateSubjectCollection(editor.subjectId, (currentSubject) => ({
-            ...currentSubject,
-            units: refreshUnitOrder([
-              ...(currentSubject.units || []),
+          setSubjects((prev) => {
+            const already = prev.some((s: any) => String(s?._id || s?.id || '') === String(createdUnit._id));
+            if (already) return prev;
+
+            const maxOrder = prev.reduce((max: number, s: any) => {
+              const o = Number.isFinite(s?.order) ? Number(s.order) : -1;
+              return Math.max(max, o);
+            }, -1);
+            const nextOrder = maxOrder >= 0 ? maxOrder + 1 : prev.length;
+
+            return [
+              ...prev,
               {
                 _id: createdUnit._id,
-                subjectId: editor.subjectId,
                 courseId: createdUnit.courseId,
                 title: createdUnit.title,
-                content: createdUnit.content,
-                order: createdUnit.order,
-                resources: [],
-                resourceIds: createdUnit.resourceIds,
-                createdAt: createdUnit.createdAt,
-                updatedAt: createdUnit.updatedAt,
-              },
-            ]),
-          }));
+                description: createdUnit.content || '',
+                order: nextOrder,
+                units: [{
+                  _id: createdUnit._id,
+                  subjectId: createdUnit._id,
+                  courseId: createdUnit.courseId,
+                  title: createdUnit.title,
+                  content: createdUnit.content,
+                  order: createdUnit.order || 0,
+                  resources: [],
+                  resourceIds: createdUnit.resourceIds || [],
+                  createdAt: createdUnit.createdAt,
+                  updatedAt: createdUnit.updatedAt,
+                }],
+                tasks: [],
+                unitIds: [createdUnit._id],
+                taskIds: [],
+              } as unknown as CourseSubjectItem,
+            ];
+          });
         } else {
           if (!editor.unitId) throw new Error("Unidad inválida");
           const result = await updateUnit(editor.unitId, { title, content });
@@ -1231,6 +1246,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
             <CourseSubjectModal
               id="course-structure-editor"
               dialogRef={editorDialogRef}
+              isOpen={true}
               mode={editor.mode}
               titleValue={title}
               setTitleValue={setTitle}
@@ -1247,6 +1263,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
             <CourseUnitModal
               id="course-structure-editor"
               dialogRef={editorDialogRef}
+              isOpen={true}
               mode={editor.mode}
               titleValue={title}
               setTitleValue={setTitle}
@@ -1263,6 +1280,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
             <CourseResourceModal
               id="course-structure-editor"
               dialogRef={editorDialogRef}
+              isOpen={true}
               mode={editor.mode}
               titleValue={title}
               setTitleValue={setTitle}
@@ -1285,6 +1303,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
             <CourseTaskModal
               id="course-structure-editor"
               dialogRef={editorDialogRef}
+              isOpen={true}
               mode={editor.mode}
               taskType={editor.taskType || 'assignment'}
               titleValue={title}

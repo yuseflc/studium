@@ -13,7 +13,9 @@ import Course from "@/models/Course";
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import Task from "@/models/Task";
+import Submission from "@/models/Submission";
 import User from "@/models/User";
+import { deleteFromR2 } from "@/lib/r2";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/config/auth.config";
 import { ICourse, IInviteCode } from "@/models/Course";
@@ -546,8 +548,42 @@ export async function deleteCourse(courseId: string): Promise<{ success: boolean
       return { success: false, error: "No tienes permiso para eliminar este curso" };
     }
 
-    // Eliminar el curso
-    await Course.findByIdAndDelete(courseId);
+    // Obtener tareas e IDs para borrar submissions
+    const tasks = await Task.find({ courseId }, { _id: 1 }).lean();
+    const taskIds = tasks.map((t) => t._id);
+
+    // Obtener recursos y submissions para borrar sus archivos de R2
+    const [resources, submissions] = await Promise.all([
+      Resource.find({ courseId }, { type: 1, url: 1 }).lean(),
+      Submission.find({ taskId: { $in: taskIds } }, { files: 1 }).lean(),
+    ]);
+
+    // Recopilar URLs de R2 a eliminar
+    const r2Urls: string[] = [];
+    for (const r of resources) {
+      if (r.type === "file" && r.url) r2Urls.push(r.url);
+    }
+    for (const s of submissions) {
+      if (s.files?.length) r2Urls.push(...s.files);
+    }
+
+    // Borrar archivos de R2 (errores individuales no deben bloquear el resto)
+    await Promise.allSettled(r2Urls.map((url) => deleteFromR2(url)));
+
+    // Borrar todos los documentos relacionados y el curso
+    await Promise.all([
+      Submission.deleteMany({ taskId: { $in: taskIds } }),
+      Task.deleteMany({ courseId }),
+      Resource.deleteMany({ courseId }),
+      Unit.deleteMany({ courseId }),
+      Course.findByIdAndDelete(courseId),
+      User.updateOne({ _id: course.ownerId }, { $pull: { createdCourses: course._id } }),
+      User.updateMany(
+        { _id: { $in: course.enrolledStudents } },
+        { $pull: { enrolledCourses: course._id } }
+      ),
+    ]);
+
     return { success: true };
   } catch (error: any) {
     console.error("Error deleting course:", error);
@@ -776,7 +812,26 @@ export async function deleteSubject(subjectId: string): Promise<{ success: boole
     }
 
     const unitId = unit._id;
+
+    // Recopilar IDs de tareas y URLs de archivos para limpiar R2
+    const [unitTasks, unitResources] = await Promise.all([
+      Task.find({ unitId }, { _id: 1 }).lean(),
+      Resource.find({ unitId }, { type: 1, url: 1 }).lean(),
+    ]);
+    const unitTaskIds = unitTasks.map((t) => t._id);
+    const unitSubmissions = await Submission.find({ taskId: { $in: unitTaskIds } }, { files: 1 }).lean();
+
+    const r2Urls: string[] = [];
+    for (const r of unitResources) {
+      if (r.type === "file" && r.url) r2Urls.push(r.url);
+    }
+    for (const s of unitSubmissions) {
+      if (s.files?.length) r2Urls.push(...s.files);
+    }
+    await Promise.allSettled(r2Urls.map((url) => deleteFromR2(url)));
+
     await Promise.all([
+      Submission.deleteMany({ taskId: { $in: unitTaskIds } }),
       Task.deleteMany({ unitId }),
       Resource.deleteMany({ unitId }),
       Unit.findByIdAndDelete(unitId),

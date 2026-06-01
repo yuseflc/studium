@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, BookOpen, Check, FileText, Link2, ShieldCheck, Sparkles, Upload, X } from "lucide-react";
+import { ArrowLeft, BookOpen, Check, FileText, Link2, ShieldCheck, Sparkles, Upload, X, ChevronDown } from "lucide-react";
 import { createResource, updateResource } from "@/app/actions/resourceActions";
 import { useFileUpload } from "@/hooks/useFileUpload";
 
@@ -291,16 +291,38 @@ export default function ResourceCreationForm({
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-secondary/10 p-2 text-secondary-content">
-                      <BookOpen size={16} />
+                <div className={`dropdown w-full ${(isSubmitting || isEditMode) ? 'pointer-events-none opacity-50' : ''}`}>
+                  <div tabIndex={(isSubmitting || isEditMode) ? -1 : 0} role={(isSubmitting || isEditMode) ? "presentation" : "button"} className={`rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm w-full text-left flex items-center justify-between ${!(isSubmitting || isEditMode) ? 'hover:border-primary/30 transition-colors cursor-pointer' : ''}`}>
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl bg-secondary/10 p-2 text-secondary-content">
+                        <BookOpen size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Unidad</p>
+                        <p className="text-sm font-semibold text-base-content">{selectedUnitTitle}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Unidad</p>
-                      <p className="text-sm font-semibold text-base-content">{selectedUnitTitle}</p>
-                    </div>
+                    {!(isSubmitting || isEditMode) && <ChevronDown size={16} className="text-base-content/40" />}
                   </div>
+                  {!(isSubmitting || isEditMode) && (
+                    <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow-xl bg-base-100 rounded-box w-full mt-2 border border-base-300 max-h-60 overflow-y-auto flex-nowrap">
+                      {units.map((unit) => (
+                        <li key={unit._id}>
+                          <button 
+                            type="button" 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setUnitId(unit._id);
+                              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+                            }} 
+                            className={unitId === unit._id ? "active font-bold" : ""}
+                          >
+                            {unit.title}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
                 <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
                   <div className="flex items-center gap-3">
@@ -531,24 +553,6 @@ export default function ResourceCreationForm({
                     </span>
                   </label>
                 ) : null}
-
-                <label className="form-control gap-2">
-                  <span className="label-text font-semibold text-base-content/80">Unidad</span>
-                  <select
-                    value={unitId}
-                    onChange={(event) => setUnitId(event.target.value)}
-                    className="select select-bordered w-full border-base-300 bg-base-100"
-                    disabled={isSubmitting || isEditMode}
-                    required
-                  >
-                    <option value="" disabled>Selecciona una unidad</option>
-                    {units.map((unit) => (
-                      <option key={unit._id} value={unit._id}>
-                        {unit.title}
-                      </option>
-                    ))}
-                  </select>
-                </label>
               </div>
             </section>
 

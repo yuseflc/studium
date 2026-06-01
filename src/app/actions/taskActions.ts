@@ -17,7 +17,7 @@ import Unit from "@/models/Unit";
 import Task from "@/models/Task";
 import User from "@/models/User";
 import Submission from "@/models/Submission";
-import { uploadToR2 } from "@/lib/r2";
+import { uploadToR2, deleteFromR2 } from "@/lib/r2";
 import { getTaskCreationContext, resolveAssignmentRecipients, type AssignmentFilterKind, type AssignmentMode } from "@/lib/task-assignment";
 import {
   createTaskSchema,
@@ -685,10 +685,21 @@ export async function deleteTask(taskId: string): Promise<TaskActionResult> {
       return { success: false, error: "No tienes permiso para eliminar esta tarea" };
     }
 
-    await Task.findByIdAndDelete(taskId);
-    if (task.unitId) {
-      await Unit.findByIdAndUpdate(task.unitId, { $pull: { taskIds: new mongoose.Types.ObjectId(taskId) } });
+    // Borrar archivos de submissions de R2 antes de eliminar
+    const submissions = await Submission.find({ taskId }, { files: 1 }).lean();
+    const r2Urls: string[] = [];
+    for (const s of submissions) {
+      if (s.files?.length) r2Urls.push(...s.files);
     }
+    await Promise.allSettled(r2Urls.map((url) => deleteFromR2(url)));
+
+    await Promise.all([
+      Submission.deleteMany({ taskId }),
+      Task.findByIdAndDelete(taskId),
+      ...(task.unitId
+        ? [Unit.findByIdAndUpdate(task.unitId, { $pull: { taskIds: new mongoose.Types.ObjectId(taskId) } })]
+        : []),
+    ]);
 
     LOGGER.info(
       {

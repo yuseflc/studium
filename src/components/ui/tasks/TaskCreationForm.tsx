@@ -5,7 +5,7 @@
 // Formulario de creación/edición de tareas (cliente)
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, AlertTriangle, BarChart3, BookOpen, Calendar, Check, ClipboardCheck, FileText, Search, SlidersHorizontal, Users } from "lucide-react";
+import { ArrowLeft, AlertTriangle, BarChart3, BookOpen, Calendar, Check, ClipboardCheck, FileText, Search, SlidersHorizontal, Users, ChevronDown } from "lucide-react";
 import { createTaskFromFormData, updateTaskFromFormData, type TaskCreationFormState } from "@/app/actions/taskActions";
 import type { TaskCreationStudent, TaskCreationUnit } from "@/lib/task-assignment";
 
@@ -197,16 +197,36 @@ export default function TaskCreationForm({
                     </div>
                   </div>
                 </div>
-                <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-xl bg-secondary/10 p-2 text-secondary-content">
-                      <BookOpen size={16} />
+                <div className={`dropdown w-full ${isPending ? 'pointer-events-none opacity-50' : ''}`}>
+                  <div tabIndex={0} role="button" className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm w-full text-left flex items-center justify-between hover:border-primary/30 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-xl bg-secondary/10 p-2 text-secondary-content">
+                        <BookOpen size={16} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Unidad</p>
+                        <p className="text-sm font-semibold text-base-content">{selectedUnitTitle || "Selecciona una unidad"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-base-content/40">Unidad</p>
-                      <p className="text-sm font-semibold text-base-content">{selectedUnitTitle || "Selecciona una unidad"}</p>
-                    </div>
+                    <ChevronDown size={16} className="text-base-content/40" />
                   </div>
+                  <ul tabIndex={0} className="dropdown-content z-[10] menu p-2 shadow-xl bg-base-100 rounded-box w-full mt-2 border border-base-300 max-h-60 overflow-y-auto flex-nowrap">
+                    {units.map((unit) => (
+                      <li key={unit._id}>
+                        <button 
+                          type="button" 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setUnitId(unit._id);
+                            if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+                          }} 
+                          className={unitId === unit._id ? "active font-bold" : ""}
+                        >
+                          {unit.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
                 <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
                   <div className="flex items-center gap-3">
@@ -252,17 +272,6 @@ export default function TaskCreationForm({
                 </div>
 
                 <div className="grid gap-4">
-                  <label className="form-control gap-2">
-                    <span className="label-text font-semibold text-base-content/80">Unidad</span>
-                    <select value={unitId} onChange={(event) => setUnitId(event.target.value)} className="select select-bordered w-full border-base-300 bg-base-100">
-                      {units.map((unit) => (
-                        <option key={unit._id} value={unit._id}>
-                          {unit.title}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
                   <label className="form-control gap-2">
                     <span className="label-text font-semibold text-base-content/80">Título</span>
                     <input name="title" type="text" value={title} onChange={(event) => setTitle(event.target.value)} className="input input-bordered w-full border-base-300 bg-base-100" placeholder="Ej: Informe de diseño accesible" required />

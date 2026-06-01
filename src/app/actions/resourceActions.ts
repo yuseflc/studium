@@ -337,6 +337,14 @@ export async function deleteResource(resourceId: string): Promise<{ success: boo
       Unit.findByIdAndUpdate(resource.unitId, { $pull: { resourceIds: resource._id } }),
     ]);
 
+    if (resource.type === "file" && resource.url) {
+      try {
+        await deleteFromR2(resource.url);
+      } catch (r2Error) {
+        LOGGER.error({ resourceId, url: resource.url, error: r2Error }, "Error deleting resource file from R2");
+      }
+    }
+
     return { success: true };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Error al eliminar el recurso";
