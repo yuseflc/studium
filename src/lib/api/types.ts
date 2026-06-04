@@ -6,7 +6,7 @@
  */
 
 import mongoose from "mongoose";
-// Subject model deprecated; types use normalized unit structures instead
+// El modelo Subject está deprecado; los tipos usan la estructura normalizada de Unit
 import { IUnit } from "@/models/Unit";
 import { IResource } from "@/models/Resource";
 import { ITask } from "@/models/Task";

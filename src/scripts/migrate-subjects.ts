@@ -13,7 +13,7 @@ async function main() {
   const shouldDelete = process.argv.includes("--delete");
 
   console.log("Connecting to DB...");
-  // Allow using .env file in project root if env vars are not set
+  // Intentar cargar el archivo .env del proyecto si las variables de entorno no están configuradas
   let MONGODB_URI = process.env.MONGODB_URI_PROD || process.env.MONGODB_URI;
   if (!MONGODB_URI) {
     try {
@@ -33,7 +33,7 @@ async function main() {
         }
       }
     } catch (e) {
-      // ignore
+      // Ignorar error si el archivo .env no existe o no es legible
     }
   }
 
@@ -53,7 +53,7 @@ async function main() {
     throw new Error("Mongoose connection established but database reference is missing");
   }
 
-  // Read legacy subjects collection directly to avoid depending on Subject model
+  // Leer la colección legacy 'subjects' directamente para no depender del modelo Subject
   const subjects = await mongoose.connection.db
     .collection('subjects')
     .find({})
@@ -70,7 +70,7 @@ async function main() {
     const taskIds = subj.taskIds || [];
 
     if (unitIds.length > 0) {
-      // Add units to course.unitIds
+      // Añadir las unidades al array unitIds del curso correspondiente
       if (!dryRun) {
         await Course.updateOne(
           { _id: courseId },
@@ -86,7 +86,7 @@ async function main() {
       console.log(`Subject ${subjectId} has no units`);
     }
 
-    // Reassign tasks that belonged to the subject to the first unit (if any)
+    // Reasignar las tareas del subject a la primera unidad disponible del curso
     if (taskIds.length > 0) {
       const targetUnitId = unitIds.length > 0 ? unitIds[0] : null;
       for (const tId of taskIds) {
@@ -103,7 +103,7 @@ async function main() {
       }
     }
 
-    // Optionally delete the subject document after migration (already executed if run earlier)
+    // Eliminar el documento subject tras la migración si se pasa el flag --delete
     if (shouldDelete) {
       console.log(`Would delete subject ${subjectId} (already handled or subject model removed)`);
     }

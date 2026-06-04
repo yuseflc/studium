@@ -15,7 +15,7 @@ import Submission from "@/models/Submission";
 import User from "@/models/User";
 import { authOptions } from "@/config/auth.config";
 import { getServerSession } from "next-auth/next";
-// Subject model deprecated; use Units directly
+// El modelo Subject está deprecado; usar Units directamente
 import { LOGGER } from "@/config/logger";
 
 function normalizeResource(resource: any) {
@@ -206,7 +206,7 @@ export async function getCourseSubjects(courseId: string | mongoose.Types.Object
  */
 export async function getSubjectUnits(subjectId: string | mongoose.Types.ObjectId) {
   try {
-    // Deprecated: units are queried by course now. Keep compatibility by returning empty array.
+    // Deprecado: las unidades se consultan por curso. Se devuelve array vacío por compatibilidad
     const units: any[] = [];
     return units;
   } catch (error) {
@@ -239,7 +239,7 @@ export async function createSubject(
   data: { title: string; description?: string; order?: number }
 ) {
   try {
-    // Create a Unit instead to represent the subject (normalized model)
+    // Crear una Unit para representar el subject (modelo normalizado post-migración)
     const unit = await Unit.create({
       courseId,
       title: data.title,
@@ -249,7 +249,7 @@ export async function createSubject(
       taskIds: [],
     });
 
-    // Ensure course.unitIds includes this unit
+    // Asegurar que course.unitIds incluya la nueva unidad (usando $addToSet para evitar duplicados)
     await Course.findByIdAndUpdate(courseId, { $addToSet: { unitIds: unit._id } });
 
     return unit;
@@ -317,7 +317,7 @@ export async function createResource(
  */
 export async function deleteSubject(subjectId: string | mongoose.Types.ObjectId) {
   try {
-    // Treat subjectId as unitId in the new normalized model
+    // Tratar el subjectId como unitId en el modelo normalizado
     const unit = await Unit.findById(subjectId);
     if (!unit) throw new Error("Unit not found");
 

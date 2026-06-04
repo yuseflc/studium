@@ -21,7 +21,7 @@ export interface ICourse {
   status: "draft" | "active" | "archived";
   unitIds: mongoose.Types.ObjectId[]; // Referencias a las unidades del curso
   units?: any[]; // Campo virtual o poblado para la UI
-  // Compatibility: previous model used `Subject` as top-level grouping
+  // Compatibilidad: el modelo anterior usaba Subject como agrupación principal del curso
   subjectIds?: mongoose.Types.ObjectId[];
   subjects?: any[];
   enrolledStudents: mongoose.Types.ObjectId[];

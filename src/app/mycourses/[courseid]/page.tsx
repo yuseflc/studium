@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic"; // Forzar que esta página sea renderiza
 export default async function MyCoursePage({ params }: { params: Promise<{ courseid: string }> }) {
   const { courseid } = await params;
   
-  // Validate user access early before fetching course data
+  // Verificar el acceso del usuario al curso antes de cargar los datos
   const hasAccess = await validateCourseAccess(courseid);
   if (!hasAccess) {
     redirect("/mycourses");

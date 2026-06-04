@@ -120,7 +120,7 @@ export async function createResource(input: CreateResourceActionInput): Promise<
       return { success: false, error: "Curso no encontrado" };
     }
 
-    // Resolve unit: prefer explicit unitId
+    // Resolver la unidad: se da preferencia al unitId explícito si fue proporcionado
     let unit: { _id: mongoose.Types.ObjectId; courseId: mongoose.Types.ObjectId } | null = null;
     if (input.unitId) {
       unit = await Unit.findById(input.unitId);

@@ -34,7 +34,7 @@ import {
   CourseStructureDeleteModal
 } from '@/components/modals';
 import {
-  // Subjects removed — use Units actions instead
+  // Subject eliminado: usar las acciones de Units en su lugar
 } from "@/app/actions/courseActions";
 import {
   createUnit,
@@ -273,14 +273,14 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
   const openCreateSubject = () => {
     if (!canEdit) return;
     resetForm();
-    // Create a unit directly (subjects are deprecated)
+    // Crear una unidad directamente (Subject está deprecado)
     setEditor({ kind: "unit", mode: "create", subjectId: subjects?.[0]?._id || "" });
   };
 
   const openEditSubject = (subject: CourseSubjectItem) => {
     if (!canEdit) return;
     resetForm();
-    // Edit the first mapped unit if present, otherwise open unit create for this subject
+    // Editar la primera unidad vinculada si existe; si no, abrir el formulario de creación de unidad
     const mappedUnit = subject.units && subject.units.length === 1 ? subject.units[0] : undefined;
     if (mappedUnit) {
       setTitle(mappedUnit.title);
@@ -422,7 +422,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     // en el estado local para mantener la vista sincronizada sin recargar.
 
   const handleMoveSubject = async (subjectId: string, direction: -1 | 1) => {
-    // Delegate to mapped-unit reordering which maps subjects->units
+    // Delegar al reordenamiento de unidades mapeadas (subjects → units)
     await handleMoveMappedUnit(subjectId, direction);
   };
 
@@ -516,7 +516,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     }
 
     const nextTasks = swapItems(tasks, currentIndex, nextIndex);
-    // Resolve unitId for compatibility: prefer explicit unitIds, then first unit, then subject id
+    // Resolver el unitId para compatibilidad: prioridad a unitIds explícito, luego primera unidad, luego el id del subject
     const unitId = subject?.unitIds?.[0] ?? subject?.units?.[0]?._id ?? subject?._id;
     if (!unitId) {
       setErrorMessage("Unidad no encontrada para reordenar tareas");
@@ -543,7 +543,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
     setErrorMessage(null);
 
     try {
-      // Subjects removed: creation/editing of course structure now operates on Units.
+      // Subject eliminado: la creación y edición de la estructura del curso opera sobre Units
 
       if (editor.kind === "unit") {
           if (editor.mode === "create") {
@@ -757,7 +757,7 @@ export default function CourseStructureManager({ courseId, subjects, setSubjects
 
     try {
       if (deleteTarget.kind === "subject") {
-        // Treat deleting a subject as deleting its mapped unit (subjects deprecated)
+        // Eliminar un subject equivale a eliminar su unidad mapeada (Subject deprecado)
         const result = await deleteUnit(deleteTarget.id);
         if (!result.success) throw new Error(result.error || "No se pudo eliminar la unidad");
         setSubjects((previous) => refreshSubjectOrder(previous.filter((subject) => subject._id !== deleteTarget.id)));

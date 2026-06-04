@@ -56,7 +56,7 @@ export default async function ResourceDetailPage({
   }
 
   if (!resourceInfo) {
-    // Demo fallback
+    // Recurso de demostración por defecto cuando no se encuentra el recurso real
     resourceInfo = {
       title: "Recurso de Demostración",
       description: "Este es un recurso de prueba. Contiene materiales de lectura adicionales para complementar las clases.",

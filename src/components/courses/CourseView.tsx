@@ -309,7 +309,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       const already = prev.some((s: any) => String(s?._id || s?.id || '') === String(unit._id));
       if (already) return prev;
 
-      // Ensure new units are appended at the end: compute next order as max(existing orders)+1
+      // Añadir la nueva unidad al final: calcular el siguiente orden como max(órdenes existentes)+1
       const maxOrder = prev.reduce((max: number, s: any) => {
         const o = Number.isFinite(s?.order) ? Number(s.order) : -1;
         return Math.max(max, o);
@@ -332,7 +332,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       ];
     });
 
-    // Scroll to the newly added unit when it appears in the DOM.
+    // Desplazar la vista hacia la nueva unidad cuando aparezca en el DOM
     const scrollToUnit = (attempt = 0) => {
       const el = document.getElementById(`unit-${unit._id}`);
       if (el) {
@@ -343,7 +343,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       }
 
       if (attempt < 10) {
-        // Retry a few times while the UI updates
+        // Reintentar varias veces mientras la UI actualiza el DOM
         setTimeout(() => scrollToUnit(attempt + 1), 120);
       }
     };

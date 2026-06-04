@@ -5,7 +5,7 @@
 // Úsalo para poblar la base de datos con usuarios, cursos y entregas
 import User from '@/models/User';
 import Course from '@/models/Course';
-// Subject model deprecated — seed creates Units directly
+// El modelo Subject está deprecado; el seed crea Units directamente
 import Unit from '@/models/Unit';
 import Resource from '@/models/Resource';
 import Task from '@/models/Task';
@@ -13,8 +13,8 @@ import Submission from '@/models/Submission';
 import { connectDB } from '@/lib/database/database';
 
 /**
- * MongoDB Seed Function: Initialize database with sample data
- * Run this function to populate MongoDB with initial data for development/testing
+ * Puebla la base de datos con datos de ejemplo para desarrollo y pruebas.
+ * Ejecutar sólo en entornos locales; no usar en producción.
  */
 export async function seedDatabase() {
     try {
@@ -28,7 +28,7 @@ export async function seedDatabase() {
         // await Resource.deleteMany({});
         // await Task.deleteMany({});
 
-        // Check if data already exists
+        // Verificar si ya existen datos para no duplicar el seed
         const existingCourses = await Course.countDocuments();
         if (existingCourses > 0) {
             console.log('Database already has courses, skipping seed...');
@@ -37,7 +37,7 @@ export async function seedDatabase() {
 
         console.log('Seeding database...');
 
-        // Create sample users
+        // Crear usuarios de ejemplo (un profesor y dos estudiantes)
         const teacher = await User.create({
             email: 'teacher@studium.com',
             firstName: 'Juan',
@@ -73,7 +73,7 @@ export async function seedDatabase() {
             },
         });
 
-        // Create sample course
+        // Crear curso de ejemplo con los estudiantes ya inscritos
         const course = await Course.create({
             title: 'Desarrollo Web Full Stack',
             description: 'Aprende a crear aplicaciones web modernas con React y Node.js',
@@ -83,7 +83,7 @@ export async function seedDatabase() {
             enrolledStudents: [student1._id, student2._id],
         });
 
-        // Create sample unit (Subjects deprecated)
+        // Crear unidad de ejemplo
         const unit = await Unit.create({
             courseId: course._id,
             title: 'Fundamentos de JavaScript',
@@ -93,10 +93,10 @@ export async function seedDatabase() {
             taskIds: [],
         });
 
-        // Ensure course.unitIds includes this unit
+        // Asegurar que course.unitIds incluya la unidad creada
         await Course.findByIdAndUpdate(course._id, { $addToSet: { unitIds: unit._id } });
 
-        // Create sample resource
+        // Crear recurso de ejemplo enlazado a la unidad
         const resource = await Resource.create({
             unitId: unit._id,
             courseId: course._id,
@@ -106,14 +106,14 @@ export async function seedDatabase() {
             description: 'Referencia oficial de JavaScript',
         });
 
-        // Add resource to unit
+        // Añadir el recurso a la lista de recursos de la unidad
         await Unit.findByIdAndUpdate(
             unit._id,
             { $push: { resourceIds: resource._id } },
             { new: true }
         );
 
-        // Create sample tasks
+        // Crear tarea de ejemplo con fechas de inicio y entrega
         const task = await Task.create({
             title: 'Primer Proyecto: Calculadora',
             description: 'Crea una calculadora simple con HTML, CSS y JavaScript',
@@ -132,16 +132,16 @@ export async function seedDatabase() {
                     weight: 40,
                 },
             ],
-            startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+            startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // hace 7 días
+            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // en 7 días
             allowLateSubmission: true,
             active: true,
         });
 
-        // Add task to unit
+        // Añadir la tarea a la lista de tareas de la unidad
         await Unit.findByIdAndUpdate(unit._id, { $addToSet: { taskIds: task._id } }, { new: true });
 
-        // Create sample submissions
+        // Crear entregas de ejemplo para los estudiantes
         await Submission.create({
             taskId: task._id,
             studentId: student1._id,

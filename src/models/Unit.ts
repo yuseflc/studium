@@ -19,7 +19,7 @@ export interface IUnit {
 
 const UnitSchema = new mongoose.Schema<IUnit>(
   {
-    // `subjectId` removed: units are now directly associated to a course via `courseId`
+    // `subjectId` eliminado: las unidades se asocian directamente al curso mediante `courseId`
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",

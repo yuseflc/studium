@@ -28,14 +28,14 @@ export default function CourseFAB({ onAddResource, onAddUnit, courseId, defaultU
 
   const modalRef = useRef<HTMLDialogElement>(null);
   
-  // Flow states
+  // Estados del flujo de creación (tipo seleccionado, carga, éxito, errores)
   const [creationType, setCreationType] = useState<CreationType>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [createdItemId, setCreatedItemId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Form states
+  // Estados del formulario (título, descripción, fecha, unidad seleccionada, archivo)
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [dueDate, setDueDate] = useState('');

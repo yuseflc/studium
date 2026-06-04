@@ -9,7 +9,7 @@
 import { connectDB } from "@/lib/database/database";
 import { revalidatePath } from "next/cache";
 import Course from "@/models/Course";
-// Subject model deprecated; use Unit model instead
+// El modelo Subject fue deprecado; se utiliza Unit en su lugar
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import Task from "@/models/Task";
@@ -720,7 +720,7 @@ export async function updateSubject(
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    // Try to update a Unit (subjects deprecated)
+    // Se intenta actualizar la Unit correspondiente (Subject está deprecado)
     const unit = await Unit.findById(subjectId);
     if (!unit) {
       return { success: false, error: "Unidad/Materia no encontrada" };
@@ -792,7 +792,7 @@ export async function deleteSubject(subjectId: string): Promise<{ success: boole
       return { success: false, error: "Usuario no encontrado" };
     }
 
-    // Treat subjectId as unitId and delete the unit
+    // Se trata el subjectId como unitId para eliminar la unidad correspondiente
     const unit = await Unit.findById(subjectId);
     if (!unit) {
       return { success: false, error: "Unidad no encontrada" };
@@ -884,7 +884,7 @@ export async function reorderSubjects(
       return { success: false, error: "No tienes permiso para reordenar las materias" };
     }
 
-    // Validate unitIds belong to course
+    // Verificar que todos los unitIds pertenecen al curso antes de reordenar
     const units = await Unit.find({ _id: { $in: subjectIds }, courseId }).select("_id").lean();
     if (units.length !== subjectIds.length) {
       return { success: false, error: "Una o más unidades no pertenecen al curso" };

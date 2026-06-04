@@ -186,7 +186,7 @@ export const enrollStudentSchema = z.object({
 export type EnrollStudentInput = z.infer<typeof enrollStudentSchema>;
 
 // ============ ESQUEMAS DE MATERIAS ============
-// Subjects removed: use Units as top-level grouping inside a Course
+// Subject eliminado: usar Units como agrupación principal dentro de un Course
 
 // ============ ESQUEMAS DE UNIDADES ============
 
@@ -508,7 +508,7 @@ export const reorderUnitTasksSchema = z.object({
 
 export type ReorderUnitTasksInput = z.infer<typeof reorderUnitTasksSchema>;
 
-// Backwards-compatibility shims for Subject-based APIs (deprecated)
+// Esquemas de compatibilidad hacia atrás para APIs basadas en Subject (deprecado)
 export const createSubjectSchema = z.object({
   courseId: z.string().regex(/^[0-9a-fA-F]{24}$/, "ID de curso inválido"),
   title: z.string().min(3).max(200).transform((v) => v.trim()),
@@ -533,7 +533,7 @@ export const reorderSubjectsSchema = z.object({
 
 export type ReorderSubjectsInput = z.infer<typeof reorderSubjectsSchema>;
 
-// Map old subject-task reorder to unit-task reorder for compatibility
+// Mapear el reordenamiento de tareas por subject al de units por compatibilidad
 export const reorderSubjectTasksSchema = reorderUnitTasksSchema;
 export type ReorderSubjectTasksInput = ReorderUnitTasksInput;
 

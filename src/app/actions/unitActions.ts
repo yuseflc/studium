@@ -12,7 +12,7 @@ import { authOptions } from "@/config/auth.config";
 import { LOGGER } from "@/config/logger";
 import { connectDB } from "@/lib/database/database";
 import Course from "@/models/Course";
-// Subject model removed: units are linked directly to Course
+// El modelo Subject fue eliminado: las unidades se vinculan directamente al Course
 import Unit from "@/models/Unit";
 import Resource from "@/models/Resource";
 import User from "@/models/User";
@@ -125,7 +125,7 @@ export async function createUnit(input: CreateUnitActionInput): Promise<UnitActi
     // Añadir referencia de unidad en el curso
     await Course.findByIdAndUpdate(courseId, { $push: { unitIds: unit._id } });
 
-    // No legacy subject linkage remains; units are canonical
+    // Ya no existe vinculación con Subject; las unidades son la entidad canónica del curso
 
     return { success: true, unit: serializeUnit(unit) };
   } catch (error) {

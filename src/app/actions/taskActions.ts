@@ -605,8 +605,6 @@ export async function reorderUnitTasks(
 
     await connectDB();
 
-    // (function continues)
-
     const currentUser = await User.findOne({ email: session.user.email }).lean();
     if (!currentUser) {
       return { success: false, error: "Usuario no encontrado" };
@@ -645,7 +643,7 @@ export async function reorderUnitTasks(
   }
 }
 
-// Backwards compatibility alias
+// Alias de compatibilidad hacia atrás: permite invocar reorderSubjectTasks como reorderUnitTasks
 export const reorderSubjectTasks = reorderUnitTasks;
 
 export async function deleteTask(taskId: string): Promise<TaskActionResult> {

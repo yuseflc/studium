@@ -6,7 +6,7 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-// Avatars from the original example
+// Avatares del ejemplo original del componente (placeholders de demostración)
 const MESCHAC_AVATAR = 'https://avatars.githubusercontent.com/u/47919550?v=4'
 const BERNARD_AVATAR = 'https://avatars.githubusercontent.com/u/31113941?v=4'
 const THEO_AVATAR = 'https://avatars.githubusercontent.com/u/68236786?v=4'
