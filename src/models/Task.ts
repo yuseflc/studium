@@ -88,7 +88,6 @@ const TaskSchema = new mongoose.Schema<ITask>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Unit",
       required: false, // durante la migración puede ser opcional; acciones validarán presencia
-      index: true,
     },
     createdById: {
       type: mongoose.Schema.Types.ObjectId,

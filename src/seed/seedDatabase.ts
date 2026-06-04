@@ -2,10 +2,9 @@
     Descripción: Script para poblar la base de datos con datos de ejemplo usados en desarrollo. */
 
 // Seed script: crea datos iniciales para desarrollo y pruebas locales
-// Úsalo para poblar la base de datos con usuarios, cursos y entregas
+// Uso: poblar la base de datos con usuarios, cursos y entregas
 import User from '@/models/User';
 import Course from '@/models/Course';
-// El modelo Subject está deprecado; el seed crea Units directamente
 import Unit from '@/models/Unit';
 import Resource from '@/models/Resource';
 import Task from '@/models/Task';
@@ -31,13 +30,24 @@ export async function seedDatabase() {
         // Verificar si ya existen datos para no duplicar el seed
         const existingCourses = await Course.countDocuments();
         if (existingCourses > 0) {
-            console.log('Database already has courses, skipping seed...');
+            console.log('Encontrados cursos existentes, saltando seed para evitar duplicados.');
             return;
         }
 
-        console.log('Seeding database...');
+        console.log('Poblando base de datos...');
 
-        // Crear usuarios de ejemplo (un profesor y dos estudiantes)
+        // Crear usuarios de ejemplo (admin, un profesor y dos estudiantes)
+        const admin = await User.create({
+            email: 'admin@studium.com',
+            firstName: 'Administrador',
+            password: 'securePassword123',
+            role: 'admin',
+            active: true,
+            profile: {
+                bio: "Cuenta de administrador de Studium.",
+            }
+        });
+
         const teacher = await User.create({
             email: 'teacher@studium.com',
             firstName: 'Juan',
@@ -110,7 +120,7 @@ export async function seedDatabase() {
         await Unit.findByIdAndUpdate(
             unit._id,
             { $push: { resourceIds: resource._id } },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         // Crear tarea de ejemplo con fechas de inicio y entrega
@@ -139,7 +149,7 @@ export async function seedDatabase() {
         });
 
         // Añadir la tarea a la lista de tareas de la unidad
-        await Unit.findByIdAndUpdate(unit._id, { $addToSet: { taskIds: task._id } }, { new: true });
+        await Unit.findByIdAndUpdate(unit._id, { $addToSet: { taskIds: task._id } }, { returnDocument: 'after' });
 
         // Crear entregas de ejemplo para los estudiantes
         await Submission.create({
@@ -157,13 +167,24 @@ export async function seedDatabase() {
             submissionStatus: 'pending',
         });
 
-        console.log('✅ Database seeded successfully');
-        console.log(`✅ Created ${[teacher, student1, student2].length} users`);
-        console.log(`✅ Created 1 course with 1 subject, 1 unit, 1 resource, and 1 task`);
-        console.log(`✅ Created sample submissions`);
+        console.log('✅ Base de datos poblada exitosamente');
+        console.log(`✅ Creados ${[teacher, student1, student2].length} usuarios`);
+        console.log(`✅ Creado 1 curso con 1 tema, 1 unidad, 1 recurso y 1 tarea`);
+        console.log(`✅ Creadas entregas de ejemplo`);
 
     } catch (error) {
-        console.error('❌ Error seeding database:', error);
+        console.error('❌ Error poblando base de datos:', error);
         throw error;
     }
+}
+
+// Punto de entrada cuando el archivo se ejecuta directamente con `run`
+// Si se importa como módulo desde otro archivo, este bloque no se ejecuta
+if ((import.meta as ImportMeta & { main?: boolean }).main) {
+    seedDatabase()
+        .then(() => process.exit(0))
+        .catch((err) => {
+            console.error(err);
+            process.exit(1);
+        });
 }

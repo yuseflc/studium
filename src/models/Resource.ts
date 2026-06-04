@@ -24,13 +24,11 @@ const ResourceSchema = new mongoose.Schema<IResource>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Unit",
       required: [true, "El ID de la unidad es requerido"],
-      index: true,
     },
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: [true, "El ID del curso es requerido"],
-      index: true,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,

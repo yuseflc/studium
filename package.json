@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "seed": "pnpm run src/seed/seedDatabase.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1055.0",

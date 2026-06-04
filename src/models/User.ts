@@ -253,7 +253,7 @@ UserSchema.methods.hasThirdParty = function (provider: string): boolean {
 };
 
 // Índices para optimizar consultas
-UserSchema.index({ email: 1 }); // Índice por correo electrónico
+// NOTA: email no se declara aquí porque `unique: true` en el campo ya crea el índice automáticamente
 UserSchema.index({ role: 1 }); // Índice por rol
 UserSchema.index({ plan: 1 }); // Índice por plan
 UserSchema.index({ organization: 1 }); // Índice por organización

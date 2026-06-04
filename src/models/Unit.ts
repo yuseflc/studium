@@ -24,7 +24,6 @@ const UnitSchema = new mongoose.Schema<IUnit>(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
       required: [true, "El ID del curso es requerido"],
-      index: true,
     },
     title: {
       type: String,
