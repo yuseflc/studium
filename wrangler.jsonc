@@ -1,8 +1,0 @@
-// Configuración de Wrangler: define el nombre del proyecto, la fecha de compatibilidad y habilita nodejs_compat para 
-// que Cloudflare Workers pueda ejecutar código Node.js (necesario para Mongoose y Next.js server).
-{
-  "name": "studium",
-  "compatibility_date": "2024-12-10",
-  "compatibility_flags": ["nodejs_compat"],
-  "pages_build_output_dir": ".open-next/assets"
-}
