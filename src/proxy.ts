@@ -3,9 +3,6 @@
 
 // Middleware de proxy que aplica autenticación mediante next-auth
 // Controla rutas protegidas y permite extender reglas por rol
-// Edge runtime requerido por Cloudflare Workers (OpenNext)
-export const runtime = "experimental-edge";
-
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
