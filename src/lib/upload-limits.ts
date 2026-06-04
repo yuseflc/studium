@@ -3,15 +3,10 @@
 
 // Límites de subida de archivos para entregas de tareas
 // Exporta un valor seguro y una etiqueta legible para UI
-const taskSubmissionMaxFileSizeBytes = Number(
-	process.env.NEXT_PUBLIC_TASK_SUBMISSION_MAX_FILE_SIZE_BYTES
-);
-
-if (!Number.isFinite(taskSubmissionMaxFileSizeBytes) || taskSubmissionMaxFileSizeBytes <= 0) {
-	throw new Error(
-		"NEXT_PUBLIC_TASK_SUBMISSION_MAX_FILE_SIZE_BYTES debe ser un número positivo"
-	);
-}
+// Fallback a 100 MB si la variable de entorno no está definida (ej. en el build de Cloudflare).
+const _parsed = Number(process.env.NEXT_PUBLIC_TASK_SUBMISSION_MAX_FILE_SIZE_BYTES);
+const taskSubmissionMaxFileSizeBytes =
+	Number.isFinite(_parsed) && _parsed > 0 ? _parsed : 104857600;
 
 function formatFileSize(bytes: number): string {
 	if (bytes % (1024 * 1024) === 0) {
