@@ -16,7 +16,6 @@ import {
   AlertTriangle,
   Archive,
   Trash2,
-  Send,
   Copy,
   RefreshCw,
   Eye,
@@ -40,7 +39,6 @@ import { getUserAvatarUrl } from "@/lib/utils/avatar";
 import { deleteTask } from "@/app/actions/taskActions";
 import {
   deleteCourse as deleteCourseAction,
-  inviteStudentByEmail,
   transferCourseOwnership,
   updateCourse,
 } from "@/app/actions/courseActions";
@@ -165,9 +163,7 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
   const [emailNotifications, setEmailNotifications] = useState(false); // notificaciones por email
 
   // ========== GESTIÓN DE INVITACIONES ==========
-  const [inviteEmail, setInviteEmail] = useState("");               // email a invitar
   const [inviteCode, setInviteCode] = useState("COURSE-2024-ABC123"); // código de invitación (mock)
-  const [isInviting, setIsInviting] = useState(false);              // estado de carga al invitar
   const [showCopied, setShowCopied] = useState(false);              // feedback visual de "copiado"
 
   // ========== MODALES DE CONFIRMACIÓN (acciones peligrosas) ==========
@@ -180,16 +176,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
 
   // ========== MODALES DE RESULTADO ==========
   // Cada uno tiene su propio modal para mostrar éxito/error sin bloquear la UI
-  const [inviteModal, setInviteModal] = useState<{
-    isOpen: boolean;
-    success: boolean;
-    message: string;
-    email?: string
-  }>({
-    isOpen: false,
-    success: false,
-    message: "",
-  });
 
   const [regenerateModal, setRegenerateModal] = useState<{
     isOpen: boolean;
@@ -424,36 +410,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
    * Invita a un estudiante por email usando la server action.
    * Muestra un modal de Studium con el resultado (éxito o error).
    */
-  const handleInviteByEmail = async () => {
-    if (!inviteEmail || !courseId) return;
-    setIsInviting(true);
-
-    try {
-      const result = await inviteStudentByEmail(courseId, inviteEmail);
-      if (!result.success) {
-        throw new Error(result.error || "Error al enviar invitación");
-      }
-
-      // Modal de éxito
-      setInviteModal({
-        isOpen: true,
-        success: true,
-        message: `Invitación enviada correctamente a ${inviteEmail}`,
-        email: inviteEmail,
-      });
-      setInviteEmail(""); // limpio el input
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al enviar la invitación";
-      // Modal de error
-      setInviteModal({
-        isOpen: true,
-        success: false,
-        message,
-      });
-    } finally {
-      setIsInviting(false);
-    }
-  };
 
   /**
    * Copia el código de invitación al portapapeles.
@@ -868,58 +824,58 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                       <div className="space-y-4">
 
                         {/* Toggle: Mostrar participantes */}
-<div className="form-control w-full">
-  <label className="cursor-pointer label flex-row items-center justify-between gap-3 w-full">
-    <div className="flex-1">
-      <span className="label-text font-medium block">Mostrar participantes en la barra horizontal</span>
-      <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-        Muestra la lista de participantes en la barra de navegación superior
-      </p>
-    </div>
-    <input
-      type="checkbox"
-      className="toggle toggle-primary flex-shrink-0"
-      checked={showParticipants}
-      onChange={(e) => setShowParticipants(e.target.checked)}
-    />
-  </label>
-</div>
+                        <div className="form-control w-full">
+                          <label className="cursor-pointer flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <span className="label-text font-medium block">Mostrar participantes en la barra horizontal</span>
+                              <p className="text-sm text-base-content/60 mt-0.5">
+                                Muestra la lista de participantes en la barra de navegación superior
+                              </p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="toggle toggle-primary flex-shrink-0 mt-0.5"
+                              checked={showParticipants}
+                              onChange={(e) => setShowParticipants(e.target.checked)}
+                            />
+                          </label>
+                        </div>
 
                         {/* Toggle: Permitir comentarios */}
-<div className="form-control w-full">
-  <label className="cursor-pointer label flex-row items-center justify-between gap-3 w-full">
-    <div className="flex-1">
-      <span className="label-text font-medium block">Permitir comentarios en el contenido</span>
-      <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-        Los estudiantes pueden comentar en las lecciones y tareas
-      </p>
-    </div>
-    <input
-      type="checkbox"
-      className="toggle toggle-primary flex-shrink-0"
-      checked={allowComments}
-      onChange={(e) => setAllowComments(e.target.checked)}
-    />
-  </label>
-</div>
+                        <div className="form-control w-full">
+                          <label className="cursor-pointer flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <span className="label-text font-medium block">Permitir comentarios en el contenido</span>
+                              <p className="text-sm text-base-content/60 mt-0.5">
+                                Los estudiantes pueden comentar en las lecciones y tareas
+                              </p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="toggle toggle-primary flex-shrink-0 mt-0.5"
+                              checked={allowComments}
+                              onChange={(e) => setAllowComments(e.target.checked)}
+                            />
+                          </label>
+                        </div>
 
-                       {/* Toggle: Notificaciones por email */}
-<div className="form-control w-full">
-  <label className="cursor-pointer label flex-row items-center justify-between gap-3 w-full">
-    <div className="flex-1">
-      <span className="label-text font-medium block">Notificar nuevas tareas por email</span>
-      <p className="text-sm text-base-content/60 mt-0.5 break-words pr-2">
-        Envía notificaciones por correo cuando se crean nuevas tareas
-      </p>
-    </div>
-    <input
-      type="checkbox"
-      className="toggle toggle-primary flex-shrink-0"
-      checked={emailNotifications}
-      onChange={(e) => setEmailNotifications(e.target.checked)}
-    />
-  </label>
-</div>
+                        {/* Toggle: Notificaciones por email */}
+                        <div className="form-control w-full">
+                          <label className="cursor-pointer flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <span className="label-text font-medium block">Notificar nuevas tareas por email</span>
+                              <p className="text-sm text-base-content/60 mt-0.5">
+                                Envía notificaciones por correo cuando se crean nuevas tareas
+                              </p>
+                            </div>
+                            <input
+                              type="checkbox"
+                              className="toggle toggle-primary flex-shrink-0 mt-0.5"
+                              checked={emailNotifications}
+                              onChange={(e) => setEmailNotifications(e.target.checked)}
+                            />
+                          </label>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -929,34 +885,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
                     <div className="card-body p-4 sm:p-6">
                       <h2 className="card-title text-lg sm:text-xl mb-4 sm:mb-6">Gestión de Participantes</h2>
                       <div className="space-y-6">
-
-                        {/* Invitar por email */}
-                        <div className="form-control">
-                          <label htmlFor="invite-email" className="label">
-                            <span className="label-text font-medium mb-2">Invitar por email</span>
-                          </label>
-                          <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                            <input
-                              id="invite-email"
-                              type="email"
-                              placeholder="email@ejemplo.com"
-                              value={inviteEmail}
-                              onChange={(e) => setInviteEmail(e.target.value)}
-                              className="input input-bordered flex-1"
-                            />
-                            <button
-                              onClick={handleInviteByEmail}
-                              className="btn btn-outline btn-primary w-full sm:w-auto gap-2"
-                              disabled={isInviting || !inviteEmail}
-                              type="button"
-                            >
-                              <Send size={16} />
-                              {isInviting ? "Enviando..." : "Invitar"}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="divider">O</div>
 
                         {/* COMPONENTE: Gestor de códigos de invitación */}
                         <CourseInviteCodesManager courseId={courseId} courseStatus={status} />
@@ -1155,23 +1083,6 @@ export default function CourseView({ courseData, courseStructure, isTeacher }: C
       )}
 
       {/* ========== MODALES DE RESULTADO (reemplazan alerts nativos) ========== */}
-
-      {/* Modal: Resultado de invitación (éxito o error) */}
-      {inviteModal.isOpen && (
-        <ModalAdvise
-          id="invite-modal"
-          title={inviteModal.success ? "Invitación Enviada" : "Error al Invitar"}
-          description={
-            inviteModal.success ? (
-              <p>Se ha enviado la invitación a <strong>{inviteModal.email}</strong> correctamente.</p>
-            ) : (
-              <p className="text-error">{inviteModal.message}</p>
-            )
-          }
-          confirmLabel="Aceptar"
-          onConfirm={() => setInviteModal({ isOpen: false, success: false, message: "" })}
-        />
-      )}
 
       {/* Modal: Confirmación para regenerar código */}
       {regenerateModal.isOpen && (

@@ -32,12 +32,12 @@ export interface Tool {
 // Mapeo accent -> clases daisyUI (evita interpolar clases dinámicas que Tailwind no purga).
 export const TOOL_ACCENT_CLASSES: Record<
   ToolAccent,
-  { soft: string; solid: string }
+  { wrapperBase: string; wrapperHover: string; iconBase: string; iconHover: string }
 > = {
-  primary: { soft: "bg-primary/50", solid: "group-hover:bg-primary group-hover:text-primary-content" },
-  secondary: { soft: "bg-secondary/50", solid: "group-hover:bg-secondary group-hover:text-secondary-content" },
-  accent: { soft: "bg-accent/50", solid: "group-hover:bg-accent group-hover:text-accent-content" },
-  info: { soft: "bg-info/50", solid: "group-hover:bg-info group-hover:text-info-content" },
+  primary:   { wrapperBase: "bg-primary/15",   wrapperHover: "group-hover:bg-primary",   iconBase: "text-primary",   iconHover: "group-hover:text-primary-content" },
+  secondary: { wrapperBase: "bg-secondary/15", wrapperHover: "group-hover:bg-secondary", iconBase: "text-secondary", iconHover: "group-hover:text-secondary-content" },
+  accent:    { wrapperBase: "bg-accent/15",    wrapperHover: "group-hover:bg-accent",    iconBase: "text-accent",    iconHover: "group-hover:text-accent-content" },
+  info:      { wrapperBase: "bg-info/15",      wrapperHover: "group-hover:bg-info",      iconBase: "text-info",      iconHover: "group-hover:text-info-content" },
 };
 
 // Cada herramienta refleja una capacidad real del modelo de datos.
@@ -63,7 +63,7 @@ export const TOOLS: Tool[] = [
   {
     id: "feedback",
     icon: MessageSquareText,
-    accent: "accent",
+    accent: "info",
     title: "Calificación y feedback",
     description:
       "Corrige cada entrega con nota y comentarios personalizados. El alumno ve su progreso y qué reforzar en cada paso.",

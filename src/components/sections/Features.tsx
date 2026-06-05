@@ -30,8 +30,8 @@ function ToolCard({ tool, illustration }: { tool: Tool; illustration?: React.Rea
 
   return (
     <Card className="bg-base-100 border-none shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden p-6 group">
-      <div className="bg-warning/20 group-hover:bg-warning p-3 rounded-2xl w-fit transition-colors">
-        <Icon className="size-6 text-warning-content group-hover:text-warning-content" />
+      <div className={`${accent.wrapperBase} ${accent.wrapperHover} p-3 rounded-2xl w-fit transition-colors`}>
+        <Icon className={`size-6 ${accent.iconBase} ${accent.iconHover}`} />
       </div>
       <h3 className="text-base-content mt-6 text-xl font-bold">{tool.title}</h3>
       <p className="text-base-content/70 mt-3 text-balance leading-relaxed">{tool.description}</p>

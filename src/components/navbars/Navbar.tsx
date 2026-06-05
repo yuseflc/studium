@@ -57,14 +57,14 @@ export default function Navbar() {
                     </div>
                     <div className="drawer-side">
                         <label htmlFor="my-drawer-5" aria-label="close sidebar" className="drawer-overlay"></label>
-                        <div className="menu bg-base-200 min-h-full w-80 p-6 text-base-content">
+                        <div className="bg-base-200 min-h-full w-80 p-6 text-base-content flex flex-col">
                             <h2 className="text-xl font-bold mb-4">Menú</h2>
-                            <ul className="flex flex-col gap-2">
+                            <ul className="menu p-0 flex flex-col gap-2">
                                 <li><Link href="#top" onClick={(e) => { e.preventDefault(); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Inicio</Link></li>
                                 <li><Link href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Herramientas</Link></li>
                                 <li><Link href="#pricing" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Precios</Link></li>
-                                <li><Link href="/mycourses" className="btn btn-primary text-white">Mis cursos</Link></li>
                             </ul>
+                            <Link href="/mycourses" className="btn btn-primary w-full mt-2">Mis cursos</Link>
                         </div>
                     </div>
                 </div>

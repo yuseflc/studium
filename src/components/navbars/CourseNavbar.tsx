@@ -125,8 +125,10 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
               </div>
 
               {/* Nav links */}
+              <div className="px-3 pt-2">
+                <Link href="/mycourses" className="btn btn-primary w-full">Mis cursos</Link>
+              </div>
               <ul className="menu menu-sm p-2 gap-0.5">
-                <li><Link href="/mycourses" className="py-2 px-3 text-sm text-base-content hover:bg-base-200 active:!bg-base-300">Mis cursos</Link></li>
                 <li><Link href="/account/profile" className="py-2 px-3 text-sm text-base-content hover:bg-base-200 active:!bg-base-300">Perfil</Link></li>
                 {userRole === "admin" && <li><Link href="/admin" className="py-2 px-3 text-sm text-warning hover:bg-warning/20 active:!bg-warning/30">Administración</Link></li>}
                 <li><LogoutButton className="py-2 px-3 text-sm text-error hover:bg-error/10 active:!bg-error/20" /></li>
