@@ -46,7 +46,7 @@ export default function CourseParticipants({ participants, courseId }: CoursePar
                             >
                                 <div className="flex flex-col items-center text-center gap-1 w-full p-0">
                                     <div className="avatar">
-                                        <div className="rounded-full h-18 w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
+                                        <div className="rounded-full h-14 w-14 sm:h-18 sm:w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
                                             {p.avatar ? (
                                                 <img src={p.avatar} alt={`${p.nombre} ${p.apellidos}`} className="object-cover" />
                                             ) : (
@@ -59,7 +59,7 @@ export default function CourseParticipants({ participants, courseId }: CoursePar
                                         <div className="font-bold text-sm text-base-content/90 leading-tight line-clamp-2 active:overflow-visible group-hover:text-primary transition-colors">
                                             {p.nombre} {p.apellidos}
                                         </div>
-                                        <div className="text-xs text-base-content/50 lowercase truncate mt-0.5">
+                                        <div className="hidden sm:block text-xs text-base-content/50 lowercase truncate mt-0.5">
                                             {p.email}
                                         </div>
                                         <div className="pt-1 flex justify-center">
@@ -93,7 +93,7 @@ export default function CourseParticipants({ participants, courseId }: CoursePar
                             >
                                 <div className="flex flex-col items-center text-center gap-1 w-full p-0">
                                     <div className="avatar">
-                                        <div className="rounded-full h-18 w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
+                                        <div className="rounded-full h-14 w-14 sm:h-18 sm:w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
                                             {p.avatar ? (
                                                 <img src={p.avatar} alt={`${p.nombre} ${p.apellidos}`} className="object-cover" />
                                             ) : (
@@ -106,7 +106,7 @@ export default function CourseParticipants({ participants, courseId }: CoursePar
                                         <div className="font-bold text-sm text-base-content/90 leading-tight line-clamp-2 active:overflow-visible group-hover:text-primary transition-colors">
                                             {p.nombre} {p.apellidos}
                                         </div>
-                                        <div className="text-xs text-base-content/50 lowercase truncate mt-0.5">
+                                        <div className="hidden sm:block text-xs text-base-content/50 lowercase truncate mt-0.5">
                                             {p.email}
                                         </div>
                                         <div className="pt-1 flex justify-center">
@@ -140,7 +140,7 @@ export default function CourseParticipants({ participants, courseId }: CoursePar
                             >
                                 <div className="flex flex-col items-center text-center gap-1 w-full p-0">
                                     <div className="avatar">
-                                        <div className="rounded-full h-18 w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
+                                        <div className="rounded-full h-14 w-14 sm:h-18 sm:w-18 bg-slate-100 flex items-center justify-center overflow-hidden group-hover:border-primary/20 transition-colors">
                                             {p.avatar ? (
                                                 <img src={p.avatar} alt={`${p.nombre} ${p.apellidos}`} className="object-cover" />
                                             ) : (
@@ -153,7 +153,7 @@ export default function CourseParticipants({ participants, courseId }: CoursePar
                                         <div className="font-bold text-sm text-base-content/90 leading-tight line-clamp-2 active:overflow-visible group-hover:text-primary transition-colors">
                                             {p.nombre} {p.apellidos}
                                         </div>
-                                        <div className="text-xs text-base-content/50 lowercase truncate mt-0.5">
+                                        <div className="hidden sm:block text-xs text-base-content/50 lowercase truncate mt-0.5">
                                             {p.email}
                                         </div>
                                         <div className="pt-1 flex justify-center">
