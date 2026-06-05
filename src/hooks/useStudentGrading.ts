@@ -123,7 +123,7 @@ export function useStudentGrading(
     }
   };
 
-  const handleSaveAll = async () => {
+  const handleSaveAll = async (): Promise<boolean> => {
     setIsSaving(true);
     setSaveStatus('saving');
     try {
@@ -136,7 +136,7 @@ export function useStudentGrading(
       if (tasksToSave.length === 0) {
         setSaveStatus('idle');
         setIsSaving(false);
-        return;
+        return true;
       }
 
       const promises = tasksToSave.map(async (stateKey) => {
@@ -159,18 +159,28 @@ export function useStudentGrading(
 
       if (hasError) {
         setSaveStatus('error');
+        return false;
       } else {
         setOriginalGrades(JSON.parse(JSON.stringify(gradesState)));
         setSaveStatus('success');
         if (onGradesSaved) await onGradesSaved();
         setTimeout(() => setSaveStatus('idle'), 3000);
+        return true;
       }
     } catch {
       setSaveStatus('error');
+      return false;
     } finally {
       setIsSaving(false);
     }
   };
+
+  // Detecta si hay calificaciones modificadas respecto al estado guardado en BD
+  const hasUnsavedChanges = Object.keys(gradesState).some(key => {
+    const current = gradesState[key];
+    const original = originalGrades[key] || { grade: '', feedback: '', taskId: '' };
+    return current.grade !== original.grade || current.feedback !== original.feedback;
+  });
 
   return {
     expandedSubjects,
@@ -179,6 +189,7 @@ export function useStudentGrading(
     handleFieldChange,
     isSaving,
     saveStatus,
+    hasUnsavedChanges,
     feedbackModalOpen,
     selectedTaskForFeedback,
     feedbackModalRef,

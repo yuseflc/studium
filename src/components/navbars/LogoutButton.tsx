@@ -12,7 +12,7 @@ interface LogoutButtonProps {
 
 export default function LogoutButton({ className = "" }: LogoutButtonProps) {
   return (
-    <a onClick={() => signOut({ redirect: true })} className={`cursor-pointer ${className}`}>
+    <a onClick={() => signOut({ redirect: true, callbackUrl: '/auth/login' })} className={`cursor-pointer ${className}`}>
       Cerrar sesión
     </a>
   );

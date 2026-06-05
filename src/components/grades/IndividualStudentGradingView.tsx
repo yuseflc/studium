@@ -3,9 +3,9 @@
 
 "use client";
 // Interfaz de calificación individual: editar notas y feedback de un estudiante
-import React from "react";
+import React, { useRef } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronRight, Save, ArrowLeft, Loader2, Check, MessageSquare, ExternalLink, AlertTriangle } from "lucide-react";
 import { FeedbackModal } from "@/components/modals/FeedbackModal";
 import { useStudentGrading } from "@/hooks/useStudentGrading";
 // Tipos mínimos locales para evitar problemas de resolución de módulos
@@ -42,6 +42,7 @@ export default function IndividualStudentGradingView({
         handleFieldChange,
         isSaving,
         saveStatus,
+        hasUnsavedChanges,
         feedbackModalOpen,
         selectedTaskForFeedback,
         handleCloseFeedbackModal,
@@ -51,11 +52,22 @@ export default function IndividualStudentGradingView({
         handleSaveAll,
     } = useStudentGrading(student, subjects, initialSubmissions, onGradesSaved);
 
+    // Diálogo de advertencia por cambios sin guardar al pulsar Volver
+    const unsavedDialogRef = useRef<HTMLDialogElement>(null);
+
+    function handleBack() {
+        if (hasUnsavedChanges) {
+            unsavedDialogRef.current?.showModal();
+        } else {
+            onBack();
+        }
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
             <div className="flex items-center justify-between bg-base-100 p-4 rounded-xl border border-base-300 shadow-sm">
                 <div className="flex items-center gap-4">
-                    <button onClick={onBack} className="btn btn-ghost btn-sm gap-2">
+                    <button onClick={handleBack} className="btn btn-ghost btn-sm gap-2">
                         <ArrowLeft size={18} />
                         Volver
                     </button>
@@ -198,6 +210,46 @@ export default function IndividualStudentGradingView({
                     onSubmit={handleSaveFeedback}
                 />
             )}
+
+            {/* Diálogo de advertencia: calificaciones sin guardar */}
+            <dialog ref={unsavedDialogRef} className="modal">
+                <div className="modal-box max-w-sm">
+                    <div className="flex flex-col items-center text-center gap-4">
+                        <div className="w-14 h-14 rounded-full bg-warning/10 flex items-center justify-center">
+                            <AlertTriangle size={28} className="text-warning" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-lg">¿Salir sin guardar?</h3>
+                            <p className="text-sm text-base-content/60 mt-1">
+                                Has calificado pero no has guardado los cambios. Se perderá el progreso si continúas.
+                            </p>
+                        </div>
+                        <div className="w-full flex flex-col gap-2 mt-1">
+                            <button className="btn btn-error w-full" onClick={onBack}>
+                                Continuar sin guardar
+                            </button>
+                            <button
+                                className="btn btn-primary w-full"
+                                onClick={async () => {
+                                    unsavedDialogRef.current?.close();
+                                    const ok = await handleSaveAll();
+                                    if (ok) onBack();
+                                }}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+                                Guardar y salir
+                            </button>
+                            <button className="btn btn-ghost w-full" onClick={() => unsavedDialogRef.current?.close()}>
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                    <button>cerrar</button>
+                </form>
+            </dialog>
         </div>
     );
 }
