@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { signOut } from "next-auth/react";
 import { fetchCourses, SerializedCourse } from "@/app/actions/courseActions";
 
 export default function Sidebar() {
@@ -157,6 +158,7 @@ export default function Sidebar() {
               <span>Mi cuenta</span>
             </Link>
             <button
+              onClick={() => signOut({ redirect: true, callbackUrl: '/auth/login' })}
               className="flex items-center gap-3 p-2 rounded-xl hover:bg-error/10 hover:text-error transition-colors text-sm font-semibold mt-2 w-full text-left"
             >
               <LogOut size={18} />
