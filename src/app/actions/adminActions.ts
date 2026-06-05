@@ -77,6 +77,24 @@ export async function searchAvailableUsersAction(query: string, page: number) {
   };
 }
 
+export async function deleteUserAction(userId: string) {
+  const adminId = await requireAdmin();
+  if (!mongoose.Types.ObjectId.isValid(userId)) throw new Error("ID inválido");
+  if (userId === adminId) throw new Error("No puedes eliminarte a ti mismo");
+
+  const user = await User.findById(userId).select("organization role").lean();
+  if (!user) throw new Error("Usuario no encontrado");
+  if (user.role === "admin") throw new Error("No se puede eliminar a otro administrador");
+
+  // Si pertenece a una organización, eliminarlo de sus miembros
+  if (user.organization) {
+    await Organization.findByIdAndUpdate(user.organization, { $pull: { members: userId } });
+  }
+
+  await User.findByIdAndDelete(userId);
+  revalidatePath("/admin/users");
+}
+
 // ── Organizaciones ───────────────────────────────────────────────────────────
 
 export async function updateOrganizationAction(

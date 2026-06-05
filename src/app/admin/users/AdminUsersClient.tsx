@@ -1,19 +1,34 @@
+/* Archivo: src\app\admin\users\AdminUsersClient.tsx
+   Descripción: Componente cliente para la gestión de usuarios en el panel de administración. */
+
 "use client";
 
 import { useState, useTransition } from "react";
-import { updateUserAction } from "@/app/actions/adminActions";
-import { IconBan, IconCheck, IconEdit } from "@tabler/icons-react";
+import { updateUserAction, deleteUserAction } from "@/app/actions/adminActions";
+import { IconBan, IconCheck, IconEdit, IconTrash } from "@tabler/icons-react";
 import type { AdminUserRow } from "@/lib/api/admin-helpers";
 import type { IUser, UserPlan } from "@/models/User";
+import DeleteUserDialog from "./DeleteUserDialog";
+import BanUserDialog from "./BanUserDialog";
 
 const ROLES: IUser["role"][] = ["student", "teacher", "admin"];
 const PLANS: UserPlan[] = ["free", "student", "basic", "premium", "education"];
 
 export default function AdminUsersClient({ users: initial }: { users: AdminUserRow[] }) {
+  // Lista de usuarios y estado de edición inline
   const [users, setUsers] = useState(initial);
   const [editing, setEditing] = useState<string | null>(null);
   const [form, setForm] = useState<{ role: IUser["role"]; plan: UserPlan }>({ role: "student", plan: "free" });
   const [isPending, startTransition] = useTransition();
+
+  // Estado de ban y diálogo de confirmación
+  const [isBanPending, startBanTransition] = useTransition();
+  const [banTarget, setBanTarget] = useState<AdminUserRow | null>(null);
+
+  // Estado de eliminación y diálogo de confirmación
+  const [isDeletePending, startDeleteTransition] = useTransition();
+  const [deleteTarget, setDeleteTarget] = useState<AdminUserRow | null>(null);
+
   const [error, setError] = useState<string | null>(null);
 
   function startEdit(user: AdminUserRow) {
@@ -36,16 +51,33 @@ export default function AdminUsersClient({ users: initial }: { users: AdminUserR
     });
   }
 
-  function handleToggleBan(user: AdminUserRow) {
+  function handleBanConfirm(userId: string) {
+    const target = banTarget;
     setError(null);
-    startTransition(async () => {
+    startBanTransition(async () => {
       try {
-        await updateUserAction(user._id, { banned: !user.banned });
+        await updateUserAction(userId, { banned: !target?.banned });
         setUsers((prev) =>
-          prev.map((u) => (u._id === user._id ? { ...u, banned: !u.banned } : u))
+          prev.map((u) => (u._id === userId ? { ...u, banned: !target?.banned } : u))
         );
+        setBanTarget(null);
       } catch {
         setError("Error al cambiar el estado del usuario.");
+        setBanTarget(null);
+      }
+    });
+  }
+
+  function handleDeleteConfirm(userId: string) {
+    setError(null);
+    startDeleteTransition(async () => {
+      try {
+        await deleteUserAction(userId);
+        setUsers((prev) => prev.filter((u) => u._id !== userId));
+        setDeleteTarget(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Error al eliminar el usuario.");
+        setDeleteTarget(null);
       }
     });
   }
@@ -155,13 +187,20 @@ export default function AdminUsersClient({ users: initial }: { users: AdminUserR
                           <IconEdit size={14} />
                         </button>
                         <button
-                          className={`btn btn-xs ${user.banned ? "btn-outline btn-success" : "btn-outline btn-error"}`}
-                          disabled={isPending}
-                          onClick={() => handleToggleBan(user)}
+                          className={`btn btn-ghost btn-xs ${user.banned ? "text-success" : "text-warning"}`}
+                          disabled={isBanPending}
+                          onClick={() => setBanTarget(user)}
                           title={user.banned ? "Desbanear usuario" : "Banear usuario"}
                         >
                           <IconBan size={14} />
-                          {user.banned ? "Desbanear" : "Banear"}
+                        </button>
+                        <button
+                          className="btn btn-ghost btn-xs text-error"
+                          disabled={isDeletePending}
+                          onClick={() => setDeleteTarget(user)}
+                          title="Eliminar usuario"
+                        >
+                          <IconTrash size={14} />
                         </button>
                       </>
                     )}
@@ -172,6 +211,19 @@ export default function AdminUsersClient({ users: initial }: { users: AdminUserR
           </tbody>
         </table>
       </div>
+
+      <BanUserDialog
+        user={banTarget}
+        isPending={isBanPending}
+        onConfirm={handleBanConfirm}
+        onClose={() => setBanTarget(null)}
+      />
+      <DeleteUserDialog
+        user={deleteTarget}
+        isPending={isDeletePending}
+        onConfirm={handleDeleteConfirm}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
