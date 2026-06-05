@@ -67,8 +67,12 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
           <div className="hidden sm:block">
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-300">
-                  <ProfileImage src={userProfilePicture} alt={userFirstName} />
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-base-300 overflow-hidden">
+                  <ProfileImage
+                    src={userProfilePicture}
+                    alt={userFirstName}
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 </div>
               </div>
 
@@ -78,8 +82,7 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
                   <RoleInfoModal role={userRole} triggerClassName="text-xs opacity-70" organizationName={userOrganizationName} />
                 </li>
                 <li><Link href="/account/profile">Perfil</Link></li>
-                {userRole === "admin" && <li><Link href="/admin" className="text-primary">Administración</Link></li>}
-                <li><Link href="/account/settings">Configuración</Link></li>
+                {userRole === "admin" && <li className="hover:bg-primary/10"><Link href="/admin" className="text-primary hover:bg-primary/10 focus:bg-primary/10">Administración</Link></li>}
                 <li className="hover:bg-error/10"><LogoutButton /></li>
               </ul>
             </div>
@@ -104,18 +107,22 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
               {/* Perfil Usuario */}
               <div className="flex flex-col items-center py-6 border-b border-base-200">
                 <div className="avatar mb-3">
-                  <div className="w-24 h-24 rounded-full bg-base-300">
-                    <ProfileImage src={userProfilePicture} alt={userFirstName} />
+                  <div className="w-24 h-24 rounded-full bg-base-300 overflow-hidden">
+                    <ProfileImage
+                      src={userProfilePicture}
+                      alt={userFirstName}
+                      className="w-full h-full object-cover rounded-full"
+                    />
                   </div>
                 </div>
                 <span className="font-bold text-lg mb-4">{userFirstName}</span>
                 <RoleInfoModal role={userRole} triggerClassName="text-xs" organizationName={userOrganizationName} />
 
                 <ul className="w-full menu menu-vertical gap-1 p-0 text-base mt-4">
-                  <li><Link href="/account/profile" className="justify-start py-2 px-4">Perfil</Link></li>
-                  {userRole === "admin" && <li><Link href="/admin" className="justify-start py-2 px-4 text-primary">Administración</Link></li>}
-                  <li><Link href="/account/settings" className="justify-start py-2 px-4">Configuración</Link></li>
-                  <li><div className="justify-start py-2 px-4 text-error"><LogoutButton /></div></li>
+                  <li><Link href="/mycourses" className="justify-start py-2 px-4 text-base-content hover:bg-base-200 focus:bg-base-200 active:!bg-base-300 active:!text-base-content">Mis cursos</Link></li>
+                  <li><Link href="/account/profile" className="justify-start py-2 px-4 text-base-content hover:bg-base-200 focus:bg-base-200 active:!bg-base-300 active:!text-base-content">Perfil</Link></li>
+                  {userRole === "admin" && <li><Link href="/admin" className="justify-start py-2 px-4 text-warning hover:bg-warning/20 focus:bg-warning/20 active:!bg-warning/30 active:!text-warning">Administración</Link></li>}
+                  <li><LogoutButton className="justify-start py-2 px-4 text-error hover:bg-error/10 focus:bg-error/10 active:!bg-error/20 active:!text-error" /></li>
                 </ul>
               </div>
 

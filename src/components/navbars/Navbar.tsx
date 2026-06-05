@@ -63,8 +63,6 @@ export default function Navbar() {
                                 <li><Link href="#top" onClick={(e) => { e.preventDefault(); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Inicio</Link></li>
                                 <li><Link href="#features" onClick={(e) => { e.preventDefault(); document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Herramientas</Link></li>
                                 <li><Link href="#pricing" onClick={(e) => { e.preventDefault(); document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' }); document.getElementById('my-drawer-5')?.click(); }}>Precios</Link></li>
-                                <li><Link href="#about" onClick={() => document.getElementById('my-drawer-5')?.click()}>Acerca de</Link></li>
-                                <li aria-hidden="true" className="divider" />
                                 <li><Link href="/mycourses" className="btn btn-primary text-white">Mis cursos</Link></li>
                             </ul>
                         </div>

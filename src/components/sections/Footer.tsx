@@ -46,7 +46,7 @@ export const Footer = () => {
     const currentYear = new Date().getFullYear();
 
     return (
-        <footer id="about" className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm lg:max-w-7xl mx-4 lg:mx-auto shadow-2xl shadow-neutral/10">
+        <footer id="about" className="m-auto text-base-content border border-neutral/10 rounded-t-3xl max-w-sm md:max-w-2xl lg:max-w-7xl mx-4 md:mx-auto shadow-2xl shadow-neutral/10">
             <div className="relative bg-base-100 rounded-3xl mx-auto py-10 flex flex-col md:flex-row justify-between items-start gap-6 px-4 md:px-0">
                 <div className="flex flex-col md:flex-row items-start justify-between gap-4 md:gap-10 md:px-8 flex-1 w-full">
                     <div className='flex flex-col items-start gap-2'>
@@ -71,7 +71,7 @@ export const Footer = () => {
                                         <Link
                                             key={link.name}
                                             href={link.href}
-                                            className="whitespace-nowrap font-medium hover: hover:text-primary text-base-content/70"
+                                            className="whitespace-nowrap font-medium hover:text-primary text-base-content/70"
                                         >
                                             {link.name}
                                         </Link>

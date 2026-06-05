@@ -6,9 +6,13 @@
 
 import { signOut } from 'next-auth/react';
 
-export default function LogoutButton() {
+interface LogoutButtonProps {
+  className?: string;
+}
+
+export default function LogoutButton({ className = "" }: LogoutButtonProps) {
   return (
-    <a onClick={() => signOut({ redirect: true })} className="cursor-pointer">
+    <a onClick={() => signOut({ redirect: true })} className={`cursor-pointer ${className}`}>
       Cerrar sesión
     </a>
   );
