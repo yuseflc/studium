@@ -94,7 +94,7 @@ export default function TeacherGradesView({ participants, subjects, courseId, in
                                                     </div>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold">{student.nombre} {student.apellidos}</span>
-                                                        <span className="text-xs opacity-50 lowercase">{student.email}</span>
+                                                        <span className="text-xs opacity-50 lowercase hidden sm:block">{student.email}</span>
                                                     </div>
                                                 </div>
                                             </td>

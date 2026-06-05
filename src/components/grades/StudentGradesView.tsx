@@ -42,7 +42,8 @@ export default function StudentGradesView({
 
     return (
         <div className="space-y-4">
-            <div className="card bg-base-100 border border-base-300 shadow-sm overflow-hidden">
+            {/* Desktop: tabla */}
+            <div className="card bg-base-100 border border-base-300 shadow-sm overflow-hidden hidden sm:block">
                 <div className="overflow-x-auto">
                     <table className="table w-full border-collapse">
                         <thead>
@@ -61,7 +62,7 @@ export default function StudentGradesView({
 
                                 return (
                                     <React.Fragment key={subject._id}>
-                                        <tr 
+                                        <tr
                                             className="bg-base-200/50"
                                             onClick={() => toggleSubject(subject._id)}
                                         >
@@ -73,12 +74,9 @@ export default function StudentGradesView({
                                             </td>
                                         </tr>
                                         {isExpanded && subjectTasks.map((task: Task) => {
-                                            // [SSR] Obtener datos reales de la entrega
                                             const taskId = task._id;
                                             const grade = getTaskGrade(taskId, submissions);
                                             const feedback = getTaskFeedback(taskId, submissions);
-                                            
-                                            // Estado: si el profesor ha puesto nota, calificado; si no, pendiente
                                             const isGraded = grade !== null;
 
                                             return (
@@ -103,15 +101,9 @@ export default function StudentGradesView({
                                                     <td className="text-center">
                                                         {isGraded ? (
                                                             <div className="flex flex-col items-center">
-                                                                <span
-                                                                    className={`font-mono font-bold text-lg ${
-                                                                        grade >= 5 ? 'text-success' : 'text-error'
-                                                                    }`}
-                                                                >
+                                                                <span className={`font-mono font-bold text-lg ${grade >= 5 ? 'text-success' : 'text-error'}`}>
                                                                     {Number(grade).toFixed(1)}
-                                                                    <span className="text-xs opacity-50 ml-0.5">
-                                                                        /10
-                                                                    </span>
+                                                                    <span className="text-xs opacity-50 ml-0.5">/10</span>
                                                                 </span>
                                                             </div>
                                                         ) : (
@@ -139,6 +131,72 @@ export default function StudentGradesView({
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            {/* Móvil: cards */}
+            <div className="sm:hidden space-y-3">
+                {subjects.map((subject) => {
+                    const subjectTasks = subject.tasks || [];
+                    if (subjectTasks.length === 0) return null;
+                    const isExpanded = expandedSubjects[subject._id];
+
+                    return (
+                        <div key={subject._id} className="rounded-xl border border-base-300 bg-base-100 shadow-sm overflow-hidden">
+                            <button
+                                className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-base-200/60 font-extrabold text-sm uppercase tracking-wide text-base-content/80"
+                                onClick={() => toggleSubject(subject._id)}
+                            >
+                                <span>{subject.title}</span>
+                                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                            </button>
+
+                            {isExpanded && (
+                                <div className="divide-y divide-base-300/30">
+                                    {subjectTasks.map((task: Task) => {
+                                        const taskId = task._id;
+                                        const grade = getTaskGrade(taskId, submissions);
+                                        const feedback = getTaskFeedback(taskId, submissions);
+                                        const isGraded = grade !== null;
+
+                                        return (
+                                            <div key={taskId} className="px-4 py-3 space-y-2">
+                                                <p className="font-medium text-sm text-base-content">{task.title}</p>
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        {isGraded ? (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-success/10 text-success border border-success/20">
+                                                                Calificado
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-base-200 text-base-content/50 border border-base-300">
+                                                                Pendiente
+                                                            </span>
+                                                        )}
+                                                        {isGraded && (
+                                                            <span className={`font-mono font-bold text-base ${grade >= 5 ? 'text-success' : 'text-error'}`}>
+                                                                {Number(grade).toFixed(1)}<span className="text-xs opacity-50">/10</span>
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {feedback ? (
+                                                        <button
+                                                            onClick={() => handleShowFeedback(task.title, feedback)}
+                                                            className="btn btn-ghost btn-xs text-primary font-bold"
+                                                        >
+                                                            Comentario
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-base-content/30 text-xs">Sin feedback</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
 
             {/* [Mini Modal] Mostrar comentario del profesor */}

@@ -99,15 +99,18 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
       <div className="drawer drawer-end fixed top-16 left-0 w-full h-[calc(100vh-64px)] pointer-events-none">
         <input id="mobile-menu-drawer" type="checkbox" className="drawer-toggle" />
 
-        <div className="drawer-side h-full overflow-hidden pointer-events-auto">
-          <label htmlFor="mobile-menu-drawer" className="drawer-overlay bg-black/30 backdrop-blur-sm"></label>
+        {/* sin overflow-hidden para que el overlay cubra bien el área exterior */}
+        <div className="drawer-side h-full pointer-events-auto">
+          <label htmlFor="mobile-menu-drawer" className="drawer-overlay bg-black/40 backdrop-blur-sm cursor-pointer"></label>
 
-          <div className="w-full max-w-sm h-full bg-base-100 shadow-2xl border-l border-base-300 flex flex-col overflow-y-auto">
-            <div className="flex-1 p-4 pb-20 space-y-6">
-              {/* Perfil Usuario */}
-              <div className="flex flex-col items-center py-6 border-b border-base-200">
-                <div className="avatar mb-3">
-                  <div className="w-24 h-24 rounded-full bg-base-300 overflow-hidden">
+          {/* w-[280px] deja ~95px de overlay visible a la izquierda → cerrar al tocar */}
+          <div className="w-[280px] h-full bg-base-100 shadow-2xl border-l border-base-300 flex flex-col overflow-y-auto">
+            <div className="flex-1 pb-6 space-y-1">
+
+              {/* Perfil compacto: fila horizontal */}
+              <div className="flex items-center gap-3 p-4 border-b border-base-200">
+                <div className="avatar flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-base-300 overflow-hidden">
                     <ProfileImage
                       src={userProfilePicture}
                       alt={userFirstName}
@@ -115,60 +118,64 @@ export default async function CourseNavbar({ courseId, courseSlug }: CourseNavba
                     />
                   </div>
                 </div>
-                <span className="font-bold text-lg mb-4">{userFirstName}</span>
-                <RoleInfoModal role={userRole} triggerClassName="text-xs" organizationName={userOrganizationName} />
-
-                <ul className="w-full menu menu-vertical gap-1 p-0 text-base mt-4">
-                  <li><Link href="/mycourses" className="justify-start py-2 px-4 text-base-content hover:bg-base-200 focus:bg-base-200 active:!bg-base-300 active:!text-base-content">Mis cursos</Link></li>
-                  <li><Link href="/account/profile" className="justify-start py-2 px-4 text-base-content hover:bg-base-200 focus:bg-base-200 active:!bg-base-300 active:!text-base-content">Perfil</Link></li>
-                  {userRole === "admin" && <li><Link href="/admin" className="justify-start py-2 px-4 text-warning hover:bg-warning/20 focus:bg-warning/20 active:!bg-warning/30 active:!text-warning">Administración</Link></li>}
-                  <li><LogoutButton className="justify-start py-2 px-4 text-error hover:bg-error/10 focus:bg-error/10 active:!bg-error/20 active:!text-error" /></li>
-                </ul>
-              </div>
-
-              {/* CURSOS DISPONIBLES */}
-              <div className="py-3 border-b border-base-200">
-                <div className="collapse collapse-arrow">
-                  <input type="checkbox" defaultChecked />
-                  <div className="collapse-title font-extrabold text-sm uppercase">
-                    CURSOS DISPONIBLES ({cursosDisponibles.length})
-                  </div>
-                  <div className="collapse-content p-0 text-sm">
-                    {cursosDisponibles.length > 0 ? (
-                      <ul className="menu menu-md w-full gap-1">
-                        {cursosDisponibles.map((curso) => (
-                          <li key={curso._id}>
-                            <Link
-                              href={`/course/${curso.slug}`}
-                              className={`py-2 px-3 flex justify-between items-center ${curso.slug === courseSlug ? 'bg-primary/10 text-primary font-bold' : ''}`}
-                            >
-                              {curso.name}
-                              {curso.slug === courseSlug && (
-                                <span className="badge badge-primary badge-sm">Actual</span>
-                              )}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="text-center text-base-content/60 py-4">No estás inscrito en ningún curso</p>
-                    )}
-                  </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-bold text-sm truncate">{userFirstName}</p>
+                  <RoleInfoModal role={userRole} triggerClassName="text-[11px] opacity-60" organizationName={userOrganizationName} />
                 </div>
               </div>
 
-              {/* CONTENIDO DEL CURSO ACTUAL - Solo visible cuando hay un curso seleccionado */}
+              {/* Nav links */}
+              <ul className="menu menu-sm p-2 gap-0.5">
+                <li><Link href="/mycourses" className="py-2 px-3 text-sm text-base-content hover:bg-base-200 active:!bg-base-300">Mis cursos</Link></li>
+                <li><Link href="/account/profile" className="py-2 px-3 text-sm text-base-content hover:bg-base-200 active:!bg-base-300">Perfil</Link></li>
+                {userRole === "admin" && <li><Link href="/admin" className="py-2 px-3 text-sm text-warning hover:bg-warning/20 active:!bg-warning/30">Administración</Link></li>}
+                <li><LogoutButton className="py-2 px-3 text-sm text-error hover:bg-error/10 active:!bg-error/20" /></li>
+              </ul>
+
+              <div className="border-t border-base-200 mx-2" />
+
+              {/* CURSOS DISPONIBLES */}
+              <div className="collapse collapse-arrow px-2">
+                <input type="checkbox" defaultChecked />
+                <div className="collapse-title font-bold text-xs uppercase tracking-wider text-base-content/50 px-2 min-h-0 py-3">
+                  Cursos ({cursosDisponibles.length})
+                </div>
+                <div className="collapse-content p-0 text-sm">
+                  {cursosDisponibles.length > 0 ? (
+                    <ul className="menu menu-sm w-full gap-0.5 p-0">
+                      {cursosDisponibles.map((curso) => (
+                        <li key={curso._id}>
+                          <Link
+                            href={`/course/${curso.slug}`}
+                            className={`py-2 px-3 text-sm flex justify-between items-center ${curso.slug === courseSlug ? 'bg-primary/10 text-primary font-bold' : ''}`}
+                          >
+                            <span className="truncate">{curso.name}</span>
+                            {curso.slug === courseSlug && (
+                              <span className="badge badge-primary badge-xs flex-shrink-0">Actual</span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-center text-base-content/50 text-xs py-3">Sin cursos inscritos</p>
+                  )}
+                </div>
+              </div>
+
+              {/* CONTENIDO DEL CURSO ACTUAL */}
               {courseId && (
-                <div className="md:hidden">
+                <div className="md:hidden border-t border-base-200 mx-2 pt-1">
                   <CourseNavbarDrawerContent />
                 </div>
               )}
 
-              {/* Theme Switcher móvil */}
-              <div className="py-4 flex flex-col items-center gap-2">
-                <span className="text-xs opacity-50 uppercase">Modo de pantalla</span>
+              {/* Theme Switcher */}
+              <div className="border-t border-base-200 mx-2 pt-3 flex items-center justify-between px-3">
+                <span className="text-xs opacity-40 uppercase tracking-wider">Tema</span>
                 <ThemeSwitcher />
               </div>
+
             </div>
           </div>
         </div>

@@ -243,9 +243,6 @@ export default function ParticipantsTable({
                   <p className="font-semibold text-base-content group-hover:underline">
                     {participant.firstName}
                   </p>
-                  <p className="text-xs text-base-content/70">
-                    {participant.email}
-                  </p>
                 </div>
               </Link>
               <span
